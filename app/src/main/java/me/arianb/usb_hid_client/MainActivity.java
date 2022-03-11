@@ -21,8 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-// TODO: package C binary with app
-//       - i did it but now some keys are broken
 // TODO: make it detect all keys (function keys, SysRq, etc.)
 //       - i think i might just have to create some manual special buttons for that purpose
 
@@ -41,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
         input = findViewById(R.id.etKeyboardInput);
         btn = findViewById(R.id.btnKeyboard);
 
-        //appFileDirectory = getFilesDir().getPath();
         appFileDirectory = "/data/data/me.arianb.usb_hid_client";
         hidGadgetPath = appFileDirectory + "/hid-gadget";
 
