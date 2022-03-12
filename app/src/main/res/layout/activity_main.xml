@@ -8,6 +8,7 @@
 
     <EditText
         android:id="@+id/etKeyboardInput"
+        android:text=""
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="101dp"
