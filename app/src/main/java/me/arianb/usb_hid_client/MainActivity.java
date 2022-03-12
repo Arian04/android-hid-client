@@ -26,7 +26,7 @@ import java.util.Map;
 // TODO: make it detect all keys (function keys, SysRq, etc.)
 //       - i think i might just have to create some manual special buttons for that purpose
 // Backspaces stop working on empty edittext
-// any key after a "+" sends twice. i have no idea why.
+// some keys after +,',( sends twice. i have no idea why.
 public class MainActivity extends AppCompatActivity {
     private EditText input;
     private Button btn;
@@ -34,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private String appFileDirectory;
     private String hidGadgetPath;
 
-    private Map<Character, String> translateChars;
     private Map<Character, String> shiftChars;
 
     @Override
@@ -45,11 +44,7 @@ public class MainActivity extends AppCompatActivity {
         input = findViewById(R.id.etKeyboardInput);
         btn = findViewById(R.id.btnKeyboard);
 
-        translateChars = new HashMap<Character, String>();
         shiftChars = new HashMap<Character, String>();
-
-        // Chars to translate to into string representing a key
-        translateChars.put(' ', "space");
 
         // Chars that are represented by another key + shift
         shiftChars.put('<', ",");
@@ -78,40 +73,34 @@ public class MainActivity extends AppCompatActivity {
         hidGadgetPath = appFileDirectory + "/hid-gadget";
 
         // If binary isn't present, copy it over.
+        // TODO: check hashes against eachother to allow updates to change this
         if (!new File(hidGadgetPath).exists()) {
             copyAssets("hid-gadget");
         }
 
         input.addTextChangedListener(new TextWatcher() {
             @Override
-            public void afterTextChanged(Editable s) {
-            }
+            public void afterTextChanged(Editable s) {}
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                System.out.println("Diff: " + s);
-                System.out.println(start + " " + before + " " + count);
+                System.out.println("Diff: " + s); // DEBUG
+                System.out.println(start + " " + before + " " + count); // DEBUG
                 if (before > count) { // I think this conditional is accurate but haven't finished testing
-                    System.out.println("Backspace");
+                    System.out.println("Backspace"); // DEBUG
                     sendKey("backspace", false);
                 } else {
                     char newChar = s.subSequence(s.length() - 1, s.length()).charAt(0);
-                    System.out.println("sendchar: " + newChar);
                     String str = null;
-                    if((str = translateChars.get(newChar)) != null) {
-                        sendKey(str, false);
-                        System.out.println("if: " + str);
-                    } else if((str = shiftChars.get(newChar)) != null) {
+                    if((str = shiftChars.get(newChar)) != null) {
                         sendKey(str, true);
-                        System.out.println("elif: " + str);
+                        System.out.println("elif: " + str); // DEBUG
                     } else {
                         sendKey(Character.toString(newChar), false);
-                        System.out.println("nomatch: " + shiftChars.get(newChar));
-                        System.out.println("else: " + newChar);
+                        System.out.println("else: " + newChar); // DEBUG
                     }
                 }
             }
@@ -126,27 +115,22 @@ public class MainActivity extends AppCompatActivity {
             options = "--left-shift";
         }
 
-        // Escape quotes
-        if(str.equals("\'")) {
-            key = "\\\'";
-        } else if(str.equals("\"")) {
+        // Escape quote
+        if(str.equals("\"")) {
             key = "\\\"";
         }
 
         if(str.length() == 1 && Character.isUpperCase(str.charAt(0))) {
             options = "--left-shift";
             key = str.toLowerCase();
-            //System.out.println(str);
         }
-        //System.out.println(hidGadgetPath);
-        String[] shell = {"su", "-c", "echo \'" + key + "\' " + options + " | " + hidGadgetPath + " /dev/hidg0 keyboard"};
+        String[] shell = {"su", "-c", "echo \"" + key + "\" " + options + " | " + hidGadgetPath + " /dev/hidg0 keyboard"};
         try {
             Process process = Runtime.getRuntime().exec(shell);
             //System.out.println(printProcessStdOutput(process));
             System.out.println(printProcessStdError(process));
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("ioexception");
         }
     }
 
