@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.EditText;
-import static java.util.Map.entry;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -178,11 +177,11 @@ public class MainActivity extends AppCompatActivity {
         // Read the output from the command
         System.out.println("Here is the standard output of the command:\n");
         String s = null;
-        String returnStr = "";
+        StringBuilder returnStr = new StringBuilder();
         while ((s = stdInput.readLine()) != null) {
-            returnStr += s + "\n";
+            returnStr.append(s).append("\n");
         }
-        return returnStr;
+        return returnStr.toString();
     }
 
     private String printProcessStdError(Process process) throws IOException {
@@ -191,10 +190,10 @@ public class MainActivity extends AppCompatActivity {
         // Read any errors from the attempted command
         System.out.println("Here is the standard error of the command (if any):\n");
         String s = null;
-        String returnStr = "";
+        StringBuilder returnStr = new StringBuilder();
         while ((s = stdError.readLine()) != null) {
-            returnStr += s + "\n";
+            returnStr.append(s).append("\n");
         }
-        return returnStr;
+        return returnStr.toString();
     }
 }
