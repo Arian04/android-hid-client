@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-// ctrl-backspace doesn't work bc backspace is registered outside of the keyListener
+// ctrl-backspace doesn't work bc backspace is (unless et is empty) registered outside of the keyListener
 // some keys after +,',( sends twice. i have no idea why.
 public class MainActivity extends AppCompatActivity {
 	private EditText input;
@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         modifierKeys.put(118, "--right-meta");
 
         // Translate keycodes into key
-        // TODO: add all letters
         keyEventCodes.put(29, "a");
         keyEventCodes.put(30, "b");
         keyEventCodes.put(31, "c");
@@ -143,13 +142,11 @@ public class MainActivity extends AppCompatActivity {
         copyAssets("hid-gadget");
 
         input.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void afterTextChanged(Editable s) {
-			}
+            @Override
+            public void afterTextChanged(Editable s) {}
 
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -161,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
 				} else {
 					char newChar = s.subSequence(s.length() - 1, s.length()).charAt(0);
 					String str = null;
+					// TODO: move this if statement to sendKey fn
 					if ((str = shiftChars.get(newChar)) != null) {
 						sendKey(str, true);
 						System.out.println("elif: " + str); // DEBUG
