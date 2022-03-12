@@ -24,7 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-
+// TODO: fix these issues
 // ctrl-backspace doesn't work bc backspace is (unless et is empty) registered outside of the keyListener
 // some keys after +,',( sends twice. i have no idea why.
 public class MainActivity extends AppCompatActivity {
