@@ -2,6 +2,7 @@ package me.arianb.usb_hid_client;
 
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,13 +97,10 @@ public class MainActivity extends AppCompatActivity {
 		appFileDirectory = "/data/data/me.arianb.usb_hid_client";
 		hidGadgetPath = appFileDirectory + "/hid-gadget";
 
-		// If binary isn't present, copy it over.
-		// TODO: check hashes against eachother to allow updates to change this
-		if (!new File(hidGadgetPath).exists()) {
-			copyAssets("hid-gadget");
-		}
+		// Copy over binary
+        copyAssets("hid-gadget");
 
-		input.addTextChangedListener(new TextWatcher() {
+        input.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
 			}
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 		});
-	}
+    }
 
 
 	private void sendKey(String str, Boolean pressShift) {
@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
 			options = "--left-shift";
 		}
 
+		// Switch case is probably cleaner for this, i should fix it later
 		// Translate character
 		if (str.equals("\n")) {
 			key = "enter";
@@ -148,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
 			key = "\\\"";
 		} else if (str.equals("\\")) {
 		    key = "\\\\";
+        } else if (str.equals("`")) {
+            key = "\\`";
         }
 
 		if (str.length() == 1 && Character.isUpperCase(str.charAt(0))) {
