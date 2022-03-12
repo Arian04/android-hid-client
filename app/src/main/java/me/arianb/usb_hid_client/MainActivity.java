@@ -25,8 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-// TODO: make it detect modifier key combos (ctrl-c, ctrl-f, etc.)
-//      ~` are broken
+// ctrl-backspace doesn't work bc backspace is registered outside of the keyListener
 // some keys after +,',( sends twice. i have no idea why.
 public class MainActivity extends AppCompatActivity {
 	private EditText input;
@@ -35,8 +34,12 @@ public class MainActivity extends AppCompatActivity {
 	private String appFileDirectory;
 	private String hidGadgetPath;
 
+	private Map<Integer, String> modifierKeys;
 	private Map<Integer, String> keyEventCodes;
 	private Map<Character, String> shiftChars;
+
+	private boolean nextKeyModified = false;
+	private String modifier;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +49,48 @@ public class MainActivity extends AppCompatActivity {
 		input = findViewById(R.id.etKeyboardInput);
 		btn = findViewById(R.id.btnKeyboard);
 
+		modifierKeys = new HashMap<Integer, String>();
 		keyEventCodes = new HashMap<Integer, String>();
 		shiftChars = new HashMap<Character, String>();
 
+		// Translate modifier keycodes into key
+        modifierKeys.put(113, "--left-ctrl");
+        modifierKeys.put(114, "--right-ctrl");
+        modifierKeys.put(59, "--left-shift");
+        modifierKeys.put(60, "--right-shift");
+        modifierKeys.put(57, "--left-alt");
+        modifierKeys.put(58, "--right-alt");
+        modifierKeys.put(117, "--left-meta");
+        modifierKeys.put(118, "--right-meta");
+
+        // Translate keycodes into key
+        // TODO: add all letters
+        keyEventCodes.put(29, "a");
+        keyEventCodes.put(30, "b");
+        keyEventCodes.put(31, "c");
+        keyEventCodes.put(32, "d");
+        keyEventCodes.put(33, "e");
+        keyEventCodes.put(34, "f");
+        keyEventCodes.put(35, "g");
+        keyEventCodes.put(36, "h");
+        keyEventCodes.put(37, "i");
+        keyEventCodes.put(38, "j");
+        keyEventCodes.put(39, "k");
+        keyEventCodes.put(40, "l");
+        keyEventCodes.put(41, "m");
+        keyEventCodes.put(42, "n");
+        keyEventCodes.put(43, "o");
+        keyEventCodes.put(44, "p");
+        keyEventCodes.put(45, "q");
+        keyEventCodes.put(46, "r");
+        keyEventCodes.put(47, "s");
+        keyEventCodes.put(48, "t");
+        keyEventCodes.put(49, "u");
+        keyEventCodes.put(50, "v");
+        keyEventCodes.put(51, "w");
+        keyEventCodes.put(52, "x");
+        keyEventCodes.put(53, "y");
+        keyEventCodes.put(54, "z");
         keyEventCodes.put(131, "f1");
         keyEventCodes.put(132, "f2");
         keyEventCodes.put(133, "f3");
@@ -97,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 		appFileDirectory = "/data/data/me.arianb.usb_hid_client";
 		hidGadgetPath = appFileDirectory + "/hid-gadget";
 
-		// Copy over binary
+		// Copy over binary (could compare existence/hashes before copying)
         copyAssets("hid-gadget");
 
         input.addTextChangedListener(new TextWatcher() {
@@ -131,12 +173,36 @@ public class MainActivity extends AppCompatActivity {
 		});
     }
 
+    // detects non-printing keys
+    // TODO: handle issues of edittext watcher and onKeyDown listener detecting the same press
+    //       currently not an issue, but it might become one later
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (KeyEvent.isModifierKey(keyCode)) {
+            modifier = modifierKeys.get(event.getKeyCode());
+            nextKeyModified = true;
+            System.out.println("mod: " + modifier);
+            return false;
+        }
+
+        String str = null;
+        if ((str = keyEventCodes.get(event.getKeyCode())) != null) {
+            sendKey(str, false);
+            System.out.println("if: " + str); // DEBUG
+        }
+        System.out.println("CODE: " + event.toString());
+        return true;
+    }
 
 	private void sendKey(String str, Boolean pressShift) {
 		String options = "";
 		String key = str;
+		if(nextKeyModified) {
+		    options += modifier;
+		    nextKeyModified = false;
+        }
 		if (pressShift) {
-			options = "--left-shift";
+			options += " --left-shift";
 		}
 
 		// Switch case is probably cleaner for this, i should fix it later
@@ -165,20 +231,6 @@ public class MainActivity extends AppCompatActivity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	// detects non-printing keys
-	// TODO: handle issues of edittext watcher and onKeyDown listener detecting the same press
-	//       currently not an issue, but it might become one later
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-        String str = null;
-	    if ((str = keyEventCodes.get(event.getKeyCode())) != null) {
-            sendKey(str, true);
-            System.out.println("if: " + str); // DEBUG
-        }
-        System.out.println("CODE: " + event.getKeyCode());
-		return false;
 	}
 
 	private void copyAssets(String filename) {
