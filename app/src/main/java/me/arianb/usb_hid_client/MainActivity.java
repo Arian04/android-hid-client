@@ -24,9 +24,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-// TODO: fix these issues
-// ctrl-backspace doesn't work bc backspace is (unless et is empty) registered outside of the keyListener
-// some keys after +,',( sends twice. i have no idea why.
+/* TODO: fix these issues
+    - ctrl-backspace doesn't work bc ctrl doesn't send a code when paired with backspace apparently
+    - ctrl <arrow key> is broken in a weird way, seems to work on second arrow press only sometimes
+*/
 public class MainActivity extends AppCompatActivity {
 	private EditText input;
 	private Button btn;
@@ -177,11 +178,11 @@ public class MainActivity extends AppCompatActivity {
     //       currently not an issue, but it might become one later
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+		//System.out.println("getmod: " + event.getModifiers()); // DEBUG
         if (KeyEvent.isModifierKey(keyCode)) {
             modifier = modifierKeys.get(event.getKeyCode());
             nextKeyModified = true;
             System.out.println("mod: " + modifier);
-            return false;
         }
 
         String str = null;
