@@ -102,6 +102,10 @@ public class MainActivity extends AppCompatActivity {
         keyEventCodes.put(140, "f10");
         keyEventCodes.put(141, "f11");
         keyEventCodes.put(142, "f12");
+		keyEventCodes.put(19, "up");
+		keyEventCodes.put(20, "down");
+		keyEventCodes.put(21, "left");
+		keyEventCodes.put(22, "right");
         keyEventCodes.put(61, "tab");
         keyEventCodes.put(67, "backspace");
         keyEventCodes.put(111, "escape");
@@ -152,10 +156,7 @@ public class MainActivity extends AppCompatActivity {
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				System.out.println("Diff: " + s); // DEBUG
 				System.out.println(start + " " + before + " " + count); // DEBUG
-				if (before > count) { // I think this conditional is accurate but haven't finished testing
-					System.out.println("Backspace"); // DEBUG
-					sendKey("backspace", false);
-				} else {
+				if (s.length() >= 1) {
 					char newChar = s.subSequence(s.length() - 1, s.length()).charAt(0);
 					String str = null;
 					// TODO: move this if statement to sendKey fn
@@ -188,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             sendKey(str, false);
             System.out.println("if: " + str); // DEBUG
         }
-        System.out.println("CODE: " + event.toString());
+        System.out.println("CODE: " + event.getKeyCode());
         return true;
     }
 
@@ -229,6 +230,9 @@ public class MainActivity extends AppCompatActivity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		// Bad workaround that clears the edittext after every key press to make arrow keys get
+		// registered by onKeyDown(because it only triggers when the key doesn't touch the edittext)
+		input.setText("");
 	}
 
 	private void copyAssets(String filename) {
