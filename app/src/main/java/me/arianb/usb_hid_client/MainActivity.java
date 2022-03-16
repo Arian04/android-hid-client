@@ -1,14 +1,20 @@
 package me.arianb.usb_hid_client;
 
 import android.content.res.AssetManager;
+import android.net.http.SslCertificate;
 import android.os.Bundle;
-import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,8 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,30 +33,34 @@ import java.util.Map;
     - ctrl <arrow key> is broken in a weird way, seems to work on second arrow press only sometimes
 */
 public class MainActivity extends AppCompatActivity {
-	private EditText input;
-	private Button btn;
+	private static final String TAG = "hid-client";
+
+	private EditText etInput;
+	private Button btnSubmit;
+	private TextView tvOutput;
+	private EditText etManual;
+	private Spinner dropdownLogging;
 
 	private String appFileDirectory;
 	private String hidGadgetPath;
 
 	private Map<Integer, String> modifierKeys;
 	private Map<Integer, String> keyEventCodes;
-	private Map<Character, String> shiftChars;
+	private Map<String, String> shiftChars;
 
 	private boolean nextKeyModified = false;
 	private String modifier;
+
+	private Thread loggingThread;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		input = findViewById(R.id.etKeyboardInput);
-		btn = findViewById(R.id.btnKeyboard);
-
-		modifierKeys = new HashMap<Integer, String>();
-		keyEventCodes = new HashMap<Integer, String>();
-		shiftChars = new HashMap<Character, String>();
+		modifierKeys = new HashMap<>();
+		keyEventCodes = new HashMap<>();
+		shiftChars = new HashMap<>();
 
 		// Translate modifier keycodes into key
         modifierKeys.put(113, "--left-ctrl");
@@ -118,27 +126,40 @@ public class MainActivity extends AppCompatActivity {
         keyEventCodes.put(112, "delete");
 
         // Chars that are represented by another key + shift
-		shiftChars.put('<', ",");
-		shiftChars.put('>', ".");
-		shiftChars.put('?', "/");
-		shiftChars.put(':', ";");
-		shiftChars.put('"', "'");
-		shiftChars.put('{', "[");
-		shiftChars.put('}', "]");
-		shiftChars.put('|', "\\");
-		shiftChars.put('~', "`");
-		shiftChars.put('!', "1");
-		shiftChars.put('@', "2");
-		shiftChars.put('#', "3");
-		shiftChars.put('$', "4");
-		shiftChars.put('%', "5");
-		shiftChars.put('^', "6");
-		shiftChars.put('&', "7");
-		shiftChars.put('*', "8");
-		shiftChars.put('(', "9");
-		shiftChars.put(')', "0");
-		shiftChars.put('_', "-");
-		shiftChars.put('+', "=");
+		shiftChars.put("<", ",");
+		shiftChars.put(">", ".");
+		shiftChars.put("?", "/");
+		shiftChars.put(":", ";");
+		shiftChars.put("\"", "'");
+		shiftChars.put("{", "[");
+		shiftChars.put("}", "]");
+		shiftChars.put("|", "\\");
+		shiftChars.put("~", "`");
+		shiftChars.put("!", "1");
+		shiftChars.put("@", "2");
+		shiftChars.put("#", "3");
+		shiftChars.put("$", "4");
+		shiftChars.put("%", "5");
+		shiftChars.put("^", "6");
+		shiftChars.put("&", "7");
+		shiftChars.put("*", "8");
+		shiftChars.put("(", "9");
+		shiftChars.put(")", "0");
+		shiftChars.put("_", "-");
+		shiftChars.put("+", "=");
+
+		etInput = findViewById(R.id.etKeyboardInput);
+		btnSubmit = findViewById(R.id.btnKeyboard);
+		tvOutput = findViewById(R.id.tvOutput);
+		etManual = findViewById(R.id.etManual);
+		dropdownLogging = findViewById(R.id.spinner);
+
+		tvOutput.setMovementMethod(new ScrollingMovementMethod());
+
+		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+				R.array.logging_options, android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		dropdownLogging.setAdapter(adapter);
 
 		appFileDirectory = "/data/data/me.arianb.usb_hid_client";
 		hidGadgetPath = appFileDirectory + "/hid-gadget";
@@ -146,7 +167,26 @@ public class MainActivity extends AppCompatActivity {
 		// Copy over binary (could compare existence/hashes before copying)
         copyAssets("hid-gadget");
 
-        input.addTextChangedListener(new TextWatcher() {
+		dropdownLogging.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+				if(loggingThread != null) {
+					// Pretty sure if thread updates tvOutput one more time before finishing being interrupted
+					// it might overwrite the new thread's output until it re-rewrites the output.
+					// Implement locks if this is an issue.
+					loggingThread.interrupt();
+				}
+				String choice = parentView.getSelectedItem().toString();
+				Log.d(TAG,"logging choice: " + choice);
+				displayLogs(choice);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parentView) {}
+		});
+
+
+		etInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {}
 
@@ -155,19 +195,13 @@ public class MainActivity extends AppCompatActivity {
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				System.out.println("Diff: " + s); // DEBUG
-				System.out.println(start + " " + before + " " + count); // DEBUG
+				Log.d(TAG,"Diff: " + s);
+				Log.d(TAG, start + " " + before + " " + count);
 				if (s.length() >= 1) {
 					char newChar = s.subSequence(s.length() - 1, s.length()).charAt(0);
 					String str = null;
-					// TODO: move this if statement to sendKey fn
-					if ((str = shiftChars.get(newChar)) != null) {
-						sendKey(str, true);
-						System.out.println("elif: " + str); // DEBUG
-					} else {
-						sendKey(Character.toString(newChar), false);
-						System.out.println("else: " + newChar); // DEBUG
-					}
+					sendKey(Character.toString(newChar));
+					Log.d(TAG, "textChanged key: " + newChar);
 				}
 			}
 		});
@@ -178,76 +212,87 @@ public class MainActivity extends AppCompatActivity {
     //       currently not an issue, but it might become one later
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-		//System.out.println("getmod: " + event.getModifiers()); // DEBUG
         if (KeyEvent.isModifierKey(keyCode)) {
             modifier = modifierKeys.get(event.getKeyCode());
             nextKeyModified = true;
-            System.out.println("mod: " + modifier);
+			Log.d(TAG, "modifier: " + modifier);
         }
 
         String str = null;
         if ((str = keyEventCodes.get(event.getKeyCode())) != null) {
-            sendKey(str, false);
-            System.out.println("if: " + str); // DEBUG
+            sendKey(str);
+			Log.d(TAG, "onKeyDown key: " + str);
         }
-        System.out.println("CODE: " + event.getKeyCode());
+		Log.d(TAG, "keycode: " + event.getKeyCode());
         return true;
     }
 
-	private void sendKey(String str, Boolean pressShift) {
+	private void sendKey(String key) {
+		if(key == null) {
+			Log.e(TAG, "sendKey received null key value");
+			return;
+		}
+
 		String options = "";
-		String key = str;
+		String adjustedKey = key;
 		if(nextKeyModified) {
 		    options += modifier;
 		    nextKeyModified = false;
         }
-		if (pressShift) {
+		String str = null;
+		if ((str = shiftChars.get(key)) != null) {
+			adjustedKey = str;
 			options += " --left-shift";
+			Log.d(TAG, "adding shift option to make: " + adjustedKey + " -> " + key);
 		}
 
-		// Switch case is probably cleaner for this, i should fix it later
-		// Translate character
-		if (str.equals("\n")) {
-			key = "enter";
+		switch (key) {
+			// Translate character
+			case "\n":
+				adjustedKey = "enter";
+				break;
+			// Escape characters (Escape them once for Java and again for the shell command)
+			case "\"":
+				adjustedKey = "\\\""; // \" = "
+				break;
+			case "\\":
+				adjustedKey = "\\\\"; // \\ = \
+				break;
+			case "`":
+				adjustedKey = "\\`"; // \` = `
+				break;
 		}
-		// Escape characters
-		else if (str.equals("\"")) {
-			key = "\\\"";
-		} else if (str.equals("\\")) {
-		    key = "\\\\";
-        } else if (str.equals("`")) {
-            key = "\\`";
-        }
 
-		if (str.length() == 1 && Character.isUpperCase(str.charAt(0))) {
+		if (key.length() == 1 && Character.isUpperCase(key.charAt(0))) {
 			options = "--left-shift";
-			key = str.toLowerCase();
+			adjustedKey = str.toLowerCase();
 		}
-		String[] shell = {"su", "-c", "echo \"" + key + "\" " + options + " | " + hidGadgetPath + " /dev/hidg0 keyboard"};
+		Log.i(TAG, "raw key: " + key + " | sending key: " + adjustedKey);
+		String[] shell = {"su", "-c", "echo \"" + adjustedKey + "\" " + options + " | " + hidGadgetPath + " /dev/hidg0 keyboard"};
 		try {
 			Process process = Runtime.getRuntime().exec(shell);
-			//System.out.println(printProcessStdOutput(process));
-			System.out.println(printProcessStdError(process));
+			String errors = getProcessStdError(process);
+			if (!errors.isEmpty()) {
+				Log.e(TAG, errors);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		// Bad workaround that clears the edittext after every key press to make arrow keys get
 		// registered by onKeyDown(because it only triggers when the key doesn't touch the edittext)
-		input.setText("");
+		etInput.setText("");
 	}
 
 	private void copyAssets(String filename) {
 		AssetManager assetManager = getAssets();
 
-		InputStream in = null;
-		OutputStream out = null;
 		Log.d("tag", "Attempting to copy this file: " + filename); // + " to: " +       assetCopyDestination);
 
 		try {
-			in = assetManager.open(filename);
+			InputStream in = assetManager.open(filename);
 			Log.d("tag", "outDir: " + appFileDirectory);
 			File outFile = new File(appFileDirectory, filename);
-			out = new FileOutputStream(outFile);
+			OutputStream out = new FileOutputStream(outFile);
 			byte[] buffer = new byte[102400];
 			int len = in.read(buffer);
 			while (len != -1) {
@@ -267,11 +312,10 @@ public class MainActivity extends AppCompatActivity {
 		Log.d("tag", "Copy success: " + filename);
 	}
 
-	private String printProcessStdOutput(Process process) throws IOException {
+	private String getProcessStdOutput(Process process) throws IOException {
 		BufferedReader stdInput = new BufferedReader(new
 				InputStreamReader(process.getInputStream()));
 		// Read the output from the command
-		System.out.println("Here is the standard output of the command:\n");
 		String s = null;
 		StringBuilder returnStr = new StringBuilder();
 		while ((s = stdInput.readLine()) != null) {
@@ -280,16 +324,49 @@ public class MainActivity extends AppCompatActivity {
 		return returnStr.toString();
 	}
 
-	private String printProcessStdError(Process process) throws IOException {
+	private String getProcessStdError(Process process) throws IOException {
 		BufferedReader stdError = new BufferedReader(new
 				InputStreamReader(process.getErrorStream()));
 		// Read any errors from the attempted command
-		System.out.println("Here is the standard error of the command (if any):\n");
 		String s = null;
 		StringBuilder returnStr = new StringBuilder();
 		while ((s = stdError.readLine()) != null) {
 			returnStr.append(s).append("\n");
 		}
 		return returnStr.toString();
+	}
+
+	private void displayLogs(String verbosityFilter) {
+		// Clear previous logs
+		runOnUiThread(() -> tvOutput.setText("No Output"));
+
+		// Trim filter down to just the first letter because that's what logcat uses to filter
+		String verbosityLetter = verbosityFilter.substring(0,1);
+		loggingThread = new Thread(() -> {
+			try {
+				String command = String.format("logcat -s hid-client:%s -v raw", verbosityLetter);
+				Process process = Runtime.getRuntime().exec(command);
+				BufferedReader bufferedReader = new BufferedReader(
+						new InputStreamReader(process.getInputStream()));
+
+				// Discard the first line of logcat ("---beginning of main---")
+				bufferedReader.readLine();
+
+				StringBuilder log = new StringBuilder();
+				String line;
+				while (!Thread.interrupted()) {
+					line = bufferedReader.readLine();
+					if (line != null) {
+						log.insert(0, line + "\n");
+						runOnUiThread(() -> tvOutput.setText(log.toString()));
+					}
+				}
+			}
+			catch (IOException e) {
+				Log.e("tag", "ioexc in logging");
+			}
+		});
+		loggingThread.start();
+		Log.d("tag","logging started with verbosity: " + verbosityFilter);
 	}
 }

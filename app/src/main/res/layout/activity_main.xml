@@ -4,33 +4,62 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:textAlignment="viewStart"
     tools:context=".MainActivity">
 
     <EditText
         android:id="@+id/etKeyboardInput"
-        android:text=""
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="101dp"
-        android:layout_marginTop="343dp"
-        android:layout_marginEnd="101dp"
-        android:layout_marginBottom="343dp"
+        android:layout_marginTop="32dp"
         android:ems="10"
         android:hint="@string/app_name"
         android:importantForAutofill="no"
         android:inputType="textMultiLine"
         android:minHeight="48dp"
+        android:text=""
         android:textColorHint="#757575"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="@+id/etManual"
+        app:layout_constraintTop_toBottomOf="@+id/etManual" />
 
     <Button
         android:id="@+id/btnKeyboard"
+        android:layout_width="82dp"
+        android:layout_height="43dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@+id/etManual"
+        app:layout_constraintTop_toTopOf="@+id/etManual"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <TextView
+        android:id="@+id/tvOutput"
+        android:scrollbars = "vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
+        android:text="No Output"
+        android:textSize="10sp"
+        app:layout_constraintStart_toStartOf="@+id/etKeyboardInput"
+        app:layout_constraintTop_toBottomOf="@+id/etKeyboardInput" />
+
+    <EditText
+        android:id="@+id/etManual"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="139dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@+id/etKeyboardInput"
+        app:layout_constraintTop_toTopOf="@+id/etKeyboardInput" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

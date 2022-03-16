@@ -6,6 +6,7 @@
         <entry key="app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.1845" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1845" />
+        <entry key="app/src/main/res/xml/device_filter.xml" value="0.17604166666666668" />
       </map>
     </option>
   </component>
