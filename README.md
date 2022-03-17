@@ -26,7 +26,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://gitea.arianb.me/arian/keyboard-app">
+  <a href="https://github.com/Arian04/keyboard-app">
     <img src="images/logo-placeholder.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -35,12 +35,12 @@
   <p align="center">
     Android app that allows you to easily use your phone as a keyboard
     <br />
-    <a href="https://gitea.arianb.me/arian/keyboard-app/wiki"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/Arian04/keyboard-app/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://gitea.arianb.me/arian/keyboard-app/issues">Report Bug</a>
+    <a href="https://github.com/Arian04/keyboard-app/issues">Report Bug</a>
     ·
-    <a href="https://gitea.arianb.me/arian/keyboard-app/issues">Request Feature</a>
+    <a href="https://github.com/Arian04/keyboard-app/issues">Request Feature</a>
   </p>
 </div>
 
@@ -95,7 +95,7 @@ This Android app allows you to use your phone as a keyboard by communicating wit
 
 Clone the repository and import into [Android Studio](https://developer.android.com/studio)
    ```sh
-   git clone https://gitea.arianb.me/arian/keyboard-app.git
+   git clone https://github.com/Arian04/keyboard-app.git
    ```
    
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -107,7 +107,7 @@ Clone the repository and import into [Android Studio](https://developer.android.
 
 Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
-_For more examples, please refer to the [Documentation](https://gitea.arianb.me/arian/keyboard-app/wiki)_
+_For more examples, please refer to the [Documentation](https://github.com/Arian04/arian/keyboard-app/wiki)_
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -120,7 +120,7 @@ _For more examples, please refer to the [Documentation](https://gitea.arianb.me/
 - [ ] Touchpad support
 - [ ] Ability to send string all at once
 
-See the [open issues](https://gitea.arianb.me/arian/keyboard-app/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/Arian04/keyboard-app/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
