@@ -119,7 +119,6 @@ _For more examples, please refer to the [Documentation](https://gitea.arianb.me/
 - [X] Keyboard support
 - [ ] Touchpad support
 - [ ] Ability to send string all at once
-- 
 
 See the [open issues](https://gitea.arianb.me/arian/keyboard-app/issues) for a full list of proposed features (and known issues).
 
