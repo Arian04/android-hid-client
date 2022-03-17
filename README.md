@@ -78,7 +78,9 @@
     alt="Main Screen"
     height="350">](images/main-screenshot)
 
-This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a character device that allows your phone to send keys to a connected host device. It presents itself as a standard hardware input device and therefore doesn't require any additional software to be installed on the computer. It is also completely functional within the connected computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, `~!@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more. Supports sending a string all at once or sending each key as they are pressed in real-time.
+This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a character device that allows your phone to send keys to a connected host device (use [USB Gadget Tool](https://github.com/tejado/android-usb-gadget) to create hidgX devices). It presents itself as a standard hardware input device and therefore doesn't require any additional software to be installed on the computer. It is also completely functional within the connected computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, `~!@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more. Supports sending a string all at once or sending each key as they are pressed in real-time.
+
+Disclaimer: This app requires your device to be rooted.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -119,6 +121,7 @@ _For more examples, please refer to the [Documentation](https://github.com/Arian
 - [X] Keyboard support
 - [ ] Touchpad support
 - [ ] Ability to send string all at once
+- [ ] Add ability to not require root access if /dev/hidgX is already writable
 
 See the [open issues](https://github.com/Arian04/android-hid-gadget/issues) for a full list of proposed features (and known issues).
 
