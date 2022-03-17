@@ -78,7 +78,7 @@
     alt="Main Screen"
     height="350">](images/main-screenshot)
 
-This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a character device that allows your phone to send keys to a connected host device (use [USB Gadget Tool](https://github.com/tejado/android-usb-gadget) to create hidgX devices). It presents itself as a standard hardware input device and therefore doesn't require any additional software to be installed on the computer. It is also completely functional within the connected computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, `~!@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more. Supports sending a string all at once or sending each key as they are pressed in real-time.
+This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a character device that allows your phone to send keys to a connected host device (I recommend using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget) to create hidgX devices). It presents itself as a standard hardware input device and therefore doesn't require any additional software to be installed on the computer. It is also completely functional within the connected computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, \`~!@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more (I recommend using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as modifier and function keys). Supports sending a string all at once or sending each key as they are pressed in real-time.
 
 Disclaimer: This app requires your device to be rooted.
 
