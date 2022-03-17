@@ -78,7 +78,7 @@
     alt="Main Screen"
     height="350">](images/main-screenshot)
 
-This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a character device that allows your phone to send keys to a connected host device. This app supports most standard keyboard keys, including a-z, 0-9, `~!@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more. Supports sending a string all at once or sending each key as they are pressed in real-time.
+This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a character device that allows your phone to send keys to a connected host device. It presents itself as a standard hardware input device and therefore doesn't require any additional software to be installed on the computer. It is also completely functional within the connected computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, `~!@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more. Supports sending a string all at once or sending each key as they are pressed in real-time.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -116,8 +116,10 @@ _For more examples, please refer to the [Documentation](https://gitea.arianb.me/
 <!-- ROADMAP -->
 ## Roadmap
 
+- [X] Keyboard support
 - [ ] Touchpad support
 - [ ] Ability to send string all at once
+- 
 
 See the [open issues](https://gitea.arianb.me/arian/keyboard-app/issues) for a full list of proposed features (and known issues).
 
