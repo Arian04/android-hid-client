@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">USB HID Client</string>
+    <string name="direct_input">Direct Input</string>
+    <string name="manual_input">Manual Input</string>
+    <string name="default_output">No Output</string>
 </resources>
