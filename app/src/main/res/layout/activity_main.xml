@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:ems="10"
-        android:hint="@string/app_name"
+        android:hint="@string/direct_input"
         android:importantForAutofill="no"
         android:inputType="textMultiLine"
         android:minHeight="48dp"
@@ -37,10 +37,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="No Output"
+        android:text="@string/default_output"
         android:textSize="10sp"
         app:layout_constraintStart_toStartOf="@+id/etKeyboardInput"
-        app:layout_constraintTop_toBottomOf="@+id/etKeyboardInput" />
+        app:layout_constraintTop_toBottomOf="@+id/etKeyboardInput"
+        tools:ignore="SmallSp" />
 
     <EditText
         android:id="@+id/etManual"
@@ -49,6 +50,8 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:ems="10"
+        android:hint="@string/manual_input"
+        android:autofillHints="emailAddress,name"
         android:gravity="start|top"
         android:inputType="textMultiLine"
         app:layout_constraintStart_toStartOf="parent"
