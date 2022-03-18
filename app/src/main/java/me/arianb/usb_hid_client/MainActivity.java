@@ -1,7 +1,6 @@
 package me.arianb.usb_hid_client;
 
 import android.content.res.AssetManager;
-import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -27,11 +26,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-/* TODO: fix these issues
-    - ctrl-backspace doesn't work bc ctrl doesn't send a code when paired with backspace apparently
-    - ctrl <arrow key> is broken in a weird way, seems to work on second arrow press only sometimes
-*/
 public class MainActivity extends AppCompatActivity {
 	private static final String TAG = "hid-client";
 
@@ -41,12 +37,10 @@ public class MainActivity extends AppCompatActivity {
 	private EditText etManual;
 	private Spinner dropdownLogging;
 
-	private String appFileDirectory;
-	private String hidGadgetPath;
-
 	private Map<Integer, String> modifierKeys;
 	private Map<Integer, String> keyEventCodes;
 	private Map<String, String> shiftChars;
+	private Map<String, String> hidCodes;
 
 	private boolean nextKeyModified = false;
 	private String modifier;
@@ -61,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 		modifierKeys = new HashMap<>();
 		keyEventCodes = new HashMap<>();
 		shiftChars = new HashMap<>();
+		hidCodes = new HashMap<>();
 
 		// Translate modifier keycodes into key
 		modifierKeys.put(113, "--left-ctrl");
@@ -148,6 +143,55 @@ public class MainActivity extends AppCompatActivity {
 		shiftChars.put("_", "-");
 		shiftChars.put("+", "=");
 
+		// convert character to its HID scan code
+		hidCodes.put("a", "x04");
+		hidCodes.put("b", "x05");
+		hidCodes.put("c", "x06");
+		hidCodes.put("d", "x07");
+		hidCodes.put("e", "x08");
+		hidCodes.put("f", "x09");
+		hidCodes.put("g", "x0a");
+		hidCodes.put("h", "x0b");
+		hidCodes.put("i", "x0c");
+		hidCodes.put("j", "x0d");
+		hidCodes.put("k", "x0e");
+		hidCodes.put("l", "x0f");
+		hidCodes.put("m", "x10");
+		hidCodes.put("n", "x11");
+		hidCodes.put("o", "x12");
+		hidCodes.put("p", "x13");
+		hidCodes.put("q", "x14");
+		hidCodes.put("r", "x15");
+		hidCodes.put("s", "x16");
+		hidCodes.put("t", "x17");
+		hidCodes.put("u", "x18");
+		hidCodes.put("v", "x19");
+		hidCodes.put("w", "x1a");
+		hidCodes.put("x", "x1b");
+		hidCodes.put("y", "x1c");
+		hidCodes.put("z", "x1d");
+
+		hidCodes.put("1", "x1e");
+		hidCodes.put("2", "x1f");
+		hidCodes.put("3", "x20");
+		hidCodes.put("4", "x21");
+		hidCodes.put("5", "x22");
+		hidCodes.put("6", "x23");
+		hidCodes.put("7", "x24");
+		hidCodes.put("8", "x25");
+		hidCodes.put("9", "x26");
+		hidCodes.put("0", "x27");
+
+		hidCodes.put("\n", "x28"); // line break -> enter
+		hidCodes.put("escape", "x29");
+		hidCodes.put("backspace", "x2a");
+		hidCodes.put("tab", "x2b");
+		hidCodes.put(" ", "x2c"); // " " -> space
+		hidCodes.put("-", "x2d");
+		hidCodes.put("=", "x2e");
+		hidCodes.put("[", "x2f");
+		// TODO: finish map (i stopped to test the app and am now fixing that instead)
+
 		etInput = findViewById(R.id.etKeyboardInput);
 		btnSubmit = findViewById(R.id.btnKeyboard);
 		tvOutput = findViewById(R.id.tvOutput);
@@ -160,12 +204,6 @@ public class MainActivity extends AppCompatActivity {
 				R.array.logging_options, android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		dropdownLogging.setAdapter(adapter);
-
-		appFileDirectory = "/data/data/me.arianb.usb_hid_client";
-		hidGadgetPath = appFileDirectory + "/hid-gadget";
-
-		// Copy over binary (could compare existence/hashes before copying)
-		copyAssets("hid-gadget");
 
 		dropdownLogging.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
@@ -186,7 +224,21 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
+		btnSubmit.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				String sendStr = etManual.getText().toString();
 
+				// Splits string into array with 1 character per element
+				String[] sendStrArr = sendStr.split("");
+
+				for (String key: sendStrArr) {
+					new Thread(() -> sendKey(key)).start();
+				}
+			}
+		});
+
+		// Listens for changes to the edittext
+		// Detects printable characters (a-z, 0-9, etc.)
 		etInput.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void afterTextChanged(Editable s) {
@@ -201,30 +253,43 @@ public class MainActivity extends AppCompatActivity {
 				Log.d(TAG, "Diff: " + s);
 				Log.d(TAG, start + " " + before + " " + count);
 				if (s.length() >= 1) {
-					char newChar = s.subSequence(s.length() - 1, s.length()).charAt(0);
-					String str = null;
-					sendKey(Character.toString(newChar));
-					Log.d(TAG, "textChanged key: " + newChar);
+					// This should typically only contain a single character at a time, but I'm
+					// handling it as an array of strings since if the app lags badly, it can
+					// sometimes take a bit before it registers and it sends as several characters.
+					String[] allKeys = s.toString().split("");
+					for (String key: allKeys) {
+						new Thread(() -> sendKey(key)).start();
+						Log.d(TAG, "textChanged key: " + key);
+
+						// Hacky workaround that clears the edittext after every key press to
+						// make arrow keys get registered by onKeyDown (because it only triggers
+						// when the key doesn't touch the edittext)
+						etInput.setText("");
+					}
 				}
 			}
 		});
 	}
 
-	// detects non-printing keys
-	// TODO: handle issues of edittext watcher and onKeyDown listener detecting the same press
-	//       currently not an issue, but it might become one later
+	// Listens for KeyEvents
+	// Detects non-printing characters (tab, backspace, function keys, etc.)
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if(!etInput.hasFocus()) {
+			Log.d(TAG,"Ignoring KeyEvent because the direct input edittext was not focused");
+			return false;
+		}
 		if (KeyEvent.isModifierKey(keyCode)) {
 			modifier = modifierKeys.get(event.getKeyCode());
 			nextKeyModified = true;
 			Log.d(TAG, "modifier: " + modifier);
 		}
 
-		String str = null;
-		if ((str = keyEventCodes.get(event.getKeyCode())) != null) {
-			sendKey(str);
-			Log.d(TAG, "onKeyDown key: " + str);
+		String key = null;
+		if ((key = keyEventCodes.get(event.getKeyCode())) != null) {
+			String finalKey = key;
+			new Thread(() -> sendKey(finalKey)).start();
+			Log.d(TAG, "onKeyDown key: " + key);
 		}
 		Log.d(TAG, "keycode: " + event.getKeyCode());
 		return true;
@@ -250,10 +315,6 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		switch (key) {
-			// Translate character
-			case "\n":
-				adjustedKey = "enter";
-				break;
 			// Escape characters (Escape them once for Java and again for the shell command)
 			case "\"":
 				adjustedKey = "\\\""; // \" = "
@@ -270,49 +331,37 @@ public class MainActivity extends AppCompatActivity {
 			options = "--left-shift";
 			adjustedKey = str.toLowerCase();
 		}
-		Log.i(TAG, "raw key: " + key + " | sending key: " + adjustedKey);
-		String[] shell = {"su", "-c", "echo \"" + adjustedKey + "\" " + options + " | " + hidGadgetPath + " /dev/hidg0 keyboard"};
+
+		// Convert key to HID code
+		adjustedKey = hidCodes.get(adjustedKey);
+
 		try {
-			Process process = Runtime.getRuntime().exec(shell);
-			String errors = getProcessStdError(process);
+			Log.i(TAG, "raw key: " + key + " | sending key: " + adjustedKey);
+			// TODO: give app user permissions to write to /dev/hidg0 because privilege escalation causes a very significant performance hit
+			// echo -en "\0\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
+			String[] sendKeyCmd = {"su", "-c", "echo", "-en","\"\\0\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
+			// echo -en "\0" > /dev/hidg0 (as root) (releases key)
+			String[] releaseKeyCmd = {"su", "-c", "echo", "-en", "\"\\0\" > /dev/hidg0"};
+
+			Process sendProcess = Runtime.getRuntime().exec(sendKeyCmd);
+			// Kill process if it doesn't complete within 1 seconds
+			if(!sendProcess.waitFor(1, TimeUnit.SECONDS)) {
+				Log.e(TAG, "Timed out while sending key. Make sure a computer is connected");
+				sendProcess.destroy();
+				return;
+			}
+			Process releaseProcess = Runtime.getRuntime().exec(releaseKeyCmd);
+			Log.d(TAG, "DEBUG OUT: " + getProcessStdOutput(sendProcess));
+			Log.d(TAG, "DEBUG ERR: " + getProcessStdError(sendProcess));
+			Log.d(TAG, "DEBUG OUT: " + getProcessStdOutput(releaseProcess));
+			Log.d(TAG, "DEBUG ERR: " + getProcessStdError(releaseProcess));
+			String errors = getProcessStdError(sendProcess);
 			if (!errors.isEmpty()) {
 				Log.e(TAG, errors);
 			}
-		} catch (IOException e) {
+		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
 		}
-		// Bad workaround that clears the edittext after every key press to make arrow keys get
-		// registered by onKeyDown(because it only triggers when the key doesn't touch the edittext)
-		etInput.setText("");
-	}
-
-	private void copyAssets(String filename) {
-		AssetManager assetManager = getAssets();
-
-		Log.d("tag", "Attempting to copy this file: " + filename); // + " to: " +       assetCopyDestination);
-
-		try {
-			InputStream in = assetManager.open(filename);
-			Log.d("tag", "outDir: " + appFileDirectory);
-			File outFile = new File(appFileDirectory, filename);
-			OutputStream out = new FileOutputStream(outFile);
-			byte[] buffer = new byte[102400];
-			int len = in.read(buffer);
-			while (len != -1) {
-				out.write(buffer, 0, len);
-				len = in.read(buffer);
-			}
-			in.close();
-			in = null;
-			out.flush();
-			out.close();
-			out = null;
-			File execFile = new File(hidGadgetPath);
-			execFile.setExecutable(true);
-		} catch (IOException e) {
-			Log.e("tag", "Failed to copy asset file: " + filename, e);
-		}
-		Log.d("tag", "Copy success: " + filename);
 	}
 
 	private String getProcessStdOutput(Process process) throws IOException {
