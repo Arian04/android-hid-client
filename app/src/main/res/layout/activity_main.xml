@@ -25,8 +25,9 @@
     <Button
         android:id="@+id/btnKeyboard"
         android:layout_width="82dp"
-        android:layout_height="43dp"
+        android:layout_height="48dp"
         android:layout_marginStart="16dp"
+        android:text="@string/send"
         app:layout_constraintStart_toEndOf="@+id/etManual"
         app:layout_constraintTop_toTopOf="@+id/etManual"
         tools:ignore="SpeakableTextPresentCheck" />
@@ -49,19 +50,22 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="@string/manual_input"
         android:autofillHints="emailAddress,name"
+        android:ems="10"
         android:gravity="start|top"
+        android:hint="@string/manual_input"
         android:inputType="textMultiLine"
+        android:minHeight="48dp"
+        android:textColorHint="#757575"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
         android:id="@+id/spinner"
         android:layout_width="139dp"
-        android:layout_height="33dp"
+        android:layout_height="48dp"
         android:layout_marginStart="16dp"
+        android:contentDescription="@string/logging_level"
         app:layout_constraintStart_toEndOf="@+id/etKeyboardInput"
         app:layout_constraintTop_toTopOf="@+id/etKeyboardInput" />
 

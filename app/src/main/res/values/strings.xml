@@ -3,4 +3,6 @@
     <string name="direct_input">Direct Input</string>
     <string name="manual_input">Manual Input</string>
     <string name="default_output">No Output</string>
+    <string name="send">Send</string>
+    <string name="logging_level">Logging Level</string>
 </resources>
