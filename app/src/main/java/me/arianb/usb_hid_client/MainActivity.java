@@ -334,6 +334,10 @@ public class MainActivity extends AppCompatActivity {
 
 		// Convert key to HID code
 		adjustedKey = hidCodes.get(adjustedKey);
+		if(adjustedKey == null) {
+			Log.e(TAG, "key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
+			return;
+		}
 
 		try {
 			Log.i(TAG, "raw key: " + key + " | sending key: " + adjustedKey);
@@ -346,15 +350,11 @@ public class MainActivity extends AppCompatActivity {
 			Process sendProcess = Runtime.getRuntime().exec(sendKeyCmd);
 			// Kill process if it doesn't complete within 1 seconds
 			if(!sendProcess.waitFor(1, TimeUnit.SECONDS)) {
-				Log.e(TAG, "Timed out while sending key. Make sure a computer is connected");
+				Log.e(TAG, "Timed out while sending key. Make sure a computer is connected.");
 				sendProcess.destroy();
 				return;
 			}
 			Process releaseProcess = Runtime.getRuntime().exec(releaseKeyCmd);
-			Log.d(TAG, "DEBUG OUT: " + getProcessStdOutput(sendProcess));
-			Log.d(TAG, "DEBUG ERR: " + getProcessStdError(sendProcess));
-			Log.d(TAG, "DEBUG OUT: " + getProcessStdOutput(releaseProcess));
-			Log.d(TAG, "DEBUG ERR: " + getProcessStdError(releaseProcess));
 			String errors = getProcessStdError(sendProcess);
 			if (!errors.isEmpty()) {
 				Log.e(TAG, errors);
