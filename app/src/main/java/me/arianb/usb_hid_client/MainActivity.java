@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 	private boolean nextKeyModified = false;
 	private String modifier;
 
-	private Thread loggingThread;
+	private Thread loggingThread = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +53,11 @@ public class MainActivity extends AppCompatActivity {
 		shiftChars = new HashMap<>();
 		hidKeyCodes = new HashMap<>();
 		hidModifierCodes = new HashMap<>();
+
+		// TODO: if i feel like it later, I can change the maps to be more efficient, but if i do, then
+		// 		 I should probably add comments labeling each line with its human-readable key
+		// 		 current: keycode/char -> usable key -> hid code
+		// 		 proposed: keycode/char -> hid code
 
 		// Translate modifier keycodes into key
 		modifierKeys.put(113, "left-ctrl");
@@ -198,7 +203,44 @@ public class MainActivity extends AppCompatActivity {
 		hidKeyCodes.put("-", "x2d");
 		hidKeyCodes.put("=", "x2e");
 		hidKeyCodes.put("[", "x2f");
-		// TODO: finish map (i stopped to test the app and am now fixing that instead)
+		hidKeyCodes.put("]", "x30");
+		hidKeyCodes.put("\\", "x31");
+		hidKeyCodes.put("#", "x32"); // I think this is only for non-US layouts
+		hidKeyCodes.put(";", "x33");
+		hidKeyCodes.put("'", "x34");
+		hidKeyCodes.put("`", "x35");
+		hidKeyCodes.put(",", "x36");
+		hidKeyCodes.put(".", "x37");
+		hidKeyCodes.put("/", "x38");
+		hidKeyCodes.put("caps-lock", "x39"); // Haven't tested a keyboard with a caps-lock key
+
+		hidKeyCodes.put("f1", "x3a");
+		hidKeyCodes.put("f2", "x3b");
+		hidKeyCodes.put("f3", "x3c");
+		hidKeyCodes.put("f4", "x3d");
+		hidKeyCodes.put("f5", "x3e");
+		hidKeyCodes.put("f6", "x3f");
+		hidKeyCodes.put("f7", "x40");
+		hidKeyCodes.put("f8", "x41");
+		hidKeyCodes.put("f9", "x42");
+		hidKeyCodes.put("f10", "x43");
+		hidKeyCodes.put("f11", "x44");
+		hidKeyCodes.put("f12", "x45");
+
+		hidKeyCodes.put("print", "x46"); // and SysRq
+		hidKeyCodes.put("scroll-lock", "x47");
+		hidKeyCodes.put("pause", "x48");
+		hidKeyCodes.put("insert", "x49");
+		hidKeyCodes.put("home", "x4a");
+		hidKeyCodes.put("page-up", "x4b");
+		hidKeyCodes.put("delete", "x4c");
+		hidKeyCodes.put("end", "x4d");
+		hidKeyCodes.put("page-down", "x4e");
+
+		hidKeyCodes.put("right", "x4f");
+		hidKeyCodes.put("left", "x50");
+		hidKeyCodes.put("down", "x51");
+		hidKeyCodes.put("up", "x52");
 
 		etInput = findViewById(R.id.etKeyboardInput);
 		btnSubmit = findViewById(R.id.btnKeyboard);
@@ -213,6 +255,8 @@ public class MainActivity extends AppCompatActivity {
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		dropdownLogging.setAdapter(adapter);
 
+		// TODO: fix issues with more verbose logging levels' output sometimes overwriting the less
+		// 		 verbose outputs when switching from a more verbose level to less verbose level.
 		dropdownLogging.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
@@ -238,9 +282,11 @@ public class MainActivity extends AppCompatActivity {
 			// Splits string into array with 1 character per element
 			String[] sendStrArr = sendStr.split("");
 
-			for (String key: sendStrArr) {
-				new Thread(() -> sendKey(key)).start();
-			}
+			new Thread(() -> {
+				for (String key: sendStrArr) {
+					sendKey(key);
+				}
+			}).start();
 		});
 
 		// Listens for changes to the edittext
@@ -263,15 +309,17 @@ public class MainActivity extends AppCompatActivity {
 					// handling it as an array of strings since if the app lags badly, it can
 					// sometimes take a bit before it registers and it sends as several characters.
 					String[] allKeys = s.toString().split("");
-					for (String key: allKeys) {
-						new Thread(() -> sendKey(key)).start();
-						Log.d(TAG, "textChanged key: " + key);
+					new Thread(() -> {
+						for (String key: allKeys) {
+							sendKey(key);
+							Log.d(TAG, "textChanged key: " + key);
 
-						// Hacky workaround that clears the edittext after every key press to
-						// make arrow keys get registered by onKeyDown (because it only triggers
-						// when the key doesn't touch the EditText)
-						etInput.setText("");
-					}
+							// Hacky workaround that clears the edittext after every key press to
+							// make arrow keys get registered by onKeyDown (because it only triggers
+							// when the key doesn't touch the EditText)
+							runOnUiThread(() -> etInput.setText(""));
+						}
+					});
 				}
 			}
 		});
@@ -302,6 +350,11 @@ public class MainActivity extends AppCompatActivity {
 		return true;
 	}
 
+	// TODO: un-multithread all calls to sendKey method OR figure out how to guarantee the order.
+
+	// TODO: add support for sending multiple modifier keys at once
+	//		 - i think you add up modifier scan codes to send multiple? so find method to add hex
+	// 		 - use an arraylist to hold mod keys and add to them instead of overwriting?
 	private void sendKey(String key) {
 		if (key == null) {
 			Log.e(TAG, "sendKey received null key value");
@@ -319,19 +372,6 @@ public class MainActivity extends AppCompatActivity {
 			adjustedKey = str;
 			sendModifier = "left-shift";
 			Log.d(TAG, "adding shift option to make: " + adjustedKey + " -> " + key);
-		}
-
-		// Escape characters (Escape them once for Java and again for the shell command)
-		switch (key) {
-			case "\"":
-				adjustedKey = "\\\""; // \" = "
-				break;
-			case "\\":
-				adjustedKey = "\\\\"; // \\ = \
-				break;
-			case "`":
-				adjustedKey = "\\`"; // \` = `
-				break;
 		}
 
 		// If character is uppercase, send the lowercase char + shift key
@@ -409,8 +449,8 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void displayLogs(String verbosityFilter) {
-		// Clear previous logs
-		runOnUiThread(() -> tvOutput.setText("No Output"));
+		// Clear previous logs (reset it back to the default output)
+		runOnUiThread(() -> tvOutput.setText(R.string.default_output));
 
 		// Trim filter down to just the first letter because that's what logcat uses to filter
 		String verbosityLetter = verbosityFilter.substring(0, 1);
@@ -428,16 +468,18 @@ public class MainActivity extends AppCompatActivity {
 				String line;
 				while (!Thread.interrupted()) {
 					line = bufferedReader.readLine();
-					if (line != null) {
+					if (!Thread.interrupted() && line != null) { // TODO: find out if this extra thread interrupted check helps
 						log.insert(0, line + "\n");
 						runOnUiThread(() -> tvOutput.setText(log.toString()));
 					}
 				}
 			} catch (IOException e) {
-				Log.e("tag", "io exception in logging");
+				e.printStackTrace();
+			} finally {
+				loggingThread = null;
 			}
 		});
 		loggingThread.start();
-		Log.d("tag", "logging started with verbosity: " + verbosityFilter);
+		Log.d(TAG, "logging started with verbosity: " + verbosityFilter);
 	}
 }
