@@ -1,6 +1,5 @@
 package me.arianb.usb_hid_client;
 
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,12 +17,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -40,7 +35,8 @@ public class MainActivity extends AppCompatActivity {
 	private Map<Integer, String> modifierKeys;
 	private Map<Integer, String> keyEventCodes;
 	private Map<String, String> shiftChars;
-	private Map<String, String> hidCodes;
+	private Map<String, String> hidKeyCodes;
+	private Map<String, String> hidModifierCodes;
 
 	private boolean nextKeyModified = false;
 	private String modifier;
@@ -55,17 +51,18 @@ public class MainActivity extends AppCompatActivity {
 		modifierKeys = new HashMap<>();
 		keyEventCodes = new HashMap<>();
 		shiftChars = new HashMap<>();
-		hidCodes = new HashMap<>();
+		hidKeyCodes = new HashMap<>();
+		hidModifierCodes = new HashMap<>();
 
 		// Translate modifier keycodes into key
-		modifierKeys.put(113, "--left-ctrl");
-		modifierKeys.put(114, "--right-ctrl");
-		modifierKeys.put(59, "--left-shift");
-		modifierKeys.put(60, "--right-shift");
-		modifierKeys.put(57, "--left-alt");
-		modifierKeys.put(58, "--right-alt");
-		modifierKeys.put(117, "--left-meta");
-		modifierKeys.put(118, "--right-meta");
+		modifierKeys.put(113, "left-ctrl");
+		modifierKeys.put(114, "right-ctrl");
+		modifierKeys.put(59, "left-shift");
+		modifierKeys.put(60, "right-shift");
+		modifierKeys.put(57, "left-alt");
+		modifierKeys.put(58, "right-alt");
+		modifierKeys.put(117, "left-meta");
+		modifierKeys.put(118, "right-meta");
 
 		// Translate keycodes into key
 		keyEventCodes.put(29, "a");
@@ -143,53 +140,64 @@ public class MainActivity extends AppCompatActivity {
 		shiftChars.put("_", "-");
 		shiftChars.put("+", "=");
 
+		// convert modifier to its HID scan code
+		hidModifierCodes.put("no-modifier", "0");
+		hidModifierCodes.put("left-ctrl", "x01");
+		hidModifierCodes.put("left-shift", "x02");
+		hidModifierCodes.put("left-alt", "x04");
+		hidModifierCodes.put("left-meta", "x08");
+		hidModifierCodes.put("right-ctrl", "x10");
+		hidModifierCodes.put("right-shift", "x20");
+		hidModifierCodes.put("right-alt", "x40");
+		hidModifierCodes.put("right-meta", "x80");
+
 		// convert character to its HID scan code
-		hidCodes.put("a", "x04");
-		hidCodes.put("b", "x05");
-		hidCodes.put("c", "x06");
-		hidCodes.put("d", "x07");
-		hidCodes.put("e", "x08");
-		hidCodes.put("f", "x09");
-		hidCodes.put("g", "x0a");
-		hidCodes.put("h", "x0b");
-		hidCodes.put("i", "x0c");
-		hidCodes.put("j", "x0d");
-		hidCodes.put("k", "x0e");
-		hidCodes.put("l", "x0f");
-		hidCodes.put("m", "x10");
-		hidCodes.put("n", "x11");
-		hidCodes.put("o", "x12");
-		hidCodes.put("p", "x13");
-		hidCodes.put("q", "x14");
-		hidCodes.put("r", "x15");
-		hidCodes.put("s", "x16");
-		hidCodes.put("t", "x17");
-		hidCodes.put("u", "x18");
-		hidCodes.put("v", "x19");
-		hidCodes.put("w", "x1a");
-		hidCodes.put("x", "x1b");
-		hidCodes.put("y", "x1c");
-		hidCodes.put("z", "x1d");
+		hidKeyCodes.put("a", "x04");
+		hidKeyCodes.put("b", "x05");
+		hidKeyCodes.put("c", "x06");
+		hidKeyCodes.put("d", "x07");
+		hidKeyCodes.put("e", "x08");
+		hidKeyCodes.put("f", "x09");
+		hidKeyCodes.put("g", "x0a");
+		hidKeyCodes.put("h", "x0b");
+		hidKeyCodes.put("i", "x0c");
+		hidKeyCodes.put("j", "x0d");
+		hidKeyCodes.put("k", "x0e");
+		hidKeyCodes.put("l", "x0f");
+		hidKeyCodes.put("m", "x10");
+		hidKeyCodes.put("n", "x11");
+		hidKeyCodes.put("o", "x12");
+		hidKeyCodes.put("p", "x13");
+		hidKeyCodes.put("q", "x14");
+		hidKeyCodes.put("r", "x15");
+		hidKeyCodes.put("s", "x16");
+		hidKeyCodes.put("t", "x17");
+		hidKeyCodes.put("u", "x18");
+		hidKeyCodes.put("v", "x19");
+		hidKeyCodes.put("w", "x1a");
+		hidKeyCodes.put("x", "x1b");
+		hidKeyCodes.put("y", "x1c");
+		hidKeyCodes.put("z", "x1d");
 
-		hidCodes.put("1", "x1e");
-		hidCodes.put("2", "x1f");
-		hidCodes.put("3", "x20");
-		hidCodes.put("4", "x21");
-		hidCodes.put("5", "x22");
-		hidCodes.put("6", "x23");
-		hidCodes.put("7", "x24");
-		hidCodes.put("8", "x25");
-		hidCodes.put("9", "x26");
-		hidCodes.put("0", "x27");
+		hidKeyCodes.put("1", "x1e");
+		hidKeyCodes.put("2", "x1f");
+		hidKeyCodes.put("3", "x20");
+		hidKeyCodes.put("4", "x21");
+		hidKeyCodes.put("5", "x22");
+		hidKeyCodes.put("6", "x23");
+		hidKeyCodes.put("7", "x24");
+		hidKeyCodes.put("8", "x25");
+		hidKeyCodes.put("9", "x26");
+		hidKeyCodes.put("0", "x27");
 
-		hidCodes.put("\n", "x28"); // line break -> enter
-		hidCodes.put("escape", "x29");
-		hidCodes.put("backspace", "x2a");
-		hidCodes.put("tab", "x2b");
-		hidCodes.put(" ", "x2c"); // " " -> space
-		hidCodes.put("-", "x2d");
-		hidCodes.put("=", "x2e");
-		hidCodes.put("[", "x2f");
+		hidKeyCodes.put("\n", "x28"); // line break -> enter
+		hidKeyCodes.put("escape", "x29");
+		hidKeyCodes.put("backspace", "x2a");
+		hidKeyCodes.put("tab", "x2b");
+		hidKeyCodes.put(" ", "x2c"); // " " -> space
+		hidKeyCodes.put("-", "x2d");
+		hidKeyCodes.put("=", "x2e");
+		hidKeyCodes.put("[", "x2f");
 		// TODO: finish map (i stopped to test the app and am now fixing that instead)
 
 		etInput = findViewById(R.id.etKeyboardInput);
@@ -224,16 +232,14 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		btnSubmit.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				String sendStr = etManual.getText().toString();
+		btnSubmit.setOnClickListener(v -> {
+			String sendStr = etManual.getText().toString();
 
-				// Splits string into array with 1 character per element
-				String[] sendStrArr = sendStr.split("");
+			// Splits string into array with 1 character per element
+			String[] sendStrArr = sendStr.split("");
 
-				for (String key: sendStrArr) {
-					new Thread(() -> sendKey(key)).start();
-				}
+			for (String key: sendStrArr) {
+				new Thread(() -> sendKey(key)).start();
 			}
 		});
 
@@ -263,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
 						// Hacky workaround that clears the edittext after every key press to
 						// make arrow keys get registered by onKeyDown (because it only triggers
-						// when the key doesn't touch the edittext)
+						// when the key doesn't touch the EditText)
 						etInput.setText("");
 					}
 				}
@@ -272,7 +278,8 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	// Listens for KeyEvents
-	// Detects non-printing characters (tab, backspace, function keys, etc.)
+	// Detects non-printing characters (tab, backspace, function keys, etc.) that aren't consumed by
+	// the EditText
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(!etInput.hasFocus()) {
@@ -301,21 +308,21 @@ public class MainActivity extends AppCompatActivity {
 			return;
 		}
 
-		String options = "";
+		String sendModifier = "no-modifier";
 		String adjustedKey = key;
 		if (nextKeyModified) {
-			options += modifier;
+			sendModifier = modifier;
 			nextKeyModified = false;
 		}
 		String str = null;
 		if ((str = shiftChars.get(key)) != null) {
 			adjustedKey = str;
-			options += " --left-shift";
+			sendModifier = "left-shift";
 			Log.d(TAG, "adding shift option to make: " + adjustedKey + " -> " + key);
 		}
 
+		// Escape characters (Escape them once for Java and again for the shell command)
 		switch (key) {
-			// Escape characters (Escape them once for Java and again for the shell command)
 			case "\"":
 				adjustedKey = "\\\""; // \" = "
 				break;
@@ -327,23 +334,31 @@ public class MainActivity extends AppCompatActivity {
 				break;
 		}
 
+		// If character is uppercase, send the lowercase char + shift key
 		if (key.length() == 1 && Character.isUpperCase(key.charAt(0))) {
-			options = "--left-shift";
-			adjustedKey = str.toLowerCase();
+			sendModifier = "left-shift";
+			adjustedKey = key.toLowerCase();
 		}
 
 		// Convert key to HID code
-		adjustedKey = hidCodes.get(adjustedKey);
+		adjustedKey = hidKeyCodes.get(adjustedKey);
 		if(adjustedKey == null) {
 			Log.e(TAG, "key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
 			return;
 		}
+		// Convert modifier to HID code
+		sendModifier = hidModifierCodes.get(sendModifier);
+		if(sendModifier == null) {
+			Log.e(TAG, "mod: '" + modifier + "' could not be converted to an HID code (it wasn't found in the map).");
+			return;
+		}
 
 		try {
-			Log.i(TAG, "raw key: " + key + " | sending key: " + adjustedKey);
+			Log.i(TAG, "raw key: " + key + " | sending key: " + adjustedKey + " | modifier: " + sendModifier);
+
 			// TODO: give app user permissions to write to /dev/hidg0 because privilege escalation causes a very significant performance hit
 			// echo -en "\0\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
-			String[] sendKeyCmd = {"su", "-c", "echo", "-en","\"\\0\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
+			String[] sendKeyCmd = {"su", "-c", "echo", "-en","\"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
 			// echo -en "\0" > /dev/hidg0 (as root) (releases key)
 			String[] releaseKeyCmd = {"su", "-c", "echo", "-en", "\"\\0\" > /dev/hidg0"};
 
@@ -355,9 +370,14 @@ public class MainActivity extends AppCompatActivity {
 				return;
 			}
 			Process releaseProcess = Runtime.getRuntime().exec(releaseKeyCmd);
-			String errors = getProcessStdError(sendProcess);
-			if (!errors.isEmpty()) {
-				Log.e(TAG, errors);
+
+			String sendErrors = getProcessStdError(sendProcess);
+			String releaseErrors = getProcessStdError(releaseProcess);
+			if (!sendErrors.isEmpty()) {
+				Log.e(TAG, sendErrors);
+			}
+			if(!releaseErrors.isEmpty()) {
+				Log.e(TAG, releaseErrors);
 			}
 		} catch (IOException | InterruptedException e) {
 			e.printStackTrace();
@@ -414,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
 					}
 				}
 			} catch (IOException e) {
-				Log.e("tag", "ioexc in logging");
+				Log.e("tag", "io exception in logging");
 			}
 		});
 		loggingThread.start();
