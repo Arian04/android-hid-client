@@ -119,6 +119,7 @@ _For more examples, please refer to the [Documentation](https://github.com/Arian
 ## Roadmap
 
 - [X] Keyboard support
+- [ ] Add some special key buttons to the UI (like multimedia keys)
 - [ ] Touchpad support
 - [ ] Ability to send string all at once
 - [ ] Add full settings page
