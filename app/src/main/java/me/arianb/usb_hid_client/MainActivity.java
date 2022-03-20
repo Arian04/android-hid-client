@@ -1,11 +1,15 @@
 package me.arianb.usb_hid_client;
 
+import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -13,10 +17,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -24,11 +32,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-	private static final String TAG = "hid-client";
+	public static final String TAG = "hid-client";
 
 	private EditText etInput;
 	private Button btnSubmit;
-	private TextView tvOutput;
+	protected static TextView tvOutput;
 	private EditText etManual;
 	private Spinner dropdownLogging;
 
@@ -277,6 +285,9 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		btnSubmit.setOnClickListener(v -> {
+			// Debugging lines
+			//ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
 			String sendStr = etManual.getText().toString();
 
 			// Splits string into array with 1 character per element
@@ -309,17 +320,16 @@ public class MainActivity extends AppCompatActivity {
 					// handling it as an array of strings since if the app lags badly, it can
 					// sometimes take a bit before it registers and it sends as several characters.
 					String[] allKeys = s.toString().split("");
-					new Thread(() -> {
-						for (String key: allKeys) {
-							sendKey(key);
-							Log.d(TAG, "textChanged key: " + key);
+					for (String key: allKeys) {
+						sendKey(key);
+						Log.d(TAG, "textChanged key: " + key);
 
-							// Hacky workaround that clears the edittext after every key press to
-							// make arrow keys get registered by onKeyDown (because it only triggers
-							// when the key doesn't touch the EditText)
-							runOnUiThread(() -> etInput.setText(""));
-						}
-					});
+						// Hacky workaround that clears the edittext after every key press to
+						// make arrow keys get registered by onKeyDown (because it only triggers
+						// when the key doesn't touch the EditText)
+						//etInput.getText().clear(); // Mitigates some of InputConnection warnings
+						etInput.setText("");
+					}
 				}
 			}
 		});
@@ -481,5 +491,34 @@ public class MainActivity extends AppCompatActivity {
 		});
 		loggingThread.start();
 		Log.d(TAG, "logging started with verbosity: " + verbosityFilter);
+	}
+
+	// method to inflate the options menu when
+	// the user opens the menu for the first time
+	@Override
+	public boolean onCreateOptionsMenu( Menu menu ) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	// methods to control the operations that will
+	// happen when user clicks on the action buttons
+	@Override
+	public boolean onOptionsItemSelected( @NonNull MenuItem item ) {
+
+		switch (item.getItemId()){
+			case R.id.menuSettings:
+				//Toast.makeText(this, "settings Clicked", Toast.LENGTH_SHORT).show(); // DEBUG
+				Intent intent = new Intent(this, SettingsActivity.class);
+				startActivity(intent);
+				break;
+			case R.id.menuHelp:
+				Toast.makeText(this, "help Clicked", Toast.LENGTH_SHORT).show(); // DEBUG
+				break;
+			case R.id.menuInfo:
+				Toast.makeText(this, "info Clicked", Toast.LENGTH_SHORT).show(); // DEBUG
+				break;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 }
