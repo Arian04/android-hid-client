@@ -75,10 +75,18 @@
 ## About The Project
 
 [<img src="images/main-screenshot.png"
-    alt="Main Screen"
-    height="350">](images/main-screenshot)
+alt="Main Screen"
+height="350">](images/main-screenshot.png)
 
-This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a character device that allows your phone to send keys to a connected host device (I recommend using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget) to create hidgX devices). It presents itself as a standard hardware input device and therefore doesn't require any additional software to be installed on the computer. It is also completely functional within the connected computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, \`~!@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more (I recommend using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as modifier and function keys).
+This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a
+character device that allows your phone to send keys to a connected host device (I recommend
+using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget) to create hidgX devices). It
+presents itself as a standard hardware input device and therefore doesn't require any additional
+software to be installed on the computer. It is also completely functional within the connected
+computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, \`~!
+@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more (I recommend
+using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as
+modifier and function keys).
 
 Disclaimer: This app requires your device to be rooted.
 
@@ -121,10 +129,10 @@ _For more examples, please refer to the [Documentation](https://github.com/Arian
 - [X] Keyboard support
 - [ ] Add some special key buttons to the UI (like multimedia keys)
 - [ ] Touchpad support
-- [ ] Ability to send string all at once
-- [ ] Add full settings page
-  - [ ] Move logging level dropdown there
-  - [ ] Add configurable location for HID character device (/dev/hidgX)
+- [X] Ability to send string all at once
+- [X] Add full settings page
+    - [ ] Move logging level dropdown there
+    - [ ] Add configurable location for HID character device (/dev/hidgX)
 - [ ] Add ability to not require root access if /dev/hidgX is already writable
 
 See the [open issues](https://github.com/Arian04/android-hid-gadget/issues) for a full list of proposed features (and known issues).
