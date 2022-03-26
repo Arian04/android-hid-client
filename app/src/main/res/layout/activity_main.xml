@@ -34,13 +34,16 @@
 
     <TextView
         android:id="@+id/tvOutput"
-        android:scrollbars = "vertical"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:scrollbars="vertical"
         android:text="@string/default_output"
         android:textSize="10sp"
-        app:layout_constraintStart_toStartOf="@+id/etKeyboardInput"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etKeyboardInput"
         tools:ignore="SmallSp" />
 
@@ -59,14 +62,5 @@
         android:textColorHint="#757575"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Spinner
-        android:id="@+id/spinner"
-        android:layout_width="139dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:contentDescription="@string/logging_level"
-        app:layout_constraintStart_toEndOf="@+id/etKeyboardInput"
-        app:layout_constraintTop_toTopOf="@+id/etKeyboardInput" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

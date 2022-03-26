@@ -1,5 +1,8 @@
 package me.arianb.usb_hid_client;
 
+import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
+import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -10,12 +13,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,9 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
 	private Button btnSubmit;
 	private TextView tvOutput;
 	private EditText etManual;
-	private Spinner dropdownLogging;
 
 	private Map<Integer, String> modifierKeys;
 	private Map<Integer, String> keyEventCodes;
@@ -48,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 	private boolean nextKeyModified = false;
 	private String modifier;
 
-	private Thread loggingThread = null;
+	public Logger logger;
 
 	private SharedPreferences preferences;
 
@@ -57,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		// Initialize maps to translate keycodes into hid codes
 		KeyCodeTranslation code = new KeyCodeTranslation();
 		modifierKeys = code.modifierKeys;
 		keyEventCodes = code.keyEventCodes;
@@ -64,33 +61,20 @@ public class MainActivity extends AppCompatActivity {
 		hidKeyCodes = code.hidKeyCodes;
 		hidModifierCodes = code.hidModifierCodes;
 
+		// Initialize UI elements
 		etInput = findViewById(R.id.etKeyboardInput);
 		btnSubmit = findViewById(R.id.btnKeyboard);
 		tvOutput = findViewById(R.id.tvOutput);
 		etManual = findViewById(R.id.etManual);
-		dropdownLogging = findViewById(R.id.spinner);
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		new SettingsActivity.SettingsFragment(this);
+		SettingsActivity.SettingsFragment.setContext(this);
+
+		// Logging
+		logger = new Logger(this, tvOutput);
+		logger.watchForPreferenceChanges(preferences);
 
 		tvOutput.setMovementMethod(new ScrollingMovementMethod());
-
-		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-				R.array.logging_options, android.R.layout.simple_spinner_item);
-		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		dropdownLogging.setAdapter(adapter);
-
-		dropdownLogging.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-			@Override
-			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-				String choice = parentView.getSelectedItem().toString();
-				displayLogs(choice);
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parentView) {
-			}
-		});
 
 		btnSubmit.setOnClickListener(v -> {
 			// Save text to send
@@ -115,11 +99,10 @@ public class MainActivity extends AppCompatActivity {
 		// Listens for changes to the edittext
 		// Detects printable characters (a-z, 0-9, etc.)
 		etInput.addTextChangedListener(new TextWatcher() {
-			@Override
+			// Methods not used
 			public void afterTextChanged(Editable s) {
 			}
 
-			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 			}
 
@@ -148,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	// Listens for KeyEvents
-	// Detects non-printing characters (tab, backspace, function keys, etc.) that aren't consumed by
-	// the EditText
+	// Detects non-printing characters (tab, backspace, function keys, etc.) that aren't consumed
+	// by the EditText
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (!etInput.hasFocus()) {
@@ -224,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
 			// echo -en "\0\0\0\0\0\0\0\0" > /dev/hidg0 (as root) (releases key)
 			String[] releaseKeyCmd = {"su", "-c", "echo", "-en", "\"\\0\\0\\0\\0\\0\\0\\0\\0\" > /dev/hidg0"};
 
+			// Send key
 			Process sendProcess = Runtime.getRuntime().exec(sendKeyCmd);
 			// Kill process if it doesn't complete within 1 seconds
 			if (!sendProcess.waitFor(1, TimeUnit.SECONDS)) {
@@ -231,8 +215,10 @@ public class MainActivity extends AppCompatActivity {
 				sendProcess.destroy();
 				return;
 			}
+			// Release key
 			Process releaseProcess = Runtime.getRuntime().exec(releaseKeyCmd);
 
+			// Log errors if the processes returned any
 			String sendErrors = getProcessStdError(sendProcess);
 			String releaseErrors = getProcessStdError(releaseProcess);
 			if (!sendErrors.isEmpty()) {
@@ -244,99 +230,6 @@ public class MainActivity extends AppCompatActivity {
 		} catch (IOException | InterruptedException e) {
 			Log.e(TAG, Arrays.toString(e.getStackTrace()));
 		}
-	}
-
-	private String getProcessStdOutput(Process process) throws IOException {
-		BufferedReader stdInput = new BufferedReader(new
-				InputStreamReader(process.getInputStream()));
-		// Read the output from the command
-		String s = null;
-		StringBuilder returnStr = new StringBuilder();
-		while ((s = stdInput.readLine()) != null) {
-			returnStr.append(s).append("\n");
-		}
-		return returnStr.toString();
-	}
-
-	private String getProcessStdError(Process process) throws IOException {
-		BufferedReader stdError = new BufferedReader(new
-				InputStreamReader(process.getErrorStream()));
-		// Read any errors from the attempted command
-		String s = null;
-		StringBuilder returnStr = new StringBuilder();
-		while ((s = stdError.readLine()) != null) {
-			returnStr.append(s).append("\n");
-		}
-		return returnStr.toString();
-	}
-
-	private void displayLogs(String verbosityFilter) {
-		if (loggingThread != null) {
-			// Pretty sure if thread updates tvOutput one more time before finishing being interrupted
-			// it might overwrite the new thread's output until it re-rewrites the output.
-			// Implement locks if this is an issue.
-			loggingThread.interrupt();
-
-			// IDK how I feel about this workaround
-			Log.e(TAG, "[ignore] NOT AN ERROR. This is being logged to trigger the logging thread to check if it's been interrupted.");
-			Log.d(TAG, "logging choice: " + verbosityFilter);
-			try {
-				if (loggingThread != null) {
-					loggingThread.join();
-				}
-			} catch (InterruptedException e) {
-				Log.e(TAG, Arrays.toString(e.getStackTrace()));
-			}
-		}
-
-		// Trim filter down to just the first letter (because that's what logcat uses to filter the
-		// logs) and make sure it's uppercase for good measure since that's also necessary
-		String verbosityLetter = verbosityFilter.substring(0, 1).toUpperCase();
-		loggingThread = new Thread(() -> {
-			try {
-				String command = String.format("logcat -s hid-client:%s -v raw", verbosityLetter);
-				Process process = Runtime.getRuntime().exec(command);
-				BufferedReader bufferedReader = new BufferedReader(
-						new InputStreamReader(process.getInputStream()));
-
-				// Discard the first line of logcat ("---beginning of main---")
-				bufferedReader.readLine();
-
-				StringBuilder log = new StringBuilder();
-				String line;
-				while (!Thread.interrupted()) {
-					line = bufferedReader.readLine();
-					if (!Thread.interrupted()) {
-						if (line != null && !line.matches("\\[ignore\\].*")) {
-							log.insert(0, line + "\n");
-							runOnUiThread(() -> tvOutput.setText(log.toString()));
-						}
-					} else {
-						Log.d(TAG, "Logging Thread interrupted. Logging Level: " + verbosityFilter);
-						break;
-					}
-				}
-				// Kill logcat process before ending thread
-				process.destroy();
-			} catch (IOException e) {
-				Log.e(TAG, Arrays.toString(e.getStackTrace()));
-			} finally {
-				// Clear previous logs (reset it back to the default output)
-				runOnUiThread(() -> tvOutput.setText(R.string.default_output));
-				loggingThread = null;
-			}
-			//Log.e(TAG, "Thread actually ended: " + verbosityLetter); // DEBUG
-		});
-		loggingThread.start();
-		Log.d(TAG, "logging started with verbosity: " + verbosityFilter);
-	}
-
-	public void setLoggingThread(Thread t) {
-		loggingThread = t;
-	}
-
-	public Thread getLoggingThread() {
-		return loggingThread;
 	}
 
 	// method to inflate the options menu when

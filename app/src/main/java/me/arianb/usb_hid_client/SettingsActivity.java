@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -40,27 +41,29 @@ public class SettingsActivity extends AppCompatActivity {
 	public static class SettingsFragment extends PreferenceFragmentCompat {
 
 		private static final String TAG = MainActivity.TAG;
-		private TextView tvOutput;
-		private Context mContext;
+		private static TextView tvOutput;
+		private static Context mainContext;
 
-		public SettingsFragment() {
-		}
-
-		public SettingsFragment(Context context) {
-			this.mContext = context;
-			tvOutput = ((Activity) mContext).findViewById(R.id.tvOutput);
+		public static void setContext(Context c) {
+			mainContext = c;
+			tvOutput = ((Activity) mainContext).findViewById(R.id.tvOutput);
 		}
 
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.root_preferences, rootKey);
+			tvOutput = ((Activity) mainContext).findViewById(R.id.tvOutput);
 
 			ListPreference loggingLevelList = findPreference("logging_level");
 			SeekBarPreference fontSizeSeekBar = findPreference("font_size");
 			SwitchPreference clearInputSwitch = findPreference("clear_manual_input");
 
 			loggingLevelList.setOnPreferenceChangeListener((preference, newValue) -> {
-				// displayLogs(newValue);
+				Log.d(TAG, "Logging pref changed to: " + newValue.toString());
+
+				// Logger listens for preference changes and will automatically update its
+				// logging level when this preference changes
+
 				return true;
 			});
 
