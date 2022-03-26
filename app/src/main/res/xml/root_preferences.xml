@@ -28,6 +28,10 @@
             app:key="clear_manual_input"
             app:title="@string/clear_input_title" />
 
+        <SwitchPreference
+            app:key="performance_mode"
+            app:title="@string/performance_mode_title" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

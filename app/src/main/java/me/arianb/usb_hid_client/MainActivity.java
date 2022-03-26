@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
 	public Logger logger;
 
 	private SharedPreferences preferences;
+
+	private DataOutputStream rootShell;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +78,15 @@ public class MainActivity extends AppCompatActivity {
 		logger.watchForPreferenceChanges(preferences);
 
 		tvOutput.setMovementMethod(new ScrollingMovementMethod());
+
+		// Get root shell
+		Process p = null;
+		try {
+			p = Runtime.getRuntime().exec("su");
+			rootShell = new DataOutputStream(p.getOutputStream());
+		} catch (IOException e) {
+			Log.e(TAG, Arrays.toString(e.getStackTrace()));
+		}
 
 		btnSubmit.setOnClickListener(v -> {
 			// Save text to send
@@ -148,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
 		String key = null;
 		if ((key = keyEventCodes.get(event.getKeyCode())) != null) {
 			String finalKey = key;
-			new Thread(() -> sendKey(finalKey)).start();
+			sendKey(finalKey);
 			Log.d(TAG, "onKeyDown key: " + key);
 		}
 		Log.d(TAG, "keycode: " + event.getKeyCode());
@@ -201,31 +213,46 @@ public class MainActivity extends AppCompatActivity {
 		try {
 			Log.i(TAG, "raw key: " + key + " | sending key: " + adjustedKey + " | modifier: " + sendModifier);
 
-			// TODO: give app user permissions to write to /dev/hidg0 because privilege escalation causes a very significant performance hit
-			// echo -en "\modifier\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
-			String[] sendKeyCmd = {"su", "-c", "echo", "-en", "\"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
-			// echo -en "\0\0\0\0\0\0\0\0" > /dev/hidg0 (as root) (releases key)
-			String[] releaseKeyCmd = {"su", "-c", "echo", "-en", "\"\\0\\0\\0\\0\\0\\0\\0\\0\" > /dev/hidg0"};
+			// TODO: give app user permissions to write to /dev/hidg0 because privilege escalation
+			//  	 causes a very significant performance hit
+			// 		 - once i complete this, remove performance mode, because it'll be fast by default
+			if (preferences.getBoolean("performance_mode", false)) {
+				// echo -en "\modifier\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
+				String sendKeyCmd = "echo -en \"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0";
+				// echo -en "\0\0\0\0\0\0\0\0" > /dev/hidg0 (as root) (releases key)
+				String releaseKeyCmd = "echo -en \"\\0\\0\\0\\0\\0\\0\\0\\0\" > /dev/hidg0";
+				// Send key
+				rootShell.writeBytes(sendKeyCmd + "\n");
+				rootShell.flush();
+				// Release key
+				rootShell.writeBytes(releaseKeyCmd + "\n");
+				rootShell.flush();
+			} else {
+				// echo -en "\modifier\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
+				String[] sendKeyCmd = {"su", "-c", "echo", "-en", "\"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
+				// echo -en "\0\0\0\0\0\0\0\0" > /dev/hidg0 (as root) (releases key)
+				String[] releaseKeyCmd = {"su", "-c", "echo", "-en", "\"\\0\\0\\0\\0\\0\\0\\0\\0\" > /dev/hidg0"};
 
-			// Send key
-			Process sendProcess = Runtime.getRuntime().exec(sendKeyCmd);
-			// Kill process if it doesn't complete within 1 seconds
-			if (!sendProcess.waitFor(1, TimeUnit.SECONDS)) {
-				Log.e(TAG, "Timed out while sending key. Make sure a computer is connected.");
-				sendProcess.destroy();
-				return;
-			}
-			// Release key
-			Process releaseProcess = Runtime.getRuntime().exec(releaseKeyCmd);
+				// Send key
+				Process sendProcess = Runtime.getRuntime().exec(sendKeyCmd);
+				// Kill process if it doesn't complete within 1 seconds
+				if (!sendProcess.waitFor(1, TimeUnit.SECONDS)) {
+					Log.e(TAG, "Timed out while sending key. Make sure a computer is connected.");
+					sendProcess.destroy();
+					return;
+				}
+				// Release key
+				Process releaseProcess = Runtime.getRuntime().exec(releaseKeyCmd);
 
-			// Log errors if the processes returned any
-			String sendErrors = getProcessStdError(sendProcess);
-			String releaseErrors = getProcessStdError(releaseProcess);
-			if (!sendErrors.isEmpty()) {
-				Log.e(TAG, sendErrors);
-			}
-			if (!releaseErrors.isEmpty()) {
-				Log.e(TAG, releaseErrors);
+				// Log errors if the processes returned any
+				String sendErrors = getProcessStdError(sendProcess);
+				String releaseErrors = getProcessStdError(releaseProcess);
+				if (!sendErrors.isEmpty()) {
+					Log.e(TAG, sendErrors);
+				}
+				if (!releaseErrors.isEmpty()) {
+					Log.e(TAG, releaseErrors);
+				}
 			}
 		} catch (IOException | InterruptedException e) {
 			Log.e(TAG, Arrays.toString(e.getStackTrace()));

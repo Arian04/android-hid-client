@@ -21,4 +21,5 @@
 
     <!-- Misc Preferences -->
     <string name="clear_input_title">Clear manual input text box on send</string>
+    <string name="performance_mode_title">Performance Mode (Faster, but not resistant to timeouts)</string>
 </resources>
