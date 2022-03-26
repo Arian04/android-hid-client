@@ -14,7 +14,7 @@ public class KeyCodeTranslation {
 	public KeyCodeTranslation() {
 		// TODO: if i feel like it later, I can change the maps to be more efficient, but if i do, then
 		// 		 I should probably add comments labeling each line with its human-readable key
-		// 		 current: keycode/char -> usable key -> hid code
+		// 		 current: keycode/char -> human-readable key -> hid code
 		// 		 proposed: keycode/char -> hid code
 
 		modifierKeys = new HashMap<>();
