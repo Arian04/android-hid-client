@@ -89,11 +89,14 @@ modifier and function keys).
 
 Disclaimer: This app requires your device to be rooted.
 
+Tested primarily on: Linux (Host computer) and Pixel 5 running Android 11.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
 <!-- GETTING STARTED -->
+
 ## Getting Started
 
 ### Prerequisites
