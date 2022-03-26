@@ -6,12 +6,19 @@
         android:id="@+id/menuSettings"
         android:orderInCategory="100"
         app:showAsAction="never" />
-    <item android:title="@string/help"
+    <item
+        android:title="@string/help"
         android:id="@+id/menuHelp"
         android:orderInCategory="100"
         app:showAsAction="never" />
-    <item android:title="@string/info"
+    <item
+        android:title="@string/info"
         android:id="@+id/menuInfo"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item
+        android:title="@string/debug"
+        android:id="@+id/menuDebug"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>

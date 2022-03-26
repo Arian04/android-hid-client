@@ -1,7 +1,7 @@
 package me.arianb.usb_hid_client;
 
-import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -21,12 +21,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.preference.PreferenceManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private EditText etInput;
 	private Button btnSubmit;
-	protected static TextView tvOutput;
+	private TextView tvOutput;
 	private EditText etManual;
 	private Spinner dropdownLogging;
 
@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
 	private String modifier;
 
 	private Thread loggingThread = null;
+
+	private SharedPreferences preferences;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -256,6 +258,9 @@ public class MainActivity extends AppCompatActivity {
 		etManual = findViewById(R.id.etManual);
 		dropdownLogging = findViewById(R.id.spinner);
 
+		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		new SettingsActivity.SettingsFragment(this);
+
 		tvOutput.setMovementMethod(new ScrollingMovementMethod());
 
 		ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -263,19 +268,10 @@ public class MainActivity extends AppCompatActivity {
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		dropdownLogging.setAdapter(adapter);
 
-		// TODO: fix issues with more verbose logging levels' output sometimes overwriting the less
-		// 		 verbose outputs when switching from a more verbose level to less verbose level.
 		dropdownLogging.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-				if (loggingThread != null) {
-					// Pretty sure if thread updates tvOutput one more time before finishing being interrupted
-					// it might overwrite the new thread's output until it re-rewrites the output.
-					// Implement locks if this is an issue.
-					loggingThread.interrupt();
-				}
 				String choice = parentView.getSelectedItem().toString();
-				Log.d(TAG, "logging choice: " + choice);
 				displayLogs(choice);
 			}
 
@@ -285,16 +281,20 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		btnSubmit.setOnClickListener(v -> {
-			// Debugging lines
-			//ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-
+			// Save text to send
 			String sendStr = etManual.getText().toString();
+
+			// Clear EditText if the user's preference is to clear it
+			if (preferences.getBoolean("clearManualInput", false)) {
+				runOnUiThread(() -> etManual.setText(""));
+			}
 
 			// Splits string into array with 1 character per element
 			String[] sendStrArr = sendStr.split("");
 
+			// Sends all keys
 			new Thread(() -> {
-				for (String key: sendStrArr) {
+				for (String key : sendStrArr) {
 					sendKey(key);
 				}
 			}).start();
@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
 					// handling it as an array of strings since if the app lags badly, it can
 					// sometimes take a bit before it registers and it sends as several characters.
 					String[] allKeys = s.toString().split("");
-					for (String key: allKeys) {
+					for (String key : allKeys) {
 						sendKey(key);
 						Log.d(TAG, "textChanged key: " + key);
 
@@ -340,8 +340,8 @@ public class MainActivity extends AppCompatActivity {
 	// the EditText
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if(!etInput.hasFocus()) {
-			Log.d(TAG,"Ignoring KeyEvent because the direct input edittext was not focused");
+		if (!etInput.hasFocus()) {
+			Log.d(TAG, "Ignoring KeyEvent because the direct input edittext was not focused");
 			return false;
 		}
 		if (KeyEvent.isModifierKey(keyCode)) {
@@ -392,13 +392,13 @@ public class MainActivity extends AppCompatActivity {
 
 		// Convert key to HID code
 		adjustedKey = hidKeyCodes.get(adjustedKey);
-		if(adjustedKey == null) {
+		if (adjustedKey == null) {
 			Log.e(TAG, "key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
 			return;
 		}
 		// Convert modifier to HID code
 		sendModifier = hidModifierCodes.get(sendModifier);
-		if(sendModifier == null) {
+		if (sendModifier == null) {
 			Log.e(TAG, "mod: '" + modifier + "' could not be converted to an HID code (it wasn't found in the map).");
 			return;
 		}
@@ -408,13 +408,13 @@ public class MainActivity extends AppCompatActivity {
 
 			// TODO: give app user permissions to write to /dev/hidg0 because privilege escalation causes a very significant performance hit
 			// echo -en "\0\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
-			String[] sendKeyCmd = {"su", "-c", "echo", "-en","\"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
+			String[] sendKeyCmd = {"su", "-c", "echo", "-en", "\"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
 			// echo -en "\0" > /dev/hidg0 (as root) (releases key)
 			String[] releaseKeyCmd = {"su", "-c", "echo", "-en", "\"\\0\" > /dev/hidg0"};
 
 			Process sendProcess = Runtime.getRuntime().exec(sendKeyCmd);
 			// Kill process if it doesn't complete within 1 seconds
-			if(!sendProcess.waitFor(1, TimeUnit.SECONDS)) {
+			if (!sendProcess.waitFor(1, TimeUnit.SECONDS)) {
 				Log.e(TAG, "Timed out while sending key. Make sure a computer is connected.");
 				sendProcess.destroy();
 				return;
@@ -426,11 +426,11 @@ public class MainActivity extends AppCompatActivity {
 			if (!sendErrors.isEmpty()) {
 				Log.e(TAG, sendErrors);
 			}
-			if(!releaseErrors.isEmpty()) {
+			if (!releaseErrors.isEmpty()) {
 				Log.e(TAG, releaseErrors);
 			}
 		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
+			Log.e(TAG, Arrays.toString(e.getStackTrace()));
 		}
 	}
 
@@ -459,11 +459,27 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	private void displayLogs(String verbosityFilter) {
-		// Clear previous logs (reset it back to the default output)
-		runOnUiThread(() -> tvOutput.setText(R.string.default_output));
+		if (loggingThread != null) {
+			// Pretty sure if thread updates tvOutput one more time before finishing being interrupted
+			// it might overwrite the new thread's output until it re-rewrites the output.
+			// Implement locks if this is an issue.
+			loggingThread.interrupt();
 
-		// Trim filter down to just the first letter because that's what logcat uses to filter
-		String verbosityLetter = verbosityFilter.substring(0, 1);
+			// IDK how I feel about this workaround
+			Log.e(TAG, "[ignore] NOT AN ERROR. This is being logged to trigger the logging thread to check if it's been interrupted.");
+			Log.d(TAG, "logging choice: " + verbosityFilter);
+			try {
+				if (loggingThread != null) {
+					loggingThread.join();
+				}
+			} catch (InterruptedException e) {
+				Log.e(TAG, Arrays.toString(e.getStackTrace()));
+			}
+		}
+
+		// Trim filter down to just the first letter (because that's what logcat uses to filter the
+		// logs) and make sure it's uppercase for good measure since that's also necessary
+		String verbosityLetter = verbosityFilter.substring(0, 1).toUpperCase();
 		loggingThread = new Thread(() -> {
 			try {
 				String command = String.format("logcat -s hid-client:%s -v raw", verbosityLetter);
@@ -478,46 +494,70 @@ public class MainActivity extends AppCompatActivity {
 				String line;
 				while (!Thread.interrupted()) {
 					line = bufferedReader.readLine();
-					if (!Thread.interrupted() && line != null) { // TODO: find out if this extra thread interrupted check helps
-						log.insert(0, line + "\n");
-						runOnUiThread(() -> tvOutput.setText(log.toString()));
+					if (!Thread.interrupted()) {
+						if (line != null && !line.matches("\\[ignore\\].*")) {
+							log.insert(0, line + "\n");
+							runOnUiThread(() -> tvOutput.setText(log.toString()));
+						}
+					} else {
+						Log.d(TAG, "Logging Thread interrupted. Logging Level: " + verbosityFilter);
+						break;
 					}
 				}
+				// Kill logcat process before ending thread
+				process.destroy();
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.e(TAG, Arrays.toString(e.getStackTrace()));
 			} finally {
+				// Clear previous logs (reset it back to the default output)
+				runOnUiThread(() -> tvOutput.setText(R.string.default_output));
 				loggingThread = null;
 			}
+			//Log.e(TAG, "Thread actually ended: " + verbosityLetter); // DEBUG
 		});
 		loggingThread.start();
 		Log.d(TAG, "logging started with verbosity: " + verbosityFilter);
 	}
 
+	public void setLoggingThread(Thread t) {
+		loggingThread = t;
+	}
+
+	public Thread getLoggingThread() {
+		return loggingThread;
+	}
+
 	// method to inflate the options menu when
 	// the user opens the menu for the first time
 	@Override
-	public boolean onCreateOptionsMenu( Menu menu ) {
+	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
-	// methods to control the operations that will
-	// happen when user clicks on the action buttons
+	// Run code on menu item selected
 	@Override
-	public boolean onOptionsItemSelected( @NonNull MenuItem item ) {
+	public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+		int itemId = item.getItemId();
 
-		switch (item.getItemId()){
-			case R.id.menuSettings:
-				//Toast.makeText(this, "settings Clicked", Toast.LENGTH_SHORT).show(); // DEBUG
-				Intent intent = new Intent(this, SettingsActivity.class);
-				startActivity(intent);
-				break;
-			case R.id.menuHelp:
-				Toast.makeText(this, "help Clicked", Toast.LENGTH_SHORT).show(); // DEBUG
-				break;
-			case R.id.menuInfo:
-				Toast.makeText(this, "info Clicked", Toast.LENGTH_SHORT).show(); // DEBUG
-				break;
+		if (itemId == R.id.menuSettings) {
+			Intent intent = new Intent(this, SettingsActivity.class);
+			startActivity(intent);
+		} else if (itemId == R.id.menuHelp) {
+			Toast.makeText(this, "help Clicked", Toast.LENGTH_SHORT).show(); // DEBUG
+		} else if (itemId == R.id.menuInfo) {
+			Toast.makeText(this, "info Clicked", Toast.LENGTH_SHORT).show(); // DEBUG
+		} else if (itemId == R.id.menuDebug) {
+			// Menu option that just runs whatever code I want to test in the app
+			//SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+			Log.d(TAG, "PREF: " + preferences.getString("logging_level", "error"));
+			try {
+				Process proc = Runtime.getRuntime().exec("ls -l /data/data/me.arianb.usb_hid_client/hidg0");
+				Log.d(TAG, "OUT: " + getProcessStdOutput(proc));
+				Log.d(TAG, "ERR: " + getProcessStdError(proc));
+			} catch (IOException e) {
+				Log.e(TAG, Arrays.toString(e.getStackTrace()));
+			}
 		}
 		return super.onOptionsItemSelected(item);
 	}
