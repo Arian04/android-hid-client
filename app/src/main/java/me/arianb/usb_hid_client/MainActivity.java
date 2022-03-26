@@ -407,10 +407,10 @@ public class MainActivity extends AppCompatActivity {
 			Log.i(TAG, "raw key: " + key + " | sending key: " + adjustedKey + " | modifier: " + sendModifier);
 
 			// TODO: give app user permissions to write to /dev/hidg0 because privilege escalation causes a very significant performance hit
-			// echo -en "\0\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
+			// echo -en "\modifier\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
 			String[] sendKeyCmd = {"su", "-c", "echo", "-en", "\"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
-			// echo -en "\0" > /dev/hidg0 (as root) (releases key)
-			String[] releaseKeyCmd = {"su", "-c", "echo", "-en", "\"\\0\" > /dev/hidg0"};
+			// echo -en "\0\0\0\0\0\0\0\0" > /dev/hidg0 (as root) (releases key)
+			String[] releaseKeyCmd = {"su", "-c", "echo", "-en", "\"\\0\\0\\0\\0\\0\\0\\0\\0\" > /dev/hidg0"};
 
 			Process sendProcess = Runtime.getRuntime().exec(sendKeyCmd);
 			// Kill process if it doesn't complete within 1 seconds
