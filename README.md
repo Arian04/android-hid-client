@@ -57,7 +57,6 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -99,31 +98,55 @@ Disclaimer: This app requires your device to be rooted.
 
 ### Prerequisites
 
-* Android Studio
+* Rooted device running Android
+  - Technically supported versions: 10 - 12
+  - Tested versions: 11
+* The presence of an HID character device (`/dev/hidgX`)
+  - Can be created using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), as
+    mentioned above
 
-### Installation
+### Installation (Source)<a name="installation-source"></a>
 
-Clone the repository and import into [Android Studio](https://developer.android.com/studio)
+Clone the repository.
+
    ```sh
    git clone https://github.com/Arian04/android-hid-gadget.git
    ```
-   
+
+import into [Android Studio](https://developer.android.com/studio), build the APK, then install it
+on your Android device.
+
+### Installation (Binary)<a name="installation-binary"> </a>
+
+Download the APK file from
+the [Github releases page](https://github.com/Arian04/android-hid-gadget/releases), then install it
+on your Android device
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
 <!-- USAGE EXAMPLES -->
+
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+Typing in the "Direct Input" text box will immediately relay the keys that you press to the
+connected device. The keys will not be displayed in the text box as you type them.
 
-_For more examples, please refer to the [Documentation](https://github.com/Arian04/arian/android-hid-gadget/wiki)_
+Typing in the "Manual Input" text box will send all the characters that you've typed into the box to
+the connected device once you hit the "send" button.
+
+### Some Use Cases
+
+* Quickly be able to change BIOS/UEFI settings of a computer when you don't have a keyboard with you
+* Typing a long string (such as a password or IP address) into a console
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
 <!-- ROADMAP -->
+
 ## Roadmap
 
 - [X] Keyboard support
