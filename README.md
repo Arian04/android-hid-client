@@ -160,6 +160,7 @@ the connected device once you hit the "send" button.
   - [X] Move logging level dropdown there
   - [ ] Add configurable location for HID character device (/dev/hidgX)
 - [ ] Add ability to not require root access if /dev/hidgX is already writable
+- [ ] Add prompt to create /dev/hidgX if not present
 
 See the [open issues](https://github.com/Arian04/android-hid-gadget/issues) for a full list of proposed features (and known issues).
 
