@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 			String sendStr = etManual.getText().toString();
 
 			// Clear EditText if the user's preference is to clear it
-			if (preferences.getBoolean("clearManualInput", false)) {
+			if (preferences.getBoolean("clear_manual_input", false)) {
 				runOnUiThread(() -> etManual.setText(""));
 			}
 
