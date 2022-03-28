@@ -22,7 +22,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import org.apache.commons.codec.binary.Hex;
+
 import java.io.DataOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -39,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
 	private Map<Integer, String> modifierKeys;
 	private Map<Integer, String> keyEventCodes;
 	private Map<String, String> shiftChars;
-	private Map<String, String> hidKeyCodes;
-	private Map<String, String> hidModifierCodes;
+	private Map<String, Byte> hidKeyCodes;
+	private Map<String, Byte> hidModifierCodes;
 
 	private boolean nextKeyModified = false;
 	private String modifier;
@@ -80,12 +83,11 @@ public class MainActivity extends AppCompatActivity {
 		tvOutput.setMovementMethod(new ScrollingMovementMethod());
 
 		// Get root shell
-		Process p = null;
 		try {
-			p = Runtime.getRuntime().exec("su");
+			Process p = Runtime.getRuntime().exec("su");
 			rootShell = new DataOutputStream(p.getOutputStream());
 		} catch (IOException e) {
-			Log.e(TAG, Arrays.toString(e.getStackTrace()));
+			Log.e(TAG, Log.getStackTraceString(e));
 		}
 
 		btnSubmit.setOnClickListener(v -> {
@@ -159,8 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
 		String key = null;
 		if ((key = keyEventCodes.get(event.getKeyCode())) != null) {
-			String finalKey = key;
-			sendKey(finalKey);
+			sendKey(key);
 			Log.d(TAG, "onKeyDown key: " + key);
 		}
 		Log.d(TAG, "keycode: " + event.getKeyCode());
@@ -198,16 +199,19 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		// Convert key to HID code
-		adjustedKey = hidKeyCodes.get(adjustedKey);
-		if (adjustedKey == null) {
+		byte keyScanCode = 0;
+		try {
+			keyScanCode = hidKeyCodes.get(adjustedKey);
+		} catch (NullPointerException e) {
 			Log.e(TAG, "key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
-			return;
 		}
+
 		// Convert modifier to HID code
-		sendModifier = hidModifierCodes.get(sendModifier);
-		if (sendModifier == null) {
+		byte modifierScanCode = 0;
+		try {
+			modifierScanCode = hidModifierCodes.get(sendModifier);
+		} catch (NullPointerException e) {
 			Log.e(TAG, "mod: '" + modifier + "' could not be converted to an HID code (it wasn't found in the map).");
-			return;
 		}
 
 		try {
@@ -216,7 +220,31 @@ public class MainActivity extends AppCompatActivity {
 			// TODO: give app user permissions to write to /dev/hidg0 because privilege escalation
 			//  	 causes a very significant performance hit
 			// 		 - once i complete this, remove performance mode, because it'll be fast by default
-			if (preferences.getBoolean("performance_mode", false)) {
+			Process checkSELinuxModeProcess = Runtime.getRuntime().exec("cat /sys/fs/selinux/enforce");
+			int SELinuxMode;
+			// If this throws an error, SELinux is enabled, otherwise it'll set selinuxMode to 1.
+			try {
+				SELinuxMode = Integer.parseInt(getProcessStdOutput(checkSELinuxModeProcess).trim());
+			} catch (NumberFormatException e) {
+				SELinuxMode = 1;
+			}
+
+			if (SELinuxMode == 0) { // Only works if selinux is disabled
+				Log.i(TAG, "SELinux is disabled. Directly writing to device.");
+				byte[] send = new byte[]{modifierScanCode, (byte) 0, keyScanCode, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
+				Log.d(TAG, "send str: " + Arrays.toString(send));
+				writeByteArrayToFile("/dev/hidg0", send);
+
+				byte[] release = new byte[]{(byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
+				Log.d(TAG, "release bytes: " + Arrays.toString(release));
+				writeByteArrayToFile("/dev/hidg0", release);
+			} else if (preferences.getBoolean("performance_mode", false)) {
+				Log.i(TAG, "\"Performance mode\" code active.");
+
+				// Convert byte to hexadecimal String and prepend x (Ex: (byte) 0x15 -> (String) x15)
+				sendModifier = "x" + Hex.encodeHexString(new byte[]{modifierScanCode});
+				adjustedKey = "x" + Hex.encodeHexString(new byte[]{keyScanCode});
+
 				// echo -en "\modifier\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
 				String sendKeyCmd = "echo -en \"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0";
 				// echo -en "\0\0\0\0\0\0\0\0" > /dev/hidg0 (as root) (releases key)
@@ -228,6 +256,12 @@ public class MainActivity extends AppCompatActivity {
 				rootShell.writeBytes(releaseKeyCmd + "\n");
 				rootShell.flush();
 			} else {
+				Log.i(TAG, "\"Performance mode\" DISABLED");
+
+				// Convert byte to hexadecimal String and prepend x (Ex: (byte) 0x15 -> (String) x15)
+				sendModifier = "x" + Hex.encodeHexString(new byte[]{modifierScanCode});
+				adjustedKey = "x" + Hex.encodeHexString(new byte[]{keyScanCode});
+
 				// echo -en "\modifier\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
 				String[] sendKeyCmd = {"su", "-c", "echo", "-en", "\"\\" + sendModifier + "\\0\\" + adjustedKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0"};
 				// echo -en "\0\0\0\0\0\0\0\0" > /dev/hidg0 (as root) (releases key)
@@ -253,9 +287,17 @@ public class MainActivity extends AppCompatActivity {
 				if (!releaseErrors.isEmpty()) {
 					Log.e(TAG, releaseErrors);
 				}
+				String sendOut = getProcessStdOutput(sendProcess);
+				String releaseOut = getProcessStdOutput(releaseProcess);
+				if (!sendOut.isEmpty()) {
+					Log.e(TAG, sendOut); // TODO Logging level
+				}
+				if (!releaseOut.isEmpty()) {
+					Log.e(TAG, releaseOut);
+				}
 			}
 		} catch (IOException | InterruptedException e) {
-			Log.e(TAG, Arrays.toString(e.getStackTrace()));
+			Log.e(TAG, Log.getStackTraceString(e));
 		}
 	}
 
@@ -288,9 +330,17 @@ public class MainActivity extends AppCompatActivity {
 				Log.d(TAG, "OUT: " + getProcessStdOutput(proc));
 				Log.d(TAG, "ERR: " + getProcessStdError(proc));
 			} catch (IOException e) {
-				Log.e(TAG, Arrays.toString(e.getStackTrace()));
+				Log.e(TAG, Log.getStackTraceString(e));
 			}
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void writeByteArrayToFile(String filename, byte[] byteArray) {
+		try (FileOutputStream outputStream = new FileOutputStream(filename)) {
+			outputStream.write(byteArray);
+		} catch (IOException e) {
+			Log.e(TAG, Log.getStackTraceString(e));
+		}
 	}
 }

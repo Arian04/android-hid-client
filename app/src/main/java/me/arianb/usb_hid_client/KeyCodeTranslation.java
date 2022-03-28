@@ -8,8 +8,8 @@ public class KeyCodeTranslation {
 	protected final Map<Integer, String> modifierKeys;
 	protected final Map<Integer, String> keyEventCodes;
 	protected final Map<String, String> shiftChars;
-	protected final Map<String, String> hidKeyCodes;
-	protected final Map<String, String> hidModifierCodes;
+	protected final Map<String, Byte> hidKeyCodes;
+	protected final Map<String, Byte> hidModifierCodes;
 
 	public KeyCodeTranslation() {
 		// TODO: if i feel like it later, I can change the maps to be more efficient, but if i do, then
@@ -110,100 +110,100 @@ public class KeyCodeTranslation {
 		shiftChars.put("+", "=");
 
 		// convert modifier to its HID scan code
-		hidModifierCodes.put("no-modifier", "0");
-		hidModifierCodes.put("left-ctrl", "x01");
-		hidModifierCodes.put("left-shift", "x02");
-		hidModifierCodes.put("left-alt", "x04");
-		hidModifierCodes.put("left-meta", "x08");
-		hidModifierCodes.put("right-ctrl", "x10");
-		hidModifierCodes.put("right-shift", "x20");
-		hidModifierCodes.put("right-alt", "x40");
-		hidModifierCodes.put("right-meta", "x80");
+		hidModifierCodes.put("no-modifier", (byte) 0);
+		hidModifierCodes.put("left-ctrl", (byte) 0x01);
+		hidModifierCodes.put("left-shift", (byte) 0x02);
+		hidModifierCodes.put("left-alt", (byte) 0x04);
+		hidModifierCodes.put("left-meta", (byte) 0x08);
+		hidModifierCodes.put("right-ctrl", (byte) 0x10);
+		hidModifierCodes.put("right-shift", (byte) 0x20);
+		hidModifierCodes.put("right-alt", (byte) 0x40);
+		hidModifierCodes.put("right-meta", (byte) 0x80);
 
 		// convert character to its HID scan code
-		hidKeyCodes.put("a", "x04");
-		hidKeyCodes.put("b", "x05");
-		hidKeyCodes.put("c", "x06");
-		hidKeyCodes.put("d", "x07");
-		hidKeyCodes.put("e", "x08");
-		hidKeyCodes.put("f", "x09");
-		hidKeyCodes.put("g", "x0a");
-		hidKeyCodes.put("h", "x0b");
-		hidKeyCodes.put("i", "x0c");
-		hidKeyCodes.put("j", "x0d");
-		hidKeyCodes.put("k", "x0e");
-		hidKeyCodes.put("l", "x0f");
-		hidKeyCodes.put("m", "x10");
-		hidKeyCodes.put("n", "x11");
-		hidKeyCodes.put("o", "x12");
-		hidKeyCodes.put("p", "x13");
-		hidKeyCodes.put("q", "x14");
-		hidKeyCodes.put("r", "x15");
-		hidKeyCodes.put("s", "x16");
-		hidKeyCodes.put("t", "x17");
-		hidKeyCodes.put("u", "x18");
-		hidKeyCodes.put("v", "x19");
-		hidKeyCodes.put("w", "x1a");
-		hidKeyCodes.put("x", "x1b");
-		hidKeyCodes.put("y", "x1c");
-		hidKeyCodes.put("z", "x1d");
+		hidKeyCodes.put("a", (byte) 0x04);
+		hidKeyCodes.put("b", (byte) 0x05);
+		hidKeyCodes.put("c", (byte) 0x06);
+		hidKeyCodes.put("d", (byte) 0x07);
+		hidKeyCodes.put("e", (byte) 0x08);
+		hidKeyCodes.put("f", (byte) 0x09);
+		hidKeyCodes.put("g", (byte) 0x0a);
+		hidKeyCodes.put("h", (byte) 0x0b);
+		hidKeyCodes.put("i", (byte) 0x0c);
+		hidKeyCodes.put("j", (byte) 0x0d);
+		hidKeyCodes.put("k", (byte) 0x0e);
+		hidKeyCodes.put("l", (byte) 0x0f);
+		hidKeyCodes.put("m", (byte) 0x10);
+		hidKeyCodes.put("n", (byte) 0x11);
+		hidKeyCodes.put("o", (byte) 0x12);
+		hidKeyCodes.put("p", (byte) 0x13);
+		hidKeyCodes.put("q", (byte) 0x14);
+		hidKeyCodes.put("r", (byte) 0x15);
+		hidKeyCodes.put("s", (byte) 0x16);
+		hidKeyCodes.put("t", (byte) 0x17);
+		hidKeyCodes.put("u", (byte) 0x18);
+		hidKeyCodes.put("v", (byte) 0x19);
+		hidKeyCodes.put("w", (byte) 0x1a);
+		hidKeyCodes.put("x", (byte) 0x1b);
+		hidKeyCodes.put("y", (byte) 0x1c);
+		hidKeyCodes.put("z", (byte) 0x1d);
 
-		hidKeyCodes.put("1", "x1e");
-		hidKeyCodes.put("2", "x1f");
-		hidKeyCodes.put("3", "x20");
-		hidKeyCodes.put("4", "x21");
-		hidKeyCodes.put("5", "x22");
-		hidKeyCodes.put("6", "x23");
-		hidKeyCodes.put("7", "x24");
-		hidKeyCodes.put("8", "x25");
-		hidKeyCodes.put("9", "x26");
-		hidKeyCodes.put("0", "x27");
+		hidKeyCodes.put("1", (byte) 0x1e);
+		hidKeyCodes.put("2", (byte) 0x1f);
+		hidKeyCodes.put("3", (byte) 0x20);
+		hidKeyCodes.put("4", (byte) 0x21);
+		hidKeyCodes.put("5", (byte) 0x22);
+		hidKeyCodes.put("6", (byte) 0x23);
+		hidKeyCodes.put("7", (byte) 0x24);
+		hidKeyCodes.put("8", (byte) 0x25);
+		hidKeyCodes.put("9", (byte) 0x26);
+		hidKeyCodes.put("0", (byte) 0x27);
 
-		hidKeyCodes.put("\n", "x28"); // line break -> enter
-		hidKeyCodes.put("escape", "x29");
-		hidKeyCodes.put("backspace", "x2a");
-		hidKeyCodes.put("tab", "x2b");
-		hidKeyCodes.put(" ", "x2c"); // " " -> space
-		hidKeyCodes.put("-", "x2d");
-		hidKeyCodes.put("=", "x2e");
-		hidKeyCodes.put("[", "x2f");
-		hidKeyCodes.put("]", "x30");
-		hidKeyCodes.put("\\", "x31");
-		hidKeyCodes.put("#", "x32"); // I think this is only for non-US layouts
-		hidKeyCodes.put(";", "x33");
-		hidKeyCodes.put("'", "x34");
-		hidKeyCodes.put("`", "x35");
-		hidKeyCodes.put(",", "x36");
-		hidKeyCodes.put(".", "x37");
-		hidKeyCodes.put("/", "x38");
-		hidKeyCodes.put("caps-lock", "x39"); // Haven't tested a keyboard with a caps-lock key
+		hidKeyCodes.put("\n", (byte) 0x28); // line break -> enter
+		hidKeyCodes.put("escape", (byte) 0x29);
+		hidKeyCodes.put("backspace", (byte) 0x2a);
+		hidKeyCodes.put("tab", (byte) 0x2b);
+		hidKeyCodes.put(" ", (byte) 0x2c); // " " -> space
+		hidKeyCodes.put("-", (byte) 0x2d);
+		hidKeyCodes.put("=", (byte) 0x2e);
+		hidKeyCodes.put("[", (byte) 0x2f);
+		hidKeyCodes.put("]", (byte) 0x30);
+		hidKeyCodes.put("\\", (byte) 0x31);
+		hidKeyCodes.put("#", (byte) 0x32); // I think this is only for non-US layouts
+		hidKeyCodes.put(";", (byte) 0x33);
+		hidKeyCodes.put("'", (byte) 0x34);
+		hidKeyCodes.put("`", (byte) 0x35);
+		hidKeyCodes.put(",", (byte) 0x36);
+		hidKeyCodes.put(".", (byte) 0x37);
+		hidKeyCodes.put("/", (byte) 0x38);
+		hidKeyCodes.put("caps-lock", (byte) 0x39); // Haven't tested a keyboard with a caps-lock key
 
-		hidKeyCodes.put("f1", "x3a");
-		hidKeyCodes.put("f2", "x3b");
-		hidKeyCodes.put("f3", "x3c");
-		hidKeyCodes.put("f4", "x3d");
-		hidKeyCodes.put("f5", "x3e");
-		hidKeyCodes.put("f6", "x3f");
-		hidKeyCodes.put("f7", "x40");
-		hidKeyCodes.put("f8", "x41");
-		hidKeyCodes.put("f9", "x42");
-		hidKeyCodes.put("f10", "x43");
-		hidKeyCodes.put("f11", "x44");
-		hidKeyCodes.put("f12", "x45");
+		hidKeyCodes.put("f1", (byte) 0x3a);
+		hidKeyCodes.put("f2", (byte) 0x3b);
+		hidKeyCodes.put("f3", (byte) 0x3c);
+		hidKeyCodes.put("f4", (byte) 0x3d);
+		hidKeyCodes.put("f5", (byte) 0x3e);
+		hidKeyCodes.put("f6", (byte) 0x3f);
+		hidKeyCodes.put("f7", (byte) 0x40);
+		hidKeyCodes.put("f8", (byte) 0x41);
+		hidKeyCodes.put("f9", (byte) 0x42);
+		hidKeyCodes.put("f10", (byte) 0x43);
+		hidKeyCodes.put("f11", (byte) 0x44);
+		hidKeyCodes.put("f12", (byte) 0x45);
 
-		hidKeyCodes.put("print", "x46"); // and SysRq
-		hidKeyCodes.put("scroll-lock", "x47");
-		hidKeyCodes.put("pause", "x48");
-		hidKeyCodes.put("insert", "x49");
-		hidKeyCodes.put("home", "x4a");
-		hidKeyCodes.put("page-up", "x4b");
-		hidKeyCodes.put("delete", "x4c");
-		hidKeyCodes.put("end", "x4d");
-		hidKeyCodes.put("page-down", "x4e");
+		hidKeyCodes.put("print", (byte) 0x46); // and SysRq
+		hidKeyCodes.put("scroll-lock", (byte) 0x47);
+		hidKeyCodes.put("pause", (byte) 0x48);
+		hidKeyCodes.put("insert", (byte) 0x49);
+		hidKeyCodes.put("home", (byte) 0x4a);
+		hidKeyCodes.put("page-up", (byte) 0x4b);
+		hidKeyCodes.put("delete", (byte) 0x4c);
+		hidKeyCodes.put("end", (byte) 0x4d);
+		hidKeyCodes.put("page-down", (byte) 0x4e);
 
-		hidKeyCodes.put("right", "x4f");
-		hidKeyCodes.put("left", "x50");
-		hidKeyCodes.put("down", "x51");
-		hidKeyCodes.put("up", "x52");
+		hidKeyCodes.put("right", (byte) 0x4f);
+		hidKeyCodes.put("left", (byte) 0x50);
+		hidKeyCodes.put("down", (byte) 0x51);
+		hidKeyCodes.put("up", (byte) 0x52);
 	}
 }
