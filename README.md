@@ -27,7 +27,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Arian04/android-hid-gadget">
-    <img src="images/logo-placeholder.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Android HID Client</h3>
