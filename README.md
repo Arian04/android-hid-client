@@ -73,9 +73,12 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[<img src="images/main-screenshot.png"
-alt="Main Screen"
-height="350">](images/main-screenshot.png)
+[<img src="images/app-screenshot.png"
+alt="Main screen"
+height="350">](images/app-screenshot.png)
+[<img src="images/app-screenshot2.png"
+alt="Main screen with logs"
+height="350">](images/app-screenshot2.png)
 
 This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a
 character device that allows your phone to send keys to a connected host device (I recommend
