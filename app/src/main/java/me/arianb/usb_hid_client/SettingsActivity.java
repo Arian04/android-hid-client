@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -15,9 +14,9 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SeekBarPreference;
 import androidx.preference.SwitchPreference;
 
-public class SettingsActivity extends AppCompatActivity {
+import timber.log.Timber;
 
-	private static final String TAG = MainActivity.TAG;
+public class SettingsActivity extends AppCompatActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +38,6 @@ public class SettingsActivity extends AppCompatActivity {
 	}
 
 	public static class SettingsFragment extends PreferenceFragmentCompat {
-
-		private static final String TAG = MainActivity.TAG;
 		private static TextView tvOutput;
 		private static Context mainContext;
 
@@ -59,7 +56,7 @@ public class SettingsActivity extends AppCompatActivity {
 			SwitchPreference clearInputSwitch = findPreference("clear_manual_input");
 
 			loggingLevelList.setOnPreferenceChangeListener((preference, newValue) -> {
-				Log.d(TAG, "Logging pref changed to: " + newValue.toString());
+				Timber.d("Logging pref changed to: %s", newValue.toString());
 
 				// Logger listens for preference changes and will automatically update its
 				// logging level when this preference changes

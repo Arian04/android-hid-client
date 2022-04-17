@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
-public class Logger {
-	public static final String TAG = MainActivity.TAG;
+import timber.log.Timber;
 
+public class Logger {
 	private final Context mainContext;
 	private final TextView textView;
 
@@ -27,7 +27,7 @@ public class Logger {
 	}
 
 	private void displayLogs(String verbosityFilter) {
-		Log.d(TAG, "logging choice: " + verbosityFilter);
+		Timber.d("logging choice: %s", verbosityFilter);
 
 		// Trim filter down to just the first letter and make it uppercase, because logcat uses the
 		// capitalized first letter of the logging level to filter
@@ -35,7 +35,7 @@ public class Logger {
 
 		loggingThread = new Thread(() -> {
 			try {
-				String command = String.format("logcat -s hid-client:%s -v raw", verbosityLetter);
+				String command = String.format("logcat -s me.arianb.usb_hid_client:%s -v raw", verbosityLetter);
 				Process process = Runtime.getRuntime().exec(command);
 				BufferedReader bufferedReader = new BufferedReader(
 						new InputStreamReader(process.getInputStream()));
@@ -54,22 +54,22 @@ public class Logger {
 							((Activity) mainContext).runOnUiThread(() -> textView.setText(log.toString()));
 						}
 					} else {
-						Log.d(TAG, "Logging Thread interrupted. Logging Level: " + verbosityFilter);
+						Timber.d("Logging Thread interrupted. Logging Level: %s", verbosityFilter);
 						break;
 					}
 				}
 				// Kill logcat process before ending thread
 				process.destroy();
 			} catch (IOException e) {
-				Log.e(TAG, Arrays.toString(e.getStackTrace()));
+				Timber.e(Log.getStackTraceString(e));
 			} finally {
 				// Clear previous logs (reset it back to the default output)
 				((Activity) mainContext).runOnUiThread(() -> textView.setText(R.string.default_output));
 			}
-			Log.d(TAG, "Thread actually ended: " + verbosityLetter); // DEBUG
+			Timber.d("Thread actually ended: %s", verbosityLetter); // DEBUG
 		});
 		loggingThread.start();
-		Log.d(TAG, "logging started with verbosity: " + verbosityFilter);
+		Timber.d("logging started with verbosity: %s", verbosityFilter);
 	}
 
 	public void watchForPreferenceChanges(SharedPreferences preferences) {
@@ -106,13 +106,13 @@ public class Logger {
 			t.interrupt();
 
 			// IDK how I feel about this workaround
-			Log.e(TAG, "[ignore] NOT AN ERROR. This is being logged to trigger the logging thread to check if it's been interrupted.");
+			Timber.e("[ignore] NOT AN ERROR. This is being logged to trigger the logging thread to check if it's been interrupted.");
 			try {
 				if (t.isAlive()) {
 					t.join();
 				}
 			} catch (InterruptedException e) {
-				Log.e(TAG, Arrays.toString(e.getStackTrace()));
+				Timber.e(Arrays.toString(e.getStackTrace()));
 			}
 		}
 	}

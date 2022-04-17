@@ -1,17 +1,15 @@
 package me.arianb.usb_hid_client;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import timber.log.Timber;
 
 // TODO: if i feel like it later, I can change the maps to be more efficient, but if i do, then
 // 		 I should probably add comments labeling each line with its human-readable key
 // 		 current: keycode/char -> human-readable key -> hid code
 // 		 proposed: keycode/char -> hid code
 public abstract class KeyCodeTranslation {
-	public static final String TAG = MainActivity.TAG;
-
 	protected static final Map<Integer, String> modifierKeys;
 	protected static final Map<Integer, String> keyEventCodes;
 	protected static final Map<String, String> shiftChars;
@@ -42,7 +40,7 @@ public abstract class KeyCodeTranslation {
 	public static byte convertKeyToScanCode(String key) {
 		//Log.d(TAG, "converting following key into scan code: " + key);
 		if (key == null) {
-			Log.e(TAG, "key is null");
+			Timber.e("key is null");
 			return 0;
 		}
 		String adjustedKey = key;
@@ -65,7 +63,7 @@ public abstract class KeyCodeTranslation {
 		try {
 			keyScanCode = hidKeyCodes.get(adjustedKey);
 		} catch (NullPointerException e) {
-			Log.e(TAG, "key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
+			Timber.e("key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
 			return 0;
 		}
 		return keyScanCode;
