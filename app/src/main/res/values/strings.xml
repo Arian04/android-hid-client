@@ -9,6 +9,7 @@
     <string name="help">Help</string>
     <string name="info">Info</string>
     <string name="debug">Debug</string>
+    <string name="ignore">Ignore</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->

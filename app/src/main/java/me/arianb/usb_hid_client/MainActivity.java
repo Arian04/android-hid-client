@@ -1,11 +1,17 @@
 package me.arianb.usb_hid_client;
 
+import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
+import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
+
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,10 +21,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
@@ -35,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 	private Button btnSubmit;
 	private TextView tvOutput;
 	private EditText etManual;
+	private AlertDialog connectionWarningDialog;
 
 	private static final Map<Integer, String> modifierKeys = KeyCodeTranslation.modifierKeys;
 	private static final Map<Integer, String> keyEventCodes = KeyCodeTranslation.keyEventCodes;
@@ -134,6 +144,62 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 		});
+
+		// Check if USB device connected
+		// TODO: test if this code is device-specific, if so, grab file path from /sys/class/udc
+		Activity mainContext = this;
+		new Thread(() -> {
+			String usbState;
+			try {
+				usbState = checkFileContentAsRoot("/sys/class/udc/a600000.dwc3/state");
+			} catch (IOException e) {
+				Timber.e(Log.getStackTraceString(e));
+				Toast.makeText(mainContext, "USB Connection check failed.", Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if (!usbState.equals("configured")) {
+				Timber.d("Cmd Output: %s", usbState);
+				AlertDialog.Builder connectionWarningBuilder = new AlertDialog.Builder(MainActivity.this)
+						.setTitle("USB state has been detected as disconnected.")
+						.setMessage("The app will not work without a connected device. Connect a device now or ignore this warning.")
+						.setNegativeButton(R.string.ignore, null)
+						.setIcon(android.R.drawable.ic_dialog_alert);
+				mainContext.runOnUiThread(() -> {
+					connectionWarningDialog = connectionWarningBuilder.create();
+					connectionWarningDialog.show();
+				});
+				final boolean[] isDialogDismissed = {false};
+				while (!isDialogDismissed[0]) {
+					try {
+						String newUsbState;
+						try {
+							newUsbState = checkFileContentAsRoot("/sys/class/udc/a600000.dwc3/state");
+						} catch (IOException e) {
+							connectionWarningDialog.dismiss();
+							Timber.e(Log.getStackTraceString(e));
+							Toast.makeText(mainContext, "USB Connection check failed.", Toast.LENGTH_SHORT).show();
+							break;
+						}
+						if (newUsbState.equals("configured")) {
+							connectionWarningDialog.dismiss();
+							break;
+						}
+						// Sleep a little between checks
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						connectionWarningDialog.dismiss();
+						Timber.e(Log.getStackTraceString(e));
+					}
+				}
+
+				connectionWarningDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						isDialogDismissed[0] = true;
+					}
+				});
+			}
+		}).start();
 	}
 
 	// Listens for KeyEvents
@@ -201,5 +267,22 @@ public class MainActivity extends AppCompatActivity {
 			*/
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private String checkFileContentAsRoot(String path) throws IOException {
+		try {
+			Process checkUSBConnectionProcess = Runtime.getRuntime().exec(new String[]{"su", "-c", "cat", path});
+			// If this times out or fails, show error message as toast
+			String processStdError = null;
+			if (!checkUSBConnectionProcess.waitFor(1, TimeUnit.SECONDS) || !(processStdError = getProcessStdError(checkUSBConnectionProcess)).isEmpty()) {
+				Timber.e(processStdError);
+				throw new IOException();
+			}
+			// If USB device is not shown as "configured" then assume it's disconnected
+			return getProcessStdOutput(checkUSBConnectionProcess).trim();
+		} catch (InterruptedException | IOException e) {
+			Timber.e(Log.getStackTraceString(e));
+			throw new IOException();
+		}
 	}
 }
