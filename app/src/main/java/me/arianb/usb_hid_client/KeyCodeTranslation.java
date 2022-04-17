@@ -1,22 +1,78 @@
 package me.arianb.usb_hid_client;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
 
-public class KeyCodeTranslation {
+// TODO: if i feel like it later, I can change the maps to be more efficient, but if i do, then
+// 		 I should probably add comments labeling each line with its human-readable key
+// 		 current: keycode/char -> human-readable key -> hid code
+// 		 proposed: keycode/char -> hid code
+public abstract class KeyCodeTranslation {
+	public static final String TAG = MainActivity.TAG;
 
-	protected final Map<Integer, String> modifierKeys;
-	protected final Map<Integer, String> keyEventCodes;
-	protected final Map<String, String> shiftChars;
-	protected final Map<String, Byte> hidKeyCodes;
-	protected final Map<String, Byte> hidModifierCodes;
+	protected static final Map<Integer, String> modifierKeys;
+	protected static final Map<Integer, String> keyEventCodes;
+	protected static final Map<String, String> shiftChars;
+	protected static final Map<String, Byte> hidKeyCodes;
+	protected static final Map<String, Byte> hidModifierCodes;
 
-	public KeyCodeTranslation() {
-		// TODO: if i feel like it later, I can change the maps to be more efficient, but if i do, then
-		// 		 I should probably add comments labeling each line with its human-readable key
-		// 		 current: keycode/char -> human-readable key -> hid code
-		// 		 proposed: keycode/char -> hid code
+	public static boolean isShiftedKey(String key) {
+		return shiftChars.containsKey(key);
+	}
 
+	public static byte convertModifierToScanCode(String modifier) {
+		//Log.d(TAG, "converting following modifier into scan code: " + modifier);
+		if (modifier == null) {
+			return 0;
+		}
+
+		// Convert modifier to HID code
+		byte modifierScanCode = 0;
+		try {
+			modifierScanCode = hidModifierCodes.get(modifier);
+		} catch (NullPointerException e) {
+			//Log.e(TAG, "mod: '" + modifier + "' could not be converted to an HID code (it wasn't found in the map).");
+			return 0;
+		}
+		return modifierScanCode;
+	}
+
+	public static byte convertKeyToScanCode(String key) {
+		//Log.d(TAG, "converting following key into scan code: " + key);
+		if (key == null) {
+			Log.e(TAG, "key is null");
+			return 0;
+		}
+		String adjustedKey = key;
+
+		if (key.length() == 1 && Character.isUpperCase(key.charAt(0))) {
+			// If character is uppercase, send the lowercase char + shift key
+			//setModifier((byte)0x02); // Set modifier to shift key
+			adjustedKey = key.toLowerCase();
+		} else {
+			// If character is a key + shift, then convert it to its un-shifted self
+			String str = shiftChars.get(key);
+			if (str != null) {
+				adjustedKey = str;
+			}
+			//Log.d(TAG, "adding shift option to make: " + adjustedKey + " -> " + key);
+		}
+
+		// Convert key to HID code
+		byte keyScanCode = 0;
+		try {
+			keyScanCode = hidKeyCodes.get(adjustedKey);
+		} catch (NullPointerException e) {
+			Log.e(TAG, "key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
+			return 0;
+		}
+		return keyScanCode;
+	}
+
+	// Fill maps
+	static {
 		modifierKeys = new HashMap<>();
 		keyEventCodes = new HashMap<>();
 		shiftChars = new HashMap<>();
