@@ -30,7 +30,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-<h3 align="center">Android HID Client</h3>
+<h3 align="center">USB HID Client</h3>
 
   <p align="center">
     Android app that allows you to easily use your phone as a keyboard
@@ -229,5 +229,7 @@ Project Link: [https://github.com/Arian04/android-hid-gadget](https://github.com
 [issues-shield]: https://img.shields.io/github/issues/Arian04/android-hid-gadget.svg?style=for-the-badge
 [issues-url]: https://github.com/Arian04/android-hid-gadget/issues
 [license-shield]: https://img.shields.io/github/license/Arian04/android-hid-gadget.svg?style=for-the-badge
+
 [license-url]: https://github.com/Arian04/android-hid-gadget/blob/master/LICENSE.txt
-[product-screenshot]: images/main-screenshot.png
+
+[product-screenshot]: images/app-screenshot.png
