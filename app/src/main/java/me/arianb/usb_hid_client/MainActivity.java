@@ -79,11 +79,11 @@ public class MainActivity extends AppCompatActivity {
 
 		// Logging
 		// TODO: logging is currently temporarily disabled, remove it later.
-		logger = new Logger(this, tvOutput);
-		logger.watchForPreferenceChanges(preferences);
+		//logger = new Logger(this, tvOutput);
+		//logger.watchForPreferenceChanges(preferences);
 
 		// Start thread to send keys
-		keySender = new KeySender(getApplicationContext());
+		keySender = new KeySender(this);
 		new Thread(keySender).start();
 
 		tvOutput.setMovementMethod(new ScrollingMovementMethod());
@@ -128,10 +128,12 @@ public class MainActivity extends AppCompatActivity {
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				if (count < before) { // If the amount of text has decreased, send backspace
-					keySender.addKey(null, "backspace");
-					etInput.setText("");
-				} else if (count - before > 1) { // If > 1 one character has changed, handle as an array
+				Timber.d("String: %s | before-count: %s-%s", s.toString(), before, count);
+				// Ignore if there is no text to send
+				if (s.length() <= 0) {
+					return;
+				}
+				if (count - before > 1) { // If > 1 one character has changed, handle as an array
 					// This should typically only contain a single character at a time, but I'm
 					// handling it as an array of strings since if the app lags badly, it can
 					// sometimes take a bit before it registers and it sends as several characters.
@@ -139,9 +141,14 @@ public class MainActivity extends AppCompatActivity {
 					for (String key : allKeys) {
 						keySender.addKey(null, key);
 					}
-				} else { // If there is <= one more character in the edittext, just send the key
+				} else if (count > before && (count >= 0 && before >= 0)) { // If there is <= one more character in the edittext, just send the key
 					keySender.addKey(null, s.subSequence(before, count).toString());
 				}
+				// Hacky workaround that clears the edittext after every key press to
+				// make arrow keys (and some others) get registered by onKeyDown (because it only
+				// triggers when the key isn't consumed by the EditText)
+				//etInput.getText().clear(); // Mitigates some of InputConnection warnings
+				etInput.setText("");
 			}
 		});
 
@@ -218,12 +225,6 @@ public class MainActivity extends AppCompatActivity {
 
 		String key = null;
 		if ((key = keyEventCodes.get(event.getKeyCode())) != null) {
-			// Hacky workaround that clears the edittext after every key press to
-			// make arrow keys get registered by onKeyDown (because it only triggers
-			// when the key doesn't touch the EditText)
-			//etInput.getText().clear(); // Mitigates some of InputConnection warnings
-			etInput.setText("");
-
 			keySender.addKey(modifier, key);
 			modifier = null;
 			Timber.d("onKeyDown key: %s", key);
