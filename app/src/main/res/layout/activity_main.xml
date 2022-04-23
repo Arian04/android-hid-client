@@ -32,21 +32,6 @@
         app:layout_constraintTop_toTopOf="@+id/etManual"
         tools:ignore="SpeakableTextPresentCheck" />
 
-    <TextView
-        android:id="@+id/tvOutput"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        android:scrollbars="vertical"
-        android:text="@string/default_output"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etKeyboardInput"
-        tools:ignore="SmallSp" />
-
     <EditText
         android:id="@+id/etManual"
         android:layout_width="wrap_content"

@@ -4,26 +4,26 @@ import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
 import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.util.Map;
@@ -33,8 +33,7 @@ import timber.log.Timber;
 
 // TODO: - Check if everything is properly explained in comments
 //		 - Mod keys are broken
-// 		 - direct input broken with multiple words, honestly implementing a KeyboardView is probably
-// 		   the best solution, this is causing more issues than it's worth
+//       - Custom view that can let the onKeyDown listener process all key events
 // 	     - settle on a way to refer to certain situations (such as referring to a key that has been
 // 	       initially pressed with shift, like !@#$%^&*(), and/or referring to the original key if the
 // 	       user had not pressed shift, in the example given above, 1234567890) and explain them here
@@ -42,15 +41,13 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity {
 	private EditText etInput;
 	private Button btnSubmit;
-	private TextView tvOutput;
 	private EditText etManual;
 	private AlertDialog connectionWarningDialog;
+	private static View parentLayout;
 
 	private static final Map<Integer, String> modifierKeys = KeyCodeTranslation.modifierKeys;
 	private static final Map<Integer, String> keyEventCodes = KeyCodeTranslation.keyEventCodes;
 	private static final Map<String, String> shiftChars = KeyCodeTranslation.shiftChars;
-
-	private Logger logger;
 
 	private String modifier;
 
@@ -71,22 +68,14 @@ public class MainActivity extends AppCompatActivity {
 		// Initialize UI elements
 		etInput = findViewById(R.id.etKeyboardInput);
 		btnSubmit = findViewById(R.id.btnKeyboard);
-		tvOutput = findViewById(R.id.tvOutput);
 		etManual = findViewById(R.id.etManual);
+		parentLayout = findViewById(android.R.id.content);
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		SettingsActivity.SettingsFragment.setContext(this);
-
-		// Logging
-		// TODO: logging is currently temporarily disabled, remove it later.
-		//logger = new Logger(this, tvOutput);
-		//logger.watchForPreferenceChanges(preferences);
 
 		// Start thread to send keys
 		keySender = new KeySender(this);
 		new Thread(keySender).start();
-
-		tvOutput.setMovementMethod(new ScrollingMovementMethod());
 
 		btnSubmit.setOnClickListener(v -> {
 			// Save text to send
@@ -116,22 +105,23 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
+		//*
 		// Listens for changes to the edittext
 		// Detects printable characters (a-z, 0-9, etc.)
 		etInput.addTextChangedListener(new TextWatcher() {
-			// Methods not used
-			public void afterTextChanged(Editable s) {
-			}
-
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				Timber.d("String: %s | before-count: %s-%s", s.toString(), before, count);
+				// Using a hacky workaround that clears the edittext after certain key events to
+				// make arrow keys (and some others) get registered by onKeyDown (because it only
+				// triggers when the key isn't consumed by the EditText)
+
 				// Ignore if there is no text to send
 				if (s.length() <= 0) {
 					return;
+				}
+				if (s.toString().contains(" ")) {
+					etInput.setText(null);
 				}
 				if (count - before > 1) { // If > 1 one character has changed, handle as an array
 					// This should typically only contain a single character at a time, but I'm
@@ -143,14 +133,19 @@ public class MainActivity extends AppCompatActivity {
 					}
 				} else if (count > before && (count >= 0 && before >= 0)) { // If there is <= one more character in the edittext, just send the key
 					keySender.addKey(null, s.subSequence(before, count).toString());
+				} else {
+					etInput.setText(null);
 				}
-				// Hacky workaround that clears the edittext after every key press to
-				// make arrow keys (and some others) get registered by onKeyDown (because it only
-				// triggers when the key isn't consumed by the EditText)
 				//etInput.getText().clear(); // Mitigates some of InputConnection warnings
-				etInput.setText("");
+			}
+
+			public void afterTextChanged(Editable s) {
+			}
+
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 			}
 		});
+		//*/
 
 		// Check if USB device connected
 		// TODO: test if this code is device-specific, if so, grab file path from /sys/class/udc
@@ -198,13 +193,7 @@ public class MainActivity extends AppCompatActivity {
 						Timber.e(Log.getStackTraceString(e));
 					}
 				}
-
-				connectionWarningDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-					@Override
-					public void onDismiss(DialogInterface dialog) {
-						isDialogDismissed[0] = true;
-					}
-				});
+				connectionWarningDialog.setOnDismissListener(dialog -> isDialogDismissed[0] = true);
 			}
 		}).start();
 	}
@@ -266,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
 				Log.e(TAG, Log.getStackTraceString(e));
 			}
 			*/
+			makeSnackbar("debug", Snackbar.LENGTH_SHORT);
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -285,5 +275,9 @@ public class MainActivity extends AppCompatActivity {
 			Timber.e(Log.getStackTraceString(e));
 			throw new IOException();
 		}
+	}
+
+	public static void makeSnackbar(String message, int length) {
+		Snackbar.make(parentLayout, message, length).show();
 	}
 }

@@ -8,6 +8,8 @@ import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import org.apache.commons.codec.binary.Hex;
 
 import java.io.DataOutputStream;
@@ -22,6 +24,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import timber.log.Timber;
 
 public class KeySender implements Runnable {
+	private static Context mainContext;
+
 	private static Queue<String> keyQueue;
 	private static Queue<String> modQueue;
 
@@ -33,6 +37,7 @@ public class KeySender implements Runnable {
 	private static final Condition queueNotEmptyCondition = queueLock.newCondition();
 
 	public KeySender(Context context) {
+		mainContext = context;
 		keyQueue = new LinkedList<>();
 		modQueue = new LinkedList<>();
 		preferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -67,13 +72,13 @@ public class KeySender implements Runnable {
 	}
 
 	public void addKey(String modifier, String key) {
-		Timber.d("trying to lock");
+		//Timber.d("trying to lock");
 		queueLock.lock();
 		modQueue.add(modifier);
 		keyQueue.add(key);
 		queueNotEmptyCondition.signal();
 		queueLock.unlock();
-		Timber.d("unlocked");
+		//Timber.d("unlocked");
 	}
 
 	// TODO: add support for sending multiple modifier keys at once
@@ -153,7 +158,9 @@ public class KeySender implements Runnable {
 				Process sendProcess = Runtime.getRuntime().exec(sendKeyCmd);
 				// Kill process if it doesn't complete within 1 seconds
 				if (!sendProcess.waitFor(300, TimeUnit.MILLISECONDS)) {
-					Timber.e("Timed out while sending key. Make sure a computer is connected.");
+					String errorMessage = "Timed out while sending key. Make sure a computer is connected.";
+					Timber.e(errorMessage);
+					MainActivity.makeSnackbar(errorMessage, Snackbar.LENGTH_SHORT);
 					sendProcess.destroy();
 					return;
 				}
@@ -165,9 +172,11 @@ public class KeySender implements Runnable {
 				String releaseErrors = getProcessStdError(releaseProcess);
 				if (!sendErrors.isEmpty()) {
 					Timber.e(sendErrors);
+					MainActivity.makeSnackbar("Error while sending key: " + sendErrors, Snackbar.LENGTH_SHORT);
 				}
 				if (!releaseErrors.isEmpty()) {
 					Timber.e(releaseErrors);
+					MainActivity.makeSnackbar("Error while releasing key: " + releaseErrors, Snackbar.LENGTH_SHORT);
 				}
 			}
 		} catch (IOException | InterruptedException e) {

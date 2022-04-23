@@ -1,5 +1,7 @@
 package me.arianb.usb_hid_client;
 
+import com.google.android.material.snackbar.Snackbar;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,6 +66,7 @@ public abstract class KeyCodeTranslation {
 			keyScanCode = hidKeyCodes.get(adjustedKey);
 		} catch (NullPointerException e) {
 			Timber.e("key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
+			MainActivity.makeSnackbar("key: '" + key + "' is not supported.", Snackbar.LENGTH_SHORT);
 			return 0;
 		}
 		return keyScanCode;
