@@ -57,7 +57,7 @@ public class KeySender implements Runnable {
 			queueLock.lock();
 			// Wait for the queue/s to actually contain keys
 			if (keyQueue.isEmpty()) {
-				Timber.d("Waiting for queue to not be empty.");
+				//Timber.d("Waiting for queue to not be empty.");
 				try {
 					queueNotEmptyCondition.await();
 				} catch (InterruptedException e) {
@@ -66,7 +66,7 @@ public class KeySender implements Runnable {
 				}
 			}
 			sendKey(modQueue.remove(), keyQueue.remove());
-			Timber.d("sending key");
+			//Timber.d("sending key");
 			queueLock.unlock();
 		}
 	}
@@ -125,7 +125,7 @@ public class KeySender implements Runnable {
 				// Release key
 				writeHIDReport("/dev/hidg0", (byte) 0, (byte) 0);
 			} else if (preferences.getBoolean("performance_mode", false)) {
-				Timber.d("\"Performance mode\" code active.");
+				//Timber.d("\"Performance mode\" code active.");
 
 				// Convert byte to hexadecimal String and prepend x (Ex: (byte) 0x15 -> (String) x15)
 				String sendModifier = "x" + Hex.encodeHexString(new byte[]{modifierScanCode});
@@ -133,7 +133,7 @@ public class KeySender implements Runnable {
 
 				// echo -en "\modifier\0\key\0\0\0\0\0" > /dev/hidg0 (as root) (presses key)
 				String sendKeyCmd = "echo -en \"\\" + sendModifier + "\\0\\" + sendKey + "\\0\\0\\0\\0\\0\" > /dev/hidg0";
-				Timber.d(sendKey);
+				//Timber.d(sendKey);
 
 				String releaseKeyCmd = "echo -en \"\\0\\0\\0\\0\\0\\0\\0\\0\" > /dev/hidg0";
 				// Send key
@@ -143,7 +143,7 @@ public class KeySender implements Runnable {
 				rootShell.writeBytes(releaseKeyCmd + "\n");
 				rootShell.flush();
 			} else {
-				Timber.d("\"Performance mode\" DISABLED");
+				//Timber.d("\"Performance mode\" DISABLED");
 
 				// Convert byte to hexadecimal String and prepend x (Ex: (byte) 0x15 -> (String) x15)
 				String sendModifier = "x" + Hex.encodeHexString(new byte[]{modifierScanCode});

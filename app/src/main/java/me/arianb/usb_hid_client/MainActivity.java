@@ -38,6 +38,7 @@ import timber.log.Timber;
 // 	       initially pressed with shift, like !@#$%^&*(), and/or referring to the original key if the
 // 	       user had not pressed shift, in the example given above, 1234567890) and explain them here
 // 		   rather than explaining them over and over in each comment.
+// 		 - handle volume keys (either relay to host or just let them pass through)
 public class MainActivity extends AppCompatActivity {
 	private EditText etInput;
 	private Button btnSubmit;
@@ -54,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
 	private KeySender keySender;
 
 	private SharedPreferences preferences;
+
+	private int previousStringLength;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -111,32 +114,30 @@ public class MainActivity extends AppCompatActivity {
 		etInput.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				Timber.d("String: %s | before-count: %s-%s", s.toString(), before, count);
+				Timber.d("String: %s | prevLen-currLen: %s-%s", s.toString(), previousStringLength, s.length());
 				// Using a hacky workaround that clears the edittext after certain key events to
 				// make arrow keys (and some others) get registered by onKeyDown (because it only
 				// triggers when the key isn't consumed by the EditText)
 
 				// Ignore if there is no text to send
-				if (s.length() <= 0) {
-					return;
-				}
-				if (s.toString().contains(" ")) {
-					etInput.setText(null);
-				}
-				if (count - before > 1) { // If > 1 one character has changed, handle as an array
+				if (s.length() == 0 && previousStringLength == 0) {
+					// Ignore
+					Timber.d("ignoring");
+				} else if (s.length() - previousStringLength >= 2) { // If > 1 one character has changed, handle as an array
 					// This should typically only contain a single character at a time, but I'm
 					// handling it as an array of strings since if the app lags badly, it can
 					// sometimes take a bit before it registers and it sends as several characters.
-					String[] allKeys = s.toString().substring(before, count).split("");
+					// This likely won't happen, but I'd rather just handle it in case.
+					String[] allKeys = s.toString().substring(s.length() - 1, s.length()).split("");
 					for (String key : allKeys) {
 						keySender.addKey(null, key);
 					}
-				} else if (count > before && (count >= 0 && before >= 0)) { // If there is <= one more character in the edittext, just send the key
-					keySender.addKey(null, s.subSequence(before, count).toString());
-				} else {
-					etInput.setText(null);
+				} else if (s.length() - previousStringLength == 1) { // If there is <= one more character in the edittext, just send the key
+					keySender.addKey(null, s.subSequence(s.length() - 1, s.length()).toString());
+				} else { // If s.length() - previousStringLength < 0
+					keySender.addKey(null, "backspace");
 				}
-				//etInput.getText().clear(); // Mitigates some of InputConnection warnings
+				previousStringLength = s.length();
 			}
 
 			public void afterTextChanged(Editable s) {
