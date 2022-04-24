@@ -246,16 +246,6 @@ public class MainActivity extends AppCompatActivity {
 		} else if (itemId == R.id.menuDebug) {
 			// Menu option that just runs whatever code I want to test in the app
 			//SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-			/*
-			Log.d(TAG, "PREF: " + preferences.getString("logging_level", "error"));
-			try {
-				Process proc = Runtime.getRuntime().exec("ls -l /data/data/me.arianb.usb_hid_client/hidg0");
-				Log.d(TAG, "OUT: " + getProcessStdOutput(proc));
-				Log.d(TAG, "ERR: " + getProcessStdError(proc));
-			} catch (IOException e) {
-				Log.e(TAG, Log.getStackTraceString(e));
-			}
-			*/
 			makeSnackbar("debug", Snackbar.LENGTH_SHORT);
 		}
 		return super.onOptionsItemSelected(item);
