@@ -63,7 +63,6 @@
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
@@ -80,6 +79,8 @@ height="350">](images/app-screenshot.png)
 alt="Main screen with logs"
 height="350">](images/app-screenshot2.png)
 
+*UI subject to change since app isn't stable yet*
+
 This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a
 character device that allows your phone to send keys to a connected host device (I recommend
 using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget) to create hidgX devices). It
@@ -92,7 +93,7 @@ modifier and function keys).
 
 Disclaimer: This app requires your device to be rooted.
 
-Tested primarily on: Linux (Host computer) and Pixel 5 running Android 11.
+Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -106,7 +107,7 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 11.
 
 * Rooted device running Android
   - Technically supported versions: 10 - 12
-  - Tested versions: 11
+  - Tested versions: 12
 * The presence of an HID character device (`/dev/hidgX`)
   - Can be created using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), as
     mentioned above
@@ -160,9 +161,7 @@ the connected device once you hit the "send" button.
 - [ ] Touchpad support
 - [X] Ability to send string all at once
 - [X] Add full settings page
-  - [X] Move logging level dropdown there
   - [ ] Add configurable location for HID character device (/dev/hidgX)
-- [ ] Add ability to not require root access if /dev/hidgX is already writable
 - [ ] Add prompt to create /dev/hidgX if not present
 
 See the [open issues](https://github.com/Arian04/android-hid-gadget/issues) for a full list of proposed features (and known issues).
@@ -193,17 +192,6 @@ Don't forget to give the project a star! Thanks again!
 ## License
 
 Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<!-- CONTACT -->
-## Contact
-
-Arian Baishya - arian.baishya2004@gmail.com
-
-Project Link: [https://github.com/Arian04/android-hid-gadget](https://github.com/Arian04/android-hid-gadget)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
