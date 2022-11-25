@@ -1,5 +1,9 @@
 package me.arianb.usb_hid_client;
 
+import static me.arianb.usb_hid_client.KeyCodeTranslation.convertKeyToScanCodes;
+import static me.arianb.usb_hid_client.KeyCodeTranslation.hidModifierCodes;
+import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventCodes;
+import static me.arianb.usb_hid_client.KeyCodeTranslation.modifierKeys;
 import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
 import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
 
@@ -26,31 +30,30 @@ import androidx.preference.PreferenceManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
-// TODO: - Check if everything is properly explained in comments
-//		 - Mod keys are broken
-//       - Custom view that can let the onKeyDown listener process all key events
-// 	     - settle on a way to refer to certain situations (such as referring to a key that has been
-// 	       initially pressed with shift, like !@#$%^&*(), and/or referring to the original key if the
-// 	       user had not pressed shift, in the example given above, 1234567890) and explain them here
-// 		   rather than explaining them over and over in each comment.
-// 		 - handle volume keys (either relay to host or just let them pass through)
+// TODO: 	- Check if everything is properly explained in comments
+//       	- Custom view that can let the onKeyDown listener process all key events
+// 		 	- handle volume keys (either relay to host or just let them pass through)
+// 				- add general media key handling (play/pause, previous, next, etc.)
+
+// Notes on terminology:
+// 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
+// 		will be referred to as a "shifted" key. In the previous example, 2, 4, and ], respectively, would
+// 		be considered the "unshifted" keys.
 public class MainActivity extends AppCompatActivity {
-	private EditText etInput;
+	private EditText etDirectInput;
 	private Button btnSubmit;
-	private EditText etManual;
+	private EditText etManualInput;
 	private AlertDialog connectionWarningDialog;
 	private static View parentLayout;
 
-	private static final Map<Integer, String> modifierKeys = KeyCodeTranslation.modifierKeys;
-	private static final Map<Integer, String> keyEventCodes = KeyCodeTranslation.keyEventCodes;
-	private static final Map<String, String> shiftChars = KeyCodeTranslation.shiftChars;
-
-	private String modifier;
+	private Set<Byte> modifiers;
 
 	private KeySender keySender;
 
@@ -69,10 +72,12 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		// Initialize UI elements
-		etInput = findViewById(R.id.etKeyboardInput);
+		etDirectInput = findViewById(R.id.etDirectInput);
 		btnSubmit = findViewById(R.id.btnKeyboard);
-		etManual = findViewById(R.id.etManual);
+		etManualInput = findViewById(R.id.etManualInput);
 		parentLayout = findViewById(android.R.id.content);
+
+		modifiers = new HashSet<>();
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
@@ -80,9 +85,10 @@ public class MainActivity extends AppCompatActivity {
 		keySender = new KeySender(this);
 		new Thread(keySender).start();
 
+		// Button sends text in manualInput TextView
 		btnSubmit.setOnClickListener(v -> {
 			// Save text to send
-			String sendStr = etManual.getText().toString();
+			String sendStr = etManualInput.getText().toString();
 
 			// If empty, don't do anything
 			if (sendStr.equals("")) {
@@ -91,27 +97,19 @@ public class MainActivity extends AppCompatActivity {
 
 			// Clear EditText if the user's preference is to clear it
 			if (preferences.getBoolean("clear_manual_input", false)) {
-				runOnUiThread(() -> etManual.setText(""));
+				runOnUiThread(() -> etManualInput.setText(""));
 			}
 
-			// TODO: maybe send on another thread.
-			//  	 save thread and wait until it's finished (if not null) to maintain order
 			// Sends all keys
 			for (int i = 0; i < sendStr.length(); i++) {
 				String key = sendStr.substring(i, i + 1);
-				String unshiftedKey = shiftChars.get(key); // If the key is a key + shift, this will be the original key
-				if (unshiftedKey != null) {
-					keySender.addKey("left-shift", unshiftedKey);
-				} else {
-					keySender.addKey(null, key);
-				}
+				convertAndAddKeyToQueue(key);
 			}
 		});
 
-		//*
 		// Listens for changes to the edittext
 		// Detects printable characters (a-z, 0-9, etc.)
-		etInput.addTextChangedListener(new TextWatcher() {
+		etDirectInput.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				Timber.d("String: %s | prevLen-currLen: %s-%s", s.toString(), previousStringLength, s.length());
@@ -120,36 +118,39 @@ public class MainActivity extends AppCompatActivity {
 				// triggers when the key isn't consumed by the EditText)
 
 				// Ignore if there is no text to send
-				if (s.length() == 0 && previousStringLength == 0) {
+				if (s.length() - previousStringLength == 0) {
 					// Ignore
 					Timber.d("ignoring");
+				} else if (s.length() - previousStringLength == 1) { // If there is one more character in the edittext, just send the key
+					Timber.d("sending one key");
+					String key = s.subSequence(s.length() - 1, s.length()).toString();
+					convertAndAddKeyToQueue(key);
 				} else if (s.length() - previousStringLength >= 2) { // If > 1 one character has changed, handle as an array
+					Timber.d("sending several keys (may have been caused by lag)");
 					// This should typically only contain a single character at a time, but I'm
 					// handling it as an array of strings since if the app lags badly, it can
 					// sometimes take a bit before it registers and it sends as several characters.
-					// This likely won't happen, but I'd rather just handle it in case.
+					// This likely won't happen once bugs are ironed out, but I'd rather just handle it in case.
 					String[] allKeys = s.toString().substring(s.length() - 1, s.length()).split("");
 					for (String key : allKeys) {
-						keySender.addKey(null, key);
+						convertAndAddKeyToQueue(key);
 					}
-				} else if (s.length() - previousStringLength == 1) { // If there is <= one more character in the edittext, just send the key
-					keySender.addKey(null, s.subSequence(s.length() - 1, s.length()).toString());
 				} else { // If s.length() - previousStringLength < 0
-					keySender.addKey(null, "backspace");
+					Timber.d("sending backspace");
+					convertAndAddKeyToQueue("backspace");
 				}
 				previousStringLength = s.length();
 			}
 
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 		});
-		//*/
 
+		// This code feels messy and hacky but it works so making it nice is a problem for later
 		// Check if USB device connected
-		// TODO: test if this code is device-specific, if so, grab file path from /sys/class/udc
+		// TODO: test if this code is device-specific, if so, write code to find file path in /sys/class/udc
+		// 		 - this no longer fully works for me, the state file always says it's disconnected
 		Activity mainContext = this;
 		new Thread(() -> {
 			String usbState;
@@ -164,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
 				Timber.d("Cmd Output: %s", usbState);
 				AlertDialog.Builder connectionWarningBuilder = new AlertDialog.Builder(MainActivity.this)
 						.setTitle("USB state has been detected as disconnected.")
-						.setMessage("The app will not work without a connected device. Connect a device now or ignore this warning.")
+						.setMessage("The app will not work without a connected device. Either you have not connected a device or the character device (/dev/hidg0) has not been created. Connect a device now or ignore this warning.")
 						.setNegativeButton(R.string.ignore, null)
 						.setIcon(android.R.drawable.ic_dialog_alert);
 				mainContext.runOnUiThread(() -> {
@@ -204,19 +205,19 @@ public class MainActivity extends AppCompatActivity {
 	// by the EditText
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (!etInput.hasFocus()) {
+		if (!etDirectInput.hasFocus()) {
 			Timber.d("Ignoring KeyEvent because the direct input edittext was not focused");
 			return false;
 		}
 		if (KeyEvent.isModifierKey(keyCode)) {
-			String modifier = modifierKeys.get(event.getKeyCode());
+			byte modifier = hidModifierCodes.get(modifierKeys.get(event.getKeyCode()));
+			addModifier(modifier);
 			Timber.d("modifier: %s", modifier);
 		}
 
 		String key = null;
 		if ((key = keyEventCodes.get(event.getKeyCode())) != null) {
-			keySender.addKey(modifier, key);
-			modifier = null;
+			convertAndAddKeyToQueue(key);
 			Timber.d("onKeyDown key: %s", key);
 		}
 		Timber.d("keycode: %s", event.getKeyCode());
@@ -240,12 +241,11 @@ public class MainActivity extends AppCompatActivity {
 			Intent intent = new Intent(this, SettingsActivity.class);
 			startActivity(intent);
 		} else if (itemId == R.id.menuHelp) {
-			Toast.makeText(this, "help clicked", Toast.LENGTH_SHORT).show(); // DEBUG
+			Toast.makeText(this, "help clicked", Toast.LENGTH_SHORT).show(); // TODO: help page
 		} else if (itemId == R.id.menuInfo) {
-			Toast.makeText(this, "info clicked", Toast.LENGTH_SHORT).show(); // DEBUG
+			Toast.makeText(this, "info clicked", Toast.LENGTH_SHORT).show(); // TODO: info page
 		} else if (itemId == R.id.menuDebug) {
 			// Menu option that just runs whatever code I want to test in the app
-			//SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 			makeSnackbar("debug", Snackbar.LENGTH_SHORT);
 		}
 		return super.onOptionsItemSelected(item);
@@ -265,6 +265,36 @@ public class MainActivity extends AppCompatActivity {
 		} catch (InterruptedException | IOException e) {
 			Timber.e(Log.getStackTraceString(e));
 			throw new IOException();
+		}
+	}
+
+	// Converts (string) key to (byte) key scan code and (byte) modifier scan code and add to queue
+	private void convertAndAddKeyToQueue(String key) {
+		byte[] tempScanCodes = convertKeyToScanCodes(key);
+		byte keyCode = tempScanCodes[1];
+
+		// Sum all modifiers in modifiers Set
+		Iterator<Byte> modifiersIterator = modifiers.iterator();
+		byte modifiersSum = 0;
+		while(modifiersIterator.hasNext()) {
+			modifiersSum += modifiersIterator.next();
+		}
+
+		byte modifierCode = (byte)(tempScanCodes[0] + modifiersSum);
+		keySender.addKey(modifierCode, keyCode);
+		modifiers.clear();
+	}
+
+	// Toggles the presence of a modifier in the Set of modifiers
+	// In other words, if the modifier is in the set, remove it, if the modifier isn't, add it.
+	// FIXME: 	The "remove" part of this is currently commented out because for some reason, sometimes
+	// 			keys send their modifiers twice, which adds, then immediately removes it, leading to an unmodified key
+	private void addModifier(byte modifier) {
+		if(modifiers.contains(modifier)) {
+			modifiers.add(modifier);
+			//modifiers.remove(modifier);
+		} else {
+			modifiers.add(modifier);
 		}
 	}
 

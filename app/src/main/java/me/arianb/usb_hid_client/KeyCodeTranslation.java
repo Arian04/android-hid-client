@@ -3,14 +3,15 @@ package me.arianb.usb_hid_client;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import timber.log.Timber;
 
 // TODO: if i feel like it later, I can change the maps to be more efficient, but if i do, then
-// 		 I should probably add comments labeling each line with its human-readable key
+// 		 I should probably add comments labeling each line with its human-readable key.
 // 		 current: keycode/char -> human-readable key -> hid code
-// 		 proposed: keycode/char -> hid code
+// 		 proposed: keycode/char -> hid code (comment: human-readable key)
 public abstract class KeyCodeTranslation {
 	protected static final Map<Integer, String> modifierKeys;
 	protected static final Map<Integer, String> keyEventCodes;
@@ -22,7 +23,15 @@ public abstract class KeyCodeTranslation {
 		return shiftChars.containsKey(key);
 	}
 
-	public static byte convertModifierToScanCode(String modifier) {
+	public static boolean isKeyUpperCase(String str) {
+		if( !(str.length() == 1) ) {
+			return false;
+		}
+		char letter = str.charAt(0);
+		return Character.isUpperCase(letter);
+	}
+
+	private static byte convertModifierToScanCode(String modifier) {
 		//Log.d(TAG, "converting following modifier into scan code: " + modifier);
 		if (modifier == null) {
 			return 0;
@@ -39,37 +48,36 @@ public abstract class KeyCodeTranslation {
 		return modifierScanCode;
 	}
 
-	public static byte convertKeyToScanCode(String key) {
+	// Converts key to two scan codes
+	// First element in array is the scan code for the modifier
+	// Second element in array is the scan code for the key
+	public static byte[] convertKeyToScanCodes(String key) {
+		byte[] keyScanCodes = {0, 0};
+
 		//Log.d(TAG, "converting following key into scan code: " + key);
 		if (key == null) {
-			Timber.e("key is null");
-			return 0;
+			Timber.e("convertKeyToScanCodes(): key is null");
+			return new byte[]{0, 0};
 		}
-		String adjustedKey = key;
 
-		if (key.length() == 1 && Character.isUpperCase(key.charAt(0))) {
-			// If character is uppercase, send the lowercase char + shift key
-			//setModifier((byte)0x02); // Set modifier to shift key
-			adjustedKey = key.toLowerCase();
-		} else {
-			// If character is a key + shift, then convert it to its un-shifted self
-			String str = shiftChars.get(key);
-			if (str != null) {
-				adjustedKey = str;
-			}
-			//Log.d(TAG, "adding shift option to make: " + adjustedKey + " -> " + key);
+		// If key is shift + another key, add left-shift scan code
+		if (KeyCodeTranslation.isShiftedKey(key)) {
+			keyScanCodes[0] += 0x02; // Add left-shift modifier
+			key = shiftChars.get(key);
+		} else if(key.length() == 1 && Character.isUpperCase(key.charAt(0))) {
+			keyScanCodes[0] += 0x02; // Add left-shift modifier
+			key = key.toLowerCase();
 		}
 
 		// Convert key to HID code
-		byte keyScanCode = 0;
-		try {
-			keyScanCode = hidKeyCodes.get(adjustedKey);
-		} catch (NullPointerException e) {
+		if (hidKeyCodes.containsKey(key)) {
+			keyScanCodes[1] = hidKeyCodes.get(key);
+		} else {
 			Timber.e("key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
 			MainActivity.makeSnackbar("key: '" + key + "' is not supported.", Snackbar.LENGTH_SHORT);
-			return 0;
+			return new byte[]{0, 0};
 		}
-		return keyScanCode;
+		return keyScanCodes;
 	}
 
 	// Fill maps
@@ -226,7 +234,7 @@ public abstract class KeyCodeTranslation {
 		hidKeyCodes.put("[", (byte) 0x2f);
 		hidKeyCodes.put("]", (byte) 0x30);
 		hidKeyCodes.put("\\", (byte) 0x31);
-		hidKeyCodes.put("#", (byte) 0x32); // I think this is only for non-US layouts
+		hidKeyCodes.put("#", (byte) 0x32); // I think this is only for special layouts with a dedicated key
 		hidKeyCodes.put(";", (byte) 0x33);
 		hidKeyCodes.put("'", (byte) 0x34);
 		hidKeyCodes.put("`", (byte) 0x35);
