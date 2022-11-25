@@ -87,8 +87,8 @@ using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget) to create 
 presents itself as a standard hardware input device and therefore doesn't require any additional
 software to be installed on the computer. It is also completely functional within the connected
 computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, \`~!
-@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more (I recommend
-using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as
+@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more (I strongly recommend
+using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as 
 modifier and function keys).
 
 Disclaimer: This app requires your device to be rooted.
@@ -106,11 +106,17 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 ### Prerequisites
 
 * Rooted device running Android
-  - Technically supported versions: 10 - 12
-  - Tested versions: 12
+	- Technically supported versions: 10 - 12
+	- Tested versions: 12
 * The presence of an HID character device (`/dev/hidgX`)
-  - Can be created using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), as
+	- Can be created using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), as
     mentioned above
+* Soft Keyboard
+	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better support, more keys, and [less issues](https://github.com/Arian04/android-hid-gadget/issues/5).
+	- Important Hacker's Keyboard settings to change: 
+		- `Key behavior settings > Ctrl key code = None (Ignored when not modifying other keys)`
+		- `Key behavior settings > Alt key code = None (Ignored when not modifying other keys)`
+		- `Key behavior settings > Meta key code = None (Ignored when not modifying other keys)`
 
 ### Installation (Source)<a name="installation-source"></a>
 
