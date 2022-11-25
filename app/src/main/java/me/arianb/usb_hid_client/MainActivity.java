@@ -2,22 +2,24 @@ package me.arianb.usb_hid_client;
 
 import static me.arianb.usb_hid_client.KeyCodeTranslation.convertKeyToScanCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.hidModifierCodes;
-import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventCodes;
-import static me.arianb.usb_hid_client.KeyCodeTranslation.modifierKeys;
+import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventKeys;
+import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventModifierKeys;
 import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
 import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
+import android.text.method.KeyListener;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -41,6 +43,8 @@ import timber.log.Timber;
 //       	- Custom view that can let the onKeyDown listener process all key events
 // 		 	- handle volume keys (either relay to host or just let them pass through)
 // 				- add general media key handling (play/pause, previous, next, etc.)
+//			- add code to check if /dev/hidg0 is writable on startup, then fix perms/add policy
+//			- add code to create /dev/hidg0 so I don't depend on another app for that
 
 // Notes on terminology:
 // 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
@@ -58,8 +62,6 @@ public class MainActivity extends AppCompatActivity {
 	private KeySender keySender;
 
 	private SharedPreferences preferences;
-
-	private int previousStringLength;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,50 +109,69 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		// Listens for changes to the edittext
-		// Detects printable characters (a-z, 0-9, etc.)
-		etDirectInput.addTextChangedListener(new TextWatcher() {
+		// Listens for keys pressed while the "Direct Input" EditText is focused and adds them to
+		// the queue of keys
+		etDirectInput.setKeyListener(new KeyListener() {
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				Timber.d("String: %s | prevLen-currLen: %s-%s", s.toString(), previousStringLength, s.length());
-				// Using a hacky workaround that clears the edittext after certain key events to
-				// make arrow keys (and some others) get registered by onKeyDown (because it only
-				// triggers when the key isn't consumed by the EditText)
+			public boolean onKeyDown(View view, Editable editable, int i, KeyEvent keyEvent) {
+				Timber.d("onKeyDown DEBUG KEY: %s", keyEvent.getKeyCode());
+				int keyCode = keyEvent.getKeyCode();
 
-				// Ignore if there is no text to send
-				if (s.length() - previousStringLength == 0) {
-					// Ignore
-					Timber.d("ignoring");
-				} else if (s.length() - previousStringLength == 1) { // If there is one more character in the edittext, just send the key
-					Timber.d("sending one key");
-					String key = s.subSequence(s.length() - 1, s.length()).toString();
-					convertAndAddKeyToQueue(key);
-				} else if (s.length() - previousStringLength >= 2) { // If > 1 one character has changed, handle as an array
-					Timber.d("sending several keys (may have been caused by lag)");
-					// This should typically only contain a single character at a time, but I'm
-					// handling it as an array of strings since if the app lags badly, it can
-					// sometimes take a bit before it registers and it sends as several characters.
-					// This likely won't happen once bugs are ironed out, but I'd rather just handle it in case.
-					String[] allKeys = s.toString().substring(s.length() - 1, s.length()).split("");
-					for (String key : allKeys) {
+				if (KeyEvent.isModifierKey(keyCode)) { // Handle modifier keys
+					byte modifier = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
+					addModifier(modifier);
+					Timber.d("modifier: %s", modifier);
+				} else { // Handle non-modifier keys
+					if (keyEventKeys.containsKey(keyCode)) {
+						String key = keyEventKeys.get(keyCode);
 						convertAndAddKeyToQueue(key);
+						Timber.d("key: %s", key);
 					}
-				} else { // If s.length() - previousStringLength < 0
-					Timber.d("sending backspace");
-					convertAndAddKeyToQueue("backspace");
 				}
-				previousStringLength = s.length();
+				return true;
 			}
 
-			public void afterTextChanged(Editable s) {}
+			@Override
+			public boolean onKeyUp(View view, Editable editable, int i, KeyEvent keyEvent) {
+				return false;
+			}
+			@Override
+			public boolean onKeyOther(View view, Editable editable, KeyEvent keyEvent) {
+				return false;
+			}
+			@Override
+			public int getInputType() {
+				return 0;
+			}
+			@Override
+			public void clearMetaKeyState(View view, Editable editable, int i) {}
+		});
 
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+		// Detect when Direct Input gets focus, since for some reason, the keyboard doesn't open
+		// when the EditText is focused after I made it use a KeyListener
+		etDirectInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if(hasFocus){
+					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					etDirectInput.postDelayed(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							etDirectInput.requestFocus();
+							imm.showSoftInput(etDirectInput, 0);
+						}
+					}, 100);
+				}
+			}
 		});
 
 		// This code feels messy and hacky but it works so making it nice is a problem for later
 		// Check if USB device connected
 		// TODO: test if this code is device-specific, if so, write code to find file path in /sys/class/udc
 		// 		 - this no longer fully works for me, the state file always says it's disconnected
+		// 		 - the problem might be my usb cable
 		Activity mainContext = this;
 		new Thread(() -> {
 			String usbState;
@@ -165,7 +186,9 @@ public class MainActivity extends AppCompatActivity {
 				Timber.d("Cmd Output: %s", usbState);
 				AlertDialog.Builder connectionWarningBuilder = new AlertDialog.Builder(MainActivity.this)
 						.setTitle("USB state has been detected as disconnected.")
-						.setMessage("The app will not work without a connected device. Either you have not connected a device or the character device (/dev/hidg0) has not been created. Connect a device now or ignore this warning.")
+						.setMessage("The app will not work without a connected device. " +
+								"Either you have not connected a device or the character device (/dev/hidg0) has not been created. " +
+								"Connect a device now or ignore this warning.")
 						.setNegativeButton(R.string.ignore, null)
 						.setIcon(android.R.drawable.ic_dialog_alert);
 				mainContext.runOnUiThread(() -> {
@@ -198,30 +221,6 @@ public class MainActivity extends AppCompatActivity {
 				connectionWarningDialog.setOnDismissListener(dialog -> isDialogDismissed[0] = true);
 			}
 		}).start();
-	}
-
-	// Listens for KeyEvents
-	// Detects non-printing characters (tab, backspace, function keys, etc.) that aren't consumed
-	// by the EditText
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (!etDirectInput.hasFocus()) {
-			Timber.d("Ignoring KeyEvent because the direct input edittext was not focused");
-			return false;
-		}
-		if (KeyEvent.isModifierKey(keyCode)) {
-			byte modifier = hidModifierCodes.get(modifierKeys.get(event.getKeyCode()));
-			addModifier(modifier);
-			Timber.d("modifier: %s", modifier);
-		}
-
-		String key = null;
-		if ((key = keyEventCodes.get(event.getKeyCode())) != null) {
-			convertAndAddKeyToQueue(key);
-			Timber.d("onKeyDown key: %s", key);
-		}
-		Timber.d("keycode: %s", event.getKeyCode());
-		return true;
 	}
 
 	// method to inflate the options menu when
@@ -268,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
 		}
 	}
 
-	// Converts (string) key to (byte) key scan code and (byte) modifier scan code and add to queue
+	// Converts (int) KeyEvent code to (byte) key scan code and (byte) modifier scan code and add to queue
 	private void convertAndAddKeyToQueue(String key) {
 		byte[] tempScanCodes = convertKeyToScanCodes(key);
 		byte keyCode = tempScanCodes[1];
@@ -289,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
 	// In other words, if the modifier is in the set, remove it, if the modifier isn't, add it.
 	// FIXME: 	The "remove" part of this is currently commented out because for some reason, sometimes
 	// 			keys send their modifiers twice, which adds, then immediately removes it, leading to an unmodified key
+	// 			- this means that currently, modifiers cannot be deselected once pressed for a key
 	private void addModifier(byte modifier) {
 		if(modifiers.contains(modifier)) {
 			modifiers.add(modifier);

@@ -3,7 +3,6 @@ package me.arianb.usb_hid_client;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -13,39 +12,17 @@ import timber.log.Timber;
 // 		 current: keycode/char -> human-readable key -> hid code
 // 		 proposed: keycode/char -> hid code (comment: human-readable key)
 public abstract class KeyCodeTranslation {
-	protected static final Map<Integer, String> modifierKeys;
-	protected static final Map<Integer, String> keyEventCodes;
+	// TODO: maybe make these private and add helper methods to do whatever needs to be done from other
+	// 		 classes to make this more abstract instead of the current mess which partially uses
+	// 		 helper methods and partially directly uses the maps
+	protected static final Map<Integer, String> keyEventModifierKeys;
+	protected static final Map<Integer, String> keyEventKeys;
 	protected static final Map<String, String> shiftChars;
 	protected static final Map<String, Byte> hidKeyCodes;
 	protected static final Map<String, Byte> hidModifierCodes;
 
 	public static boolean isShiftedKey(String key) {
 		return shiftChars.containsKey(key);
-	}
-
-	public static boolean isKeyUpperCase(String str) {
-		if( !(str.length() == 1) ) {
-			return false;
-		}
-		char letter = str.charAt(0);
-		return Character.isUpperCase(letter);
-	}
-
-	private static byte convertModifierToScanCode(String modifier) {
-		//Log.d(TAG, "converting following modifier into scan code: " + modifier);
-		if (modifier == null) {
-			return 0;
-		}
-
-		// Convert modifier to HID code
-		byte modifierScanCode = 0;
-		try {
-			modifierScanCode = hidModifierCodes.get(modifier);
-		} catch (NullPointerException e) {
-			//Log.e(TAG, "mod: '" + modifier + "' could not be converted to an HID code (it wasn't found in the map).");
-			return 0;
-		}
-		return modifierScanCode;
 	}
 
 	// Converts key to two scan codes
@@ -82,74 +59,104 @@ public abstract class KeyCodeTranslation {
 
 	// Fill maps
 	static {
-		modifierKeys = new HashMap<>();
-		keyEventCodes = new HashMap<>();
+		keyEventModifierKeys = new HashMap<>();
+		keyEventKeys = new HashMap<>();
 		shiftChars = new HashMap<>();
 		hidKeyCodes = new HashMap<>();
 		hidModifierCodes = new HashMap<>();
 
 		// Translate modifier keycodes into key
-		modifierKeys.put(113, "left-ctrl");
-		modifierKeys.put(114, "right-ctrl");
-		modifierKeys.put(59, "left-shift");
-		modifierKeys.put(60, "right-shift");
-		modifierKeys.put(57, "left-alt");
-		modifierKeys.put(58, "right-alt");
-		modifierKeys.put(117, "left-meta");
-		modifierKeys.put(118, "right-meta");
+		keyEventModifierKeys.put(113, "left-ctrl");
+		keyEventModifierKeys.put(114, "right-ctrl");
+		keyEventModifierKeys.put(59, "left-shift");
+		keyEventModifierKeys.put(60, "right-shift");
+		keyEventModifierKeys.put(57, "left-alt");
+		keyEventModifierKeys.put(58, "right-alt");
+		keyEventModifierKeys.put(117, "left-meta");
+		keyEventModifierKeys.put(118, "right-meta");
 
 		// Translate keycodes into key
-		keyEventCodes.put(29, "a");
-		keyEventCodes.put(30, "b");
-		keyEventCodes.put(31, "c");
-		keyEventCodes.put(32, "d");
-		keyEventCodes.put(33, "e");
-		keyEventCodes.put(34, "f");
-		keyEventCodes.put(35, "g");
-		keyEventCodes.put(36, "h");
-		keyEventCodes.put(37, "i");
-		keyEventCodes.put(38, "j");
-		keyEventCodes.put(39, "k");
-		keyEventCodes.put(40, "l");
-		keyEventCodes.put(41, "m");
-		keyEventCodes.put(42, "n");
-		keyEventCodes.put(43, "o");
-		keyEventCodes.put(44, "p");
-		keyEventCodes.put(45, "q");
-		keyEventCodes.put(46, "r");
-		keyEventCodes.put(47, "s");
-		keyEventCodes.put(48, "t");
-		keyEventCodes.put(49, "u");
-		keyEventCodes.put(50, "v");
-		keyEventCodes.put(51, "w");
-		keyEventCodes.put(52, "x");
-		keyEventCodes.put(53, "y");
-		keyEventCodes.put(54, "z");
-		keyEventCodes.put(131, "f1");
-		keyEventCodes.put(132, "f2");
-		keyEventCodes.put(133, "f3");
-		keyEventCodes.put(134, "f4");
-		keyEventCodes.put(135, "f5");
-		keyEventCodes.put(136, "f6");
-		keyEventCodes.put(137, "f7");
-		keyEventCodes.put(138, "f8");
-		keyEventCodes.put(139, "f9");
-		keyEventCodes.put(140, "f10");
-		keyEventCodes.put(141, "f11");
-		keyEventCodes.put(142, "f12");
-		keyEventCodes.put(19, "up");
-		keyEventCodes.put(20, "down");
-		keyEventCodes.put(21, "left");
-		keyEventCodes.put(22, "right");
-		keyEventCodes.put(61, "tab");
-		keyEventCodes.put(67, "backspace");
-		keyEventCodes.put(111, "escape");
-		keyEventCodes.put(120, "print"); // and SysRq
-		keyEventCodes.put(116, "scroll-lock");
-		keyEventCodes.put(143, "num-lock");
-		keyEventCodes.put(121, "pause");
-		keyEventCodes.put(124, "insert");
-		keyEventCodes.put(112, "delete");
+		keyEventKeys.put(7, "0");
+		keyEventKeys.put(8, "1");
+		keyEventKeys.put(9, "2");
+		keyEventKeys.put(10, "3");
+		keyEventKeys.put(11, "4");
+		keyEventKeys.put(12, "5");
+		keyEventKeys.put(13, "6");
+		keyEventKeys.put(14, "7");
+		keyEventKeys.put(15, "8");
+		keyEventKeys.put(16, "9");
+
+		keyEventKeys.put(29, "a");
+		keyEventKeys.put(30, "b");
+		keyEventKeys.put(31, "c");
+		keyEventKeys.put(32, "d");
+		keyEventKeys.put(33, "e");
+		keyEventKeys.put(34, "f");
+		keyEventKeys.put(35, "g");
+		keyEventKeys.put(36, "h");
+		keyEventKeys.put(37, "i");
+		keyEventKeys.put(38, "j");
+		keyEventKeys.put(39, "k");
+		keyEventKeys.put(40, "l");
+		keyEventKeys.put(41, "m");
+		keyEventKeys.put(42, "n");
+		keyEventKeys.put(43, "o");
+		keyEventKeys.put(44, "p");
+		keyEventKeys.put(45, "q");
+		keyEventKeys.put(46, "r");
+		keyEventKeys.put(47, "s");
+		keyEventKeys.put(48, "t");
+		keyEventKeys.put(49, "u");
+		keyEventKeys.put(50, "v");
+		keyEventKeys.put(51, "w");
+		keyEventKeys.put(52, "x");
+		keyEventKeys.put(53, "y");
+		keyEventKeys.put(54, "z");
+
+		keyEventKeys.put(55, ",");
+		keyEventKeys.put(56, ".");
+		keyEventKeys.put(68, "`");
+		keyEventKeys.put(69, "-");
+		keyEventKeys.put(70, "=");
+		keyEventKeys.put(71, "[");
+		keyEventKeys.put(72, "]");
+		keyEventKeys.put(73, "\\");
+		keyEventKeys.put(74, ";");
+		keyEventKeys.put(75, "'");
+		keyEventKeys.put(76, "/");
+
+		keyEventKeys.put(131, "f1");
+		keyEventKeys.put(132, "f2");
+		keyEventKeys.put(133, "f3");
+		keyEventKeys.put(134, "f4");
+		keyEventKeys.put(135, "f5");
+		keyEventKeys.put(136, "f6");
+		keyEventKeys.put(137, "f7");
+		keyEventKeys.put(138, "f8");
+		keyEventKeys.put(139, "f9");
+		keyEventKeys.put(140, "f10");
+		keyEventKeys.put(141, "f11");
+		keyEventKeys.put(142, "f12");
+
+		keyEventKeys.put(19, "up");
+		keyEventKeys.put(20, "down");
+		keyEventKeys.put(21, "left");
+		keyEventKeys.put(22, "right");
+
+		keyEventKeys.put(61, "tab");
+		keyEventKeys.put(67, "backspace");
+		keyEventKeys.put(111, "escape");
+		keyEventKeys.put(112, "delete");
+		keyEventKeys.put(116, "scroll-lock");
+		keyEventKeys.put(120, "print"); // and SysRq
+		keyEventKeys.put(121, "pause");
+		keyEventKeys.put(122, "home");
+		keyEventKeys.put(123, "end");
+		keyEventKeys.put(124, "insert");
+		keyEventKeys.put(143, "num-lock");
+		keyEventKeys.put(92, "page-up");
+		keyEventKeys.put(93, "page-down");
 
 		// Keys that are represented by another key + shift
 		shiftChars.put("<", ",");
