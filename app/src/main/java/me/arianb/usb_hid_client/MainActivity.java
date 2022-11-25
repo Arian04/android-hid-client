@@ -286,13 +286,9 @@ public class MainActivity extends AppCompatActivity {
 
 	// Toggles the presence of a modifier in the Set of modifiers
 	// In other words, if the modifier is in the set, remove it, if the modifier isn't, add it.
-	// FIXME: 	The "remove" part of this is currently commented out because for some reason, sometimes
-	// 			keys send their modifiers twice, which adds, then immediately removes it, leading to an unmodified key
-	// 			- this means that currently, modifiers cannot be deselected once pressed for a key
 	private void addModifier(byte modifier) {
 		if(modifiers.contains(modifier)) {
-			modifiers.add(modifier);
-			//modifiers.remove(modifier);
+			modifiers.remove(modifier);
 		} else {
 			modifiers.add(modifier);
 		}
