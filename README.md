@@ -26,7 +26,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/Arian04/android-hid-gadget">
+  <a href="https://github.com/Arian04/android-hid-client">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -35,12 +35,12 @@
   <p align="center">
     Android app that allows you to easily use your phone as a keyboard
     <br />
-    <a href="https://github.com/Arian04/android-hid-gadget/wiki"><strong>Explore the docs »</strong></a>
+    <a href="https://github.com/Arian04/android-hid-client/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/Arian04/android-hid-gadget/issues">Report Bug</a>
+    <a href="https://github.com/Arian04/android-hid-client/issues">Report Bug</a>
     ·
-    <a href="https://github.com/Arian04/android-hid-gadget/issues">Request Feature</a>
+    <a href="https://github.com/Arian04/android-hid-client/issues">Request Feature</a>
   </p>
 </div>
 
@@ -112,7 +112,7 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 	- Can be created using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), as
     mentioned above
 * Soft Keyboard
-	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better support, more keys, and [less issues](https://github.com/Arian04/android-hid-gadget/issues/5).
+	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better support, more keys, and [less issues](https://github.com/Arian04/android-hid-client/issues/5).
 	- Important Hacker's Keyboard settings to change: 
 		- `Key behavior settings > Ctrl key code = None (Ignored when not modifying other keys)`
 		- `Key behavior settings > Alt key code = None (Ignored when not modifying other keys)`
@@ -123,7 +123,7 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 Clone the repository.
 
    ```sh
-   git clone https://github.com/Arian04/android-hid-gadget.git
+   git clone https://github.com/Arian04/android-hid-client.git
    ```
 
 import into [Android Studio](https://developer.android.com/studio), build the APK, then install it
@@ -132,7 +132,7 @@ on your Android device.
 ### Installation (Binary)<a name="installation-binary"> </a>
 
 Download the APK file from
-the [Github releases page](https://github.com/Arian04/android-hid-gadget/releases), then install it
+the [Github releases page](https://github.com/Arian04/android-hid-client/releases), then install it
 on your Android device
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -170,7 +170,7 @@ the connected device once you hit the "send" button.
   - [ ] Add configurable location for HID character device (/dev/hidgX)
 - [ ] Add prompt to create /dev/hidgX if not present
 
-See the [open issues](https://github.com/Arian04/android-hid-gadget/issues) for a full list of proposed features (and known issues).
+See the [open issues](https://github.com/Arian04/android-hid-client/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -214,16 +214,16 @@ Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/Arian04/android-hid-gadget.svg?style=for-the-badge
-[contributors-url]: https://github.com/Arian04/android-hid-gadget/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/Arian04/android-hid-gadget.svg?style=for-the-badge
-[forks-url]: https://github.com/Arian04/android-hid-gadget/network/members
-[stars-shield]: https://img.shields.io/github/stars/Arian04/android-hid-gadget.svg?style=for-the-badge
-[stars-url]: https://github.com/Arian04/android-hid-gadget/stargazers
-[issues-shield]: https://img.shields.io/github/issues/Arian04/android-hid-gadget.svg?style=for-the-badge
-[issues-url]: https://github.com/Arian04/android-hid-gadget/issues
-[license-shield]: https://img.shields.io/github/license/Arian04/android-hid-gadget.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/Arian04/android-hid-client.svg?style=for-the-badge
+[contributors-url]: https://github.com/Arian04/android-hid-client/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Arian04/android-hid-client.svg?style=for-the-badge
+[forks-url]: https://github.com/Arian04/android-hid-client/network/members
+[stars-shield]: https://img.shields.io/github/stars/Arian04/android-hid-client.svg?style=for-the-badge
+[stars-url]: https://github.com/Arian04/android-hid-client/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Arian04/android-hid-client.svg?style=for-the-badge
+[issues-url]: https://github.com/Arian04/android-hid-client/issues
+[license-shield]: https://img.shields.io/github/license/Arian04/android-hid-client.svg?style=for-the-badge
 
-[license-url]: https://github.com/Arian04/android-hid-gadget/blob/master/LICENSE.txt
+[license-url]: https://github.com/Arian04/android-hid-client/blob/master/LICENSE.txt
 
 [product-screenshot]: images/app-screenshot.png
