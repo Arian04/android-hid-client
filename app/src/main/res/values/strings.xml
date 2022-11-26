@@ -13,14 +13,10 @@
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->
-    <string name="logging_header">Logging</string>
     <string name="misc_header">Misc</string>
 
-    <!-- Logging Preferences -->
-    <string name="logging_level_title">Logging Level</string>
-    <string name="font_size_title">Log Font Size</string>
-
     <!-- Misc Preferences -->
-    <string name="clear_input_title">Clear manual input text box on send</string>
-    <string name="performance_mode_title">Performance Mode (Faster, but not resistant to timeouts)</string>
+    <string name="clear_manual_input_title">Clear manual input text box on send</string>
+    <string name="volume_button_passthrough_title">Volume button passthrough</string>
+    <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
 </resources>

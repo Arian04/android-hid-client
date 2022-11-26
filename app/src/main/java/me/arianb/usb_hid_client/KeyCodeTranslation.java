@@ -18,8 +18,8 @@ public abstract class KeyCodeTranslation {
 	protected static final Map<Integer, String> keyEventModifierKeys;
 	protected static final Map<Integer, String> keyEventKeys;
 	protected static final Map<String, String> shiftChars;
-	protected static final Map<String, Byte> hidKeyCodes;
 	protected static final Map<String, Byte> hidModifierCodes;
+	protected static final Map<String, Byte> hidKeyCodes;
 
 	public static boolean isShiftedKey(String key) {
 		return shiftChars.containsKey(key);
@@ -143,6 +143,9 @@ public abstract class KeyCodeTranslation {
 		keyEventKeys.put(20, "down");
 		keyEventKeys.put(21, "left");
 		keyEventKeys.put(22, "right");
+
+		keyEventKeys.put(24, "volume-up");
+		keyEventKeys.put(25, "volume-down");
 
 		keyEventKeys.put(61, "tab");
 		keyEventKeys.put(67, "backspace");
@@ -277,5 +280,8 @@ public abstract class KeyCodeTranslation {
 		hidKeyCodes.put("left", (byte) 0x50);
 		hidKeyCodes.put("down", (byte) 0x51);
 		hidKeyCodes.put("up", (byte) 0x52);
+
+		hidKeyCodes.put("volume-up", (byte) 0x80);
+		hidKeyCodes.put("volume-down", (byte) 0x81);
 	}
 }

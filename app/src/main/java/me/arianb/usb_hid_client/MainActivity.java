@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.method.KeyListener;
@@ -63,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
 	private SharedPreferences preferences;
 
+	private AudioManager audioManager;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -82,6 +85,9 @@ public class MainActivity extends AppCompatActivity {
 		modifiers = new HashSet<>();
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+		audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+
 
 		// Start thread to send keys
 		keySender = new KeySender(this);
@@ -105,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 			// Sends all keys
 			for (int i = 0; i < sendStr.length(); i++) {
 				String key = sendStr.substring(i, i + 1);
-				convertAndAddKeyToQueue(key);
+				convertKeyAndSendKey(key);
 			}
 		});
 
@@ -123,9 +129,8 @@ public class MainActivity extends AppCompatActivity {
 					Timber.d("modifier: %s", modifier);
 				} else { // Handle non-modifier keys
 					if (keyEventKeys.containsKey(keyCode)) {
-						String key = keyEventKeys.get(keyCode);
-						convertAndAddKeyToQueue(key);
-						Timber.d("key: %s", key);
+						convertKeyEventAndSendKey(keyCode);
+						Timber.d("key: %s", keyEventKeys.get(keyCode));
 					}
 				}
 				return true;
@@ -268,9 +273,26 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	// Converts (int) KeyEvent code to (byte) key scan code and (byte) modifier scan code and add to queue
-	private void convertAndAddKeyToQueue(String key) {
-		byte[] tempScanCodes = convertKeyToScanCodes(key);
-		byte keyCode = tempScanCodes[1];
+	private void convertKeyEventAndSendKey(int keyCode) {
+		// If key is volume (up or down) key and volume key passthrough is not enabled
+		// then increase phone volume like normal (must be done manually since KeyListener consumes it)
+
+		if( (keyCode == 24 || keyCode == 25) && !preferences.getBoolean("volume_button_passthrough", false) ) {
+			Timber.d("volume key: %s", keyCode);
+			switch (keyCode) {
+				case 24: // Volume up
+					audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+					break;
+				case 25: // Volume down
+					audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+					break;
+			}
+			return;
+		}
+
+
+		byte[] tempHIDCodes = convertKeyToScanCodes(keyEventKeys.get(keyCode));
+		byte keyHIDCode = tempHIDCodes[1];
 
 		// Sum all modifiers in modifiers Set
 		Iterator<Byte> modifiersIterator = modifiers.iterator();
@@ -279,8 +301,26 @@ public class MainActivity extends AppCompatActivity {
 			modifiersSum += modifiersIterator.next();
 		}
 
-		byte modifierCode = (byte)(tempScanCodes[0] + modifiersSum);
-		keySender.addKey(modifierCode, keyCode);
+		byte modifierHIDCode = (byte)(tempHIDCodes[0] + modifiersSum);
+		Timber.d("adding key: %s - %s", modifierHIDCode, keyHIDCode);
+		keySender.addKey(modifierHIDCode, keyHIDCode);
+		modifiers.clear();
+	}
+
+	// Converts (String) key to (byte) key scan code and (byte) modifier scan code and add to queue
+	private void convertKeyAndSendKey(String key) {
+		byte[] tempHIDCodes = convertKeyToScanCodes(key);
+		byte keyHIDCode = tempHIDCodes[1];
+
+		// Sum all modifiers in modifiers Set
+		Iterator<Byte> modifiersIterator = modifiers.iterator();
+		byte modifiersSum = 0;
+		while(modifiersIterator.hasNext()) {
+			modifiersSum += modifiersIterator.next();
+		}
+
+		byte modifierHIDCode = (byte)(tempHIDCodes[0] + modifiersSum);
+		keySender.addKey(modifierHIDCode, keyHIDCode);
 		modifiers.clear();
 	}
 

@@ -1,36 +1,16 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory app:title="@string/logging_header">
-
-        <ListPreference
-            app:defaultValue="error"
-            app:entries="@array/logging_options"
-            app:entryValues="@array/logging_values"
-            app:key="logging_level"
-            app:title="@string/logging_level_title"
-            app:useSimpleSummaryProvider="true" />
-
-        <SeekBarPreference
-            app:min="5"
-            app:defaultValue="10"
-            android:max="15"
-            app:showSeekBarValue="true"
-            app:key="font_size"
-            app:title="@string/font_size_title"
-            app:useSimpleSummaryProvider="true" />
-
-    </PreferenceCategory>
-
     <PreferenceCategory app:title="@string/misc_header">
 
         <SwitchPreference
             app:key="clear_manual_input"
-            app:title="@string/clear_input_title" />
+            app:title="@string/clear_manual_input_title" />
 
         <SwitchPreference
-            app:key="performance_mode"
-            app:title="@string/performance_mode_title" />
+            app:key="volume_button_passthrough"
+            app:title="@string/volume_button_passthrough_title"
+            app:summary="@string/volume_button_passthrough_summary"/>
 
     </PreferenceCategory>
 

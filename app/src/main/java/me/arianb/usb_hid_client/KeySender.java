@@ -15,15 +15,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import timber.log.Timber;
 
 public class KeySender implements Runnable {
-	private static Queue<Byte> keyQueue;
 	private static Queue<Byte> modQueue;
+	private static Queue<Byte> keyQueue;
 
 	private static final ReentrantLock queueLock = new ReentrantLock(true);
 	private static final Condition queueNotEmptyCondition = queueLock.newCondition();
 
 	public KeySender(Context context) {
-		keyQueue = new LinkedList<>();
 		modQueue = new LinkedList<>();
+		keyQueue = new LinkedList<>();
 	}
 
 	@Override
@@ -68,10 +68,13 @@ public class KeySender implements Runnable {
 		writeHIDReport("/dev/hidg0", (byte) 0, (byte) 0);
 	}
 
+	// Writes HID report to character device
+	// The modifier is first 2 bytes, the key gets the remaining 6 bytes (but they only ever use 1 byte each)
 	private void writeHIDReport(String device, byte modifier, byte key) {
-		//Timber.d("hid report: %s - %s", modifier, key);
+		Timber.d("hid report: %s - %s", modifier, key);
 
 		byte[] report = new byte[]{ modifier, (byte) 0, key, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
+
 		try (FileOutputStream outputStream = new FileOutputStream(device)) {
 			outputStream.write(report);
 		} catch (IOException e) {
