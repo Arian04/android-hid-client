@@ -16,9 +16,4 @@
         android:id="@+id/menuInfo"
         android:orderInCategory="100"
         app:showAsAction="never" />
-    <item
-        android:title="@string/debug"
-        android:id="@+id/menuDebug"
-        android:orderInCategory="100"
-        app:showAsAction="never" />
 </menu>
