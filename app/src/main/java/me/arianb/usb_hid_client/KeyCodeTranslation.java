@@ -148,6 +148,7 @@ public abstract class KeyCodeTranslation {
 		keyEventKeys.put(25, "volume-down");
 
 		keyEventKeys.put(61, "tab");
+		keyEventKeys.put(62, " ");
 		keyEventKeys.put(67, "backspace");
 		keyEventKeys.put(111, "escape");
 		keyEventKeys.put(112, "delete");
