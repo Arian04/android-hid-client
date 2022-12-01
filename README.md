@@ -112,7 +112,7 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 	- Can be created using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), as
     mentioned above
 * Soft Keyboard
-	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better support, more keys, and [less issues](https://github.com/Arian04/android-hid-client/issues/5).
+	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better support, more keys, and [less issues](https://github.com/Arian04/android-hid-client/labels/soft%20keyboard%20issue).
 	- Important Hacker's Keyboard settings to change: 
 		- `Key behavior settings > Ctrl key code = None (Ignored when not modifying other keys)`
 		- `Key behavior settings > Alt key code = None (Ignored when not modifying other keys)`
