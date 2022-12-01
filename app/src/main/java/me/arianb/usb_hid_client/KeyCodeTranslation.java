@@ -86,6 +86,8 @@ public abstract class KeyCodeTranslation {
 		keyEventKeys.put(14, "7");
 		keyEventKeys.put(15, "8");
 		keyEventKeys.put(16, "9");
+		keyEventKeys.put(17, "*");
+		keyEventKeys.put(18, "#");
 
 		keyEventKeys.put(29, "a");
 		keyEventKeys.put(30, "b");
@@ -125,6 +127,7 @@ public abstract class KeyCodeTranslation {
 		keyEventKeys.put(74, ";");
 		keyEventKeys.put(75, "'");
 		keyEventKeys.put(76, "/");
+		keyEventKeys.put(77, "@");
 
 		keyEventKeys.put(131, "f1");
 		keyEventKeys.put(132, "f2");
