@@ -276,10 +276,10 @@ public class MainActivity extends AppCompatActivity {
 			Timber.d("volume key: %s", keyCode);
 			switch (keyCode) {
 				case 24: // Volume up
-					audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+					audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
 					break;
 				case 25: // Volume down
-					audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+					audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
 					break;
 			}
 			return;
