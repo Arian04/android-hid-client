@@ -159,11 +159,9 @@ public class MainActivity extends AppCompatActivity {
 			public void onFocusChange(View v, boolean hasFocus) {
 				if(hasFocus){
 					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					etDirectInput.postDelayed(new Runnable()
-					{
+					etDirectInput.postDelayed(new Runnable() {
 						@Override
-						public void run()
-						{
+						public void run() {
 							etDirectInput.requestFocus();
 							imm.showSoftInput(etDirectInput, 0);
 						}
