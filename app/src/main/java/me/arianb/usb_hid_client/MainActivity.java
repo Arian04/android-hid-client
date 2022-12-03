@@ -246,9 +246,6 @@ public class MainActivity extends AppCompatActivity {
 			Toast.makeText(this, "help clicked", Toast.LENGTH_SHORT).show(); // TODO: help page
 		} else if (itemId == R.id.menuInfo) {
 			Toast.makeText(this, "info clicked", Toast.LENGTH_SHORT).show(); // TODO: info page
-		} else if (itemId == R.id.menuDebug) {
-			// Menu option that just runs whatever code I want to test in the app
-			makeSnackbar("debug", Snackbar.LENGTH_SHORT);
 		}
 		return super.onOptionsItemSelected(item);
 	}
