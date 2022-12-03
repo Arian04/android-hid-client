@@ -49,7 +49,7 @@ import timber.log.Timber;
 
 // Notes on terminology:
 // 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
-// 		will be referred to as a "shifted" key. In the previous example, 2, 4, and ], respectively, would
+// 		will be referred to as a "shifted" key. In the previous example, 2, 4, and ] would
 // 		be considered the "unshifted" keys.
 public class MainActivity extends AppCompatActivity {
 	private EditText etDirectInput;
@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 		// Check if USB device connected
 		// TODO: test if this code is device-specific, if so, write code to find file path in /sys/class/udc
 		// 		 - this no longer fully works for me, the state file always says it's disconnected
-		// 		 - the problem might be my usb cable
+		// 		 - the problem might be my usb cable, test this more later on
 		Activity mainContext = this;
 		new Thread(() -> {
 			String usbState;
@@ -271,7 +271,6 @@ public class MainActivity extends AppCompatActivity {
 	private void convertKeyEventAndSendKey(int keyCode) {
 		// If key is volume (up or down) key and volume key passthrough is not enabled
 		// then increase phone volume like normal (must be done manually since KeyListener consumes it)
-
 		if( (keyCode == 24 || keyCode == 25) && !preferences.getBoolean("volume_button_passthrough", false) ) {
 			Timber.d("volume key: %s", keyCode);
 			switch (keyCode) {
@@ -284,7 +283,6 @@ public class MainActivity extends AppCompatActivity {
 			}
 			return;
 		}
-
 
 		byte[] tempHIDCodes = convertKeyToScanCodes(keyEventKeys.get(keyCode));
 		byte keyHIDCode = tempHIDCodes[1];
@@ -321,6 +319,8 @@ public class MainActivity extends AppCompatActivity {
 
 	// Toggles the presence of a modifier in the Set of modifiers
 	// In other words, if the modifier is in the set, remove it, if the modifier isn't, add it.
+	// The purpose of this is so that when modifiers are pressed a second time, they get unselected
+	// ex: User is using Hacker's keyboard and clicks ctrl key, then clicks it again to toggle it off
 	private void addModifier(byte modifier) {
 		if(modifiers.contains(modifier)) {
 			modifiers.remove(modifier);

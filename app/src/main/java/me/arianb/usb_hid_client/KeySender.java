@@ -58,9 +58,6 @@ public class KeySender implements Runnable {
 	}
 
 	public void sendKey(byte modifier, byte key) {
-		//Timber.d(TAG, "raw key: " + key + " | sending key: " + adjustedKey + " | modifier: " + sendModifier);
-		//Timber.d("SELinux code is running. Directly writing to character device.");
-
 		// Send key
 		writeHIDReport("/dev/hidg0", modifier, key);
 
