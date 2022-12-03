@@ -4,18 +4,15 @@ import static me.arianb.usb_hid_client.KeyCodeTranslation.convertKeyToScanCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.hidModifierCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventKeys;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventModifierKeys;
-import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
-import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.method.KeyListener;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,20 +29,16 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
 // TODO: 	- Check if everything is properly explained in comments
 //       	- Custom view that can let the onKeyDown listener process all key events
-// 		 	- handle volume keys (either relay to host or just let them pass through)
-// 				- add general media key handling (play/pause, previous, next, etc.)
-//			- add code to check if /dev/hidg0 is writable on startup, then fix perms/add policy
-//			- add code to create /dev/hidg0 so I don't depend on another app for that
+// 			- add general media key handling (play/pause, previous, next, etc.)
 
 // Notes on terminology:
 // 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
@@ -65,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
 	private SharedPreferences preferences;
 
 	private AudioManager audioManager;
+
+	private static CharacterDevice characterDevice;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
 		audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 
+		characterDevice = new CharacterDevice(getApplicationContext());
 
 		// Start thread to send keys
 		keySender = new KeySender(this);
@@ -131,6 +127,8 @@ public class MainActivity extends AppCompatActivity {
 					if (keyEventKeys.containsKey(keyCode)) {
 						convertKeyEventAndSendKey(keyCode);
 						Timber.d("key: %s", keyEventKeys.get(keyCode));
+					} else {
+						Snackbar.make(parentLayout, "That key is not supported yet, file a bug report", Snackbar.LENGTH_SHORT).show();
 					}
 				}
 				return true;
@@ -170,60 +168,26 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		// This code feels messy and hacky but it works so making it nice is a problem for later
-		// Check if USB device connected
-		// TODO: test if this code is device-specific, if so, write code to find file path in /sys/class/udc
-		// 		 - this no longer fully works for me, the state file always says it's disconnected
-		// 		 - the problem might be my usb cable, test this more later on
-		Activity mainContext = this;
-		new Thread(() -> {
-			String usbState;
-			try {
-				usbState = checkFileContentAsRoot("/sys/class/udc/a600000.dwc3/state");
-			} catch (IOException e) {
-				Timber.e(Log.getStackTraceString(e));
-				Toast.makeText(mainContext, "USB Connection check failed.", Toast.LENGTH_SHORT).show();
-				return;
-			}
-			if (!usbState.equals("configured")) {
-				Timber.d("Cmd Output: %s", usbState);
-				AlertDialog.Builder connectionWarningBuilder = new AlertDialog.Builder(MainActivity.this)
-						.setTitle("USB state has been detected as disconnected.")
-						.setMessage("The app will not work without a connected device. " +
-								"Either you have not connected a device or the character device (/dev/hidg0) has not been created. " +
-								"Connect a device now or ignore this warning.")
-						.setNegativeButton(R.string.ignore, null)
-						.setIcon(android.R.drawable.ic_dialog_alert);
-				mainContext.runOnUiThread(() -> {
-					connectionWarningDialog = connectionWarningBuilder.create();
-					connectionWarningDialog.show();
-				});
-				final boolean[] isDialogDismissed = {false};
-				while (!isDialogDismissed[0]) {
-					try {
-						String newUsbState;
-						try {
-							newUsbState = checkFileContentAsRoot("/sys/class/udc/a600000.dwc3/state");
-						} catch (IOException e) {
-							connectionWarningDialog.dismiss();
-							Timber.e(Log.getStackTraceString(e));
-							Toast.makeText(mainContext, "USB Connection check failed.", Toast.LENGTH_SHORT).show();
-							break;
-						}
-						if (newUsbState.equals("configured")) {
-							connectionWarningDialog.dismiss();
-							break;
-						}
-						// Sleep a little between checks
-						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						connectionWarningDialog.dismiss();
-						Timber.e(Log.getStackTraceString(e));
+		// Warns user if character device doesn't exist and shows a button to fix it
+		if (!new File("/dev/hidg0").exists()) { // If it doesn't exist
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Error: Nonexistent character device");
+			builder.setMessage("/dev/hidg0 does not exist, would you like for it to be created for you?\n\n" +
+					"Don't decline unless you would rather create it yourself and know how to do that.");
+			builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					if (!characterDevice.createCharacterDevice()) {
+						Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
+					} else if (!characterDevice.fixCharacterDevicePermissions("/dev/hidg0")) {
+						Snackbar.make(parentLayout, "ERROR: Failed to fix character device permissions.", Snackbar.LENGTH_SHORT).show();
 					}
+					dialog.dismiss();
 				}
-				connectionWarningDialog.setOnDismissListener(dialog -> isDialogDismissed[0] = true);
-			}
-		}).start();
+			});
+			builder.setNegativeButton("NO", null);
+			AlertDialog alert = builder.create();
+			alert.show();
+		}
 	}
 
 	// method to inflate the options menu when
@@ -248,23 +212,6 @@ public class MainActivity extends AppCompatActivity {
 			Toast.makeText(this, "info clicked", Toast.LENGTH_SHORT).show(); // TODO: info page
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	private String checkFileContentAsRoot(String path) throws IOException {
-		try {
-			Process checkUSBConnectionProcess = Runtime.getRuntime().exec(new String[]{"su", "-c", "cat", path});
-			// If this times out or fails, show error message as toast
-			String processStdError = null;
-			if (!checkUSBConnectionProcess.waitFor(1, TimeUnit.SECONDS) || !(processStdError = getProcessStdError(checkUSBConnectionProcess)).isEmpty()) {
-				Timber.e(processStdError);
-				throw new IOException();
-			}
-			// If USB device is not shown as "configured" then assume it's disconnected
-			return getProcessStdOutput(checkUSBConnectionProcess).trim();
-		} catch (InterruptedException | IOException e) {
-			Timber.e(Log.getStackTraceString(e));
-			throw new IOException();
-		}
 	}
 
 	// Converts (int) KeyEvent code to (byte) key scan code and (byte) modifier scan code and add to queue
@@ -295,7 +242,6 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		byte modifierHIDCode = (byte)(tempHIDCodes[0] + modifiersSum);
-		Timber.d("adding key: %s - %s", modifierHIDCode, keyHIDCode);
 		keySender.addKey(modifierHIDCode, keyHIDCode);
 		modifiers.clear();
 	}
@@ -322,14 +268,23 @@ public class MainActivity extends AppCompatActivity {
 	// The purpose of this is so that when modifiers are pressed a second time, they get unselected
 	// ex: User is using Hacker's keyboard and clicks ctrl key, then clicks it again to toggle it off
 	private void addModifier(byte modifier) {
-		if(modifiers.contains(modifier)) {
+		if (modifiers.contains(modifier)) {
 			modifiers.remove(modifier);
 		} else {
 			modifiers.add(modifier);
 		}
 	}
 
+	// These are messy and I don't like it but I can't figure out another way to handle showing
+	// snackbars for errors within KeySender, if anyone is reading this and knows how, tell me please :)
 	public static void makeSnackbar(String message, int length) {
 		Snackbar.make(parentLayout, message, length).show();
 	}
+
+	public static void makeFixPermissionsSnackbar() {
+		Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
+		snackbar.setAction("FIX", v -> characterDevice.fixCharacterDevicePermissions("/dev/hidg0"));
+		snackbar.show();
+	}
+
 }

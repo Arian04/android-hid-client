@@ -82,14 +82,13 @@ height="350">](images/app-screenshot2.png)
 *UI subject to change since app isn't stable yet*
 
 This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a
-character device that allows your phone to send keys to a connected host device (I recommend
-using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget) to create hidgX devices). It
-presents itself as a standard hardware input device and therefore doesn't require any additional
-software to be installed on the computer. It is also completely functional within the connected
-computer's BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, \`~!
-@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more (I strongly recommend
-using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as 
-modifier and function keys).
+character device that allows your phone to send keys to a connected host device. It presents itself
+as a standard hardware input device and therefore doesn't require any additional software to be
+installed on the computer. It is also completely functional within the connected computer's
+BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, \`~!
+@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more (I strongly
+recommend using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys
+such as modifier and function keys).
 
 Disclaimer: This app requires your device to be rooted.
 
@@ -108,9 +107,6 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 * Rooted device running Android
 	- Technically supported versions: 10 - 12
 	- Tested versions: 12
-* The presence of an HID character device (`/dev/hidgX`)
-	- Can be created using [USB Gadget Tool](https://github.com/tejado/android-usb-gadget), as
-    mentioned above
 * Soft Keyboard
 	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better support, more keys, and [less issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A%22soft+keyboard+issue%22+is%3Aclosed).
 	- Important Hacker's Keyboard settings to change: 

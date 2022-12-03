@@ -75,8 +75,15 @@ public class KeySender implements Runnable {
 		try (FileOutputStream outputStream = new FileOutputStream(device)) {
 			outputStream.write(report);
 		} catch (IOException e) {
-			MainActivity.makeSnackbar("Error: Failed to send key.", Snackbar.LENGTH_SHORT);
-			Timber.e(Log.getStackTraceString(e));
+			String stacktrace = Log.getStackTraceString(e);
+			if (stacktrace.toLowerCase().contains("errno 108")) {
+				MainActivity.makeSnackbar("ERROR: Your device seems to be disconnected. If not, try reseating the usb cable", Snackbar.LENGTH_LONG);
+			} else if (stacktrace.toLowerCase().contains("permission denied")) {
+				MainActivity.makeFixPermissionsSnackbar();
+			} else {
+				MainActivity.makeSnackbar("ERROR: Failed to send key.", Snackbar.LENGTH_SHORT);
+			}
+			Timber.e(stacktrace);
 		}
 	}
 }
