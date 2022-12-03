@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
 					Timber.d("modifier: %s", modifier);
 				} else { // Handle non-modifier keys
 					if (keyEventKeys.containsKey(keyCode)) {
-						convertKeyEventAndSendKey(keyCode);
+						convertKeyAndSendKey(keyCode);
 						Timber.d("key: %s", keyEventKeys.get(keyCode));
 					} else {
 						Snackbar.make(parentLayout, "That key is not supported yet, file a bug report", Snackbar.LENGTH_SHORT).show();
@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 	}
 
 	// Converts (int) KeyEvent code to (byte) key scan code and (byte) modifier scan code and add to queue
-	private void convertKeyEventAndSendKey(int keyCode) {
+	private void convertKeyAndSendKey(int keyCode) {
 		// If key is volume (up or down) key and volume key passthrough is not enabled
 		// then increase phone volume like normal (must be done manually since KeyListener consumes it)
 		if( (keyCode == 24 || keyCode == 25) && !preferences.getBoolean("volume_button_passthrough", false) ) {
