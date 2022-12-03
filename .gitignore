@@ -13,4 +13,5 @@
 .externalNativeBuild
 .cxx
 local.properties
-app/release
+
+app/release # exclude release build of app
