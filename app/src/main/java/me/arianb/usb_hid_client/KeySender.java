@@ -1,6 +1,5 @@
 package me.arianb.usb_hid_client;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -21,7 +20,7 @@ public class KeySender implements Runnable {
 	private static final ReentrantLock queueLock = new ReentrantLock(true);
 	private static final Condition queueNotEmptyCondition = queueLock.newCondition();
 
-	public KeySender(Context context) {
+	public KeySender() {
 		modQueue = new LinkedList<>();
 		keyQueue = new LinkedList<>();
 	}
@@ -59,10 +58,10 @@ public class KeySender implements Runnable {
 
 	public void sendKey(byte modifier, byte key) {
 		// Send key
-		writeHIDReport("/dev/hidg0", modifier, key);
+		writeHIDReport(CharacterDevice.KEYBOARD_DEVICE_PATH, modifier, key);
 
 		// Release key
-		writeHIDReport("/dev/hidg0", (byte) 0, (byte) 0);
+		writeHIDReport(CharacterDevice.KEYBOARD_DEVICE_PATH, (byte) 0, (byte) 0);
 	}
 
 	// Writes HID report to character device
@@ -79,7 +78,13 @@ public class KeySender implements Runnable {
 			if (stacktrace.toLowerCase().contains("errno 108")) {
 				MainActivity.makeSnackbar("ERROR: Your device seems to be disconnected. If not, try reseating the usb cable", Snackbar.LENGTH_LONG);
 			} else if (stacktrace.toLowerCase().contains("permission denied")) {
-				MainActivity.makeFixPermissionsSnackbar();
+				if (device.equals(CharacterDevice.KEYBOARD_DEVICE_PATH)) {
+					MainActivity.makeFixKeyboardPermissionsSnackbar();
+				} else if (device.equals(CharacterDevice.MOUSE_DEVICE_PATH)) {
+					MainActivity.makeFixMousePermissionsSnackbar();
+				} else {
+					Timber.e("ERROR: permission denied and writeHIDReport called with invalid device path");
+				}
 			} else {
 				MainActivity.makeSnackbar("ERROR: Failed to send key.", Snackbar.LENGTH_SHORT);
 			}

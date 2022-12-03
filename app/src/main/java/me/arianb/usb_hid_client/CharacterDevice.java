@@ -15,12 +15,26 @@ import java.io.InputStream;
 import timber.log.Timber;
 
 public class CharacterDevice {
+	// Path to the keyboard character device
+	public static final String KEYBOARD_DEVICE_PATH = "/dev/hidg0";
+
+	// TODO: remove the "doesn't exist yet" part of this comment once it's implemented
+	// Path to the mouse character device (doesn't exist yet, it's on the roadmap though)
+	public static final String MOUSE_DEVICE_PATH = "/dev/hidg1";
+
 	private final Context appContext;
 	private final int appUID;
 
 	public CharacterDevice(Context context) {
 		this.appContext = context;
 		appUID = context.getApplicationInfo().uid;
+	}
+
+	public static boolean characterDeviceExists(String charDevicePath) {
+		if (!(charDevicePath.equals(KEYBOARD_DEVICE_PATH) || charDevicePath.equals(MOUSE_DEVICE_PATH))) {
+			return false;
+		}
+		return new File(CharacterDevice.KEYBOARD_DEVICE_PATH).exists();
 	}
 
 	// TODO: add more error handling
@@ -95,13 +109,13 @@ public class CharacterDevice {
 
 			Process fixPermsShell = Runtime.getRuntime().exec("su");
 			DataOutputStream fixPermsOS = new DataOutputStream(fixPermsShell.getOutputStream());
-			fixPermsOS.writeBytes("chown " + appUID + ":" + appUID + " /dev/hidg0" + "\n");
+			fixPermsOS.writeBytes(String.format("chown %d:%d %s\n", appUID, appUID, device));
 			fixPermsOS.flush();
-			fixPermsOS.writeBytes("chmod 600 /dev/hidg0" + "\n");
+			fixPermsOS.writeBytes(String.format("chmod 600 %s\n", device));
 			fixPermsOS.flush();
 			fixPermsOS.writeBytes("magiskpolicy --live 'allow untrusted_app device chr_file { getattr open write }'" + "\n");
 			fixPermsOS.flush();
-			fixPermsOS.writeBytes("chcon u:object_r:device" + context + " /dev/hidg0" + "\n");
+			fixPermsOS.writeBytes(String.format("chcon u:object_r:device%s %s\n", context, device));
 			fixPermsOS.flush();
 			fixPermsOS.writeBytes("exit" + "\n");
 			fixPermsOS.flush();

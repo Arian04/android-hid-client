@@ -1,5 +1,7 @@
 package me.arianb.usb_hid_client;
 
+import static me.arianb.usb_hid_client.CharacterDevice.KEYBOARD_DEVICE_PATH;
+import static me.arianb.usb_hid_client.CharacterDevice.MOUSE_DEVICE_PATH;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.convertKeyToScanCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.hidModifierCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventKeys;
@@ -29,7 +31,6 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -37,7 +38,6 @@ import java.util.Set;
 import timber.log.Timber;
 
 // TODO: 	- Check if everything is properly explained in comments
-//       	- Custom view that can let the onKeyDown listener process all key events
 // 			- add general media key handling (play/pause, previous, next, etc.)
 
 // Notes on terminology:
@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
 	private EditText etDirectInput;
 	private Button btnSubmit;
 	private EditText etManualInput;
-	private AlertDialog connectionWarningDialog;
 	private static View parentLayout;
 
 	private Set<Byte> modifiers;
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 		characterDevice = new CharacterDevice(getApplicationContext());
 
 		// Start thread to send keys
-		keySender = new KeySender(this);
+		keySender = new KeySender();
 		new Thread(keySender).start();
 
 		// Button sends text in manualInput TextView
@@ -169,16 +168,16 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		// Warns user if character device doesn't exist and shows a button to fix it
-		if (!new File("/dev/hidg0").exists()) { // If it doesn't exist
+		if (!CharacterDevice.characterDeviceExists(KEYBOARD_DEVICE_PATH)) { // If it doesn't exist
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Error: Nonexistent character device");
-			builder.setMessage("/dev/hidg0 does not exist, would you like for it to be created for you?\n\n" +
-					"Don't decline unless you would rather create it yourself and know how to do that.");
+			builder.setMessage(String.format("%s does not exist, would you like for it to be created for you?\n\n" +
+					"Don't decline unless you would rather create it yourself and know how to do that.", KEYBOARD_DEVICE_PATH));
 			builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int which) {
 					if (!characterDevice.createCharacterDevice()) {
 						Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
-					} else if (!characterDevice.fixCharacterDevicePermissions("/dev/hidg0")) {
+					} else if (!characterDevice.fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH)) {
 						Snackbar.make(parentLayout, "ERROR: Failed to fix character device permissions.", Snackbar.LENGTH_SHORT).show();
 					}
 					dialog.dismiss();
@@ -281,9 +280,15 @@ public class MainActivity extends AppCompatActivity {
 		Snackbar.make(parentLayout, message, length).show();
 	}
 
-	public static void makeFixPermissionsSnackbar() {
+	public static void makeFixKeyboardPermissionsSnackbar() {
 		Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
-		snackbar.setAction("FIX", v -> characterDevice.fixCharacterDevicePermissions("/dev/hidg0"));
+		snackbar.setAction("FIX", v -> characterDevice.fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH));
+		snackbar.show();
+	}
+
+	public static void makeFixMousePermissionsSnackbar() {
+		Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
+		snackbar.setAction("FIX", v -> characterDevice.fixCharacterDevicePermissions(MOUSE_DEVICE_PATH));
 		snackbar.show();
 	}
 
