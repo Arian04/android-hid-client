@@ -106,8 +106,8 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 
 * Rooted device running Android
   - The only supported root method is magisk (this is because `magiskpolicy` is used)
-	- Technically supported versions: 10 - 12
-	- Tested versions: 12
+  - Technically supported Android versions: 10 - 12
+  - Tested Android versions: 12
 * Soft Keyboard
 	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better support, more keys, and [less issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A%22soft+keyboard+issue%22+is%3Aclosed).
 	- Important Hacker's Keyboard settings to change: 
