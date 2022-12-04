@@ -37,8 +37,9 @@ import java.util.Set;
 
 import timber.log.Timber;
 
-// TODO: 	- Check if everything is properly explained in comments
-// 			- add general media key handling (play/pause, previous, next, etc.)
+// TODO:
+//  - Check if everything is properly explained in comments
+// 	- add general media key handling (play/pause, previous, next, etc.)
 
 // Notes on terminology:
 // 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
@@ -112,11 +113,13 @@ public class MainActivity extends AppCompatActivity {
 
 		// Listens for keys pressed while the "Direct Input" EditText is focused and adds them to
 		// the queue of keys
-		etDirectInput.setKeyListener(new KeyListener() {
+		etDirectInput.setOnKeyListener(new View.OnKeyListener() {
 			@Override
-			public boolean onKeyDown(View view, Editable editable, int i, KeyEvent keyEvent) {
-				Timber.d("onKeyDown DEBUG KEY: %s", keyEvent.getKeyCode());
-				int keyCode = keyEvent.getKeyCode();
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				if (event.getAction() != KeyEvent.ACTION_DOWN) {
+					return false;
+				}
+				Timber.d("onKey: %d", keyCode);
 
 				if (KeyEvent.isModifierKey(keyCode)) { // Handle modifier keys
 					byte modifier = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
@@ -132,21 +135,31 @@ public class MainActivity extends AppCompatActivity {
 				}
 				return true;
 			}
+		});
 
+		// For some reason, the onKeyListener doesn't work properly at all unless this is also set
+		// And if I try to use this instead of the onKeyListener, tab and enter don't work
+		etDirectInput.setKeyListener(new KeyListener() {
 			@Override
+			public boolean onKeyDown(View view, Editable editable, int i, KeyEvent keyEvent) {
+				Timber.d("onKeyDown DEBUG: %s", keyEvent.getKeyCode());
+				return true;
+			}
+
 			public boolean onKeyUp(View view, Editable editable, int i, KeyEvent keyEvent) {
 				return false;
 			}
-			@Override
+
 			public boolean onKeyOther(View view, Editable editable, KeyEvent keyEvent) {
 				return false;
 			}
-			@Override
+
 			public int getInputType() {
 				return 0;
 			}
-			@Override
-			public void clearMetaKeyState(View view, Editable editable, int i) {}
+
+			public void clearMetaKeyState(View view, Editable editable, int i) {
+			}
 		});
 
 		// Detect when Direct Input gets focus, since for some reason, the keyboard doesn't open
@@ -154,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
 		etDirectInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
-				if(hasFocus){
+				if (hasFocus) {
 					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 					etDirectInput.postDelayed(new Runnable() {
 						@Override
@@ -164,6 +177,22 @@ public class MainActivity extends AppCompatActivity {
 						}
 					}, 100);
 				}
+			}
+		});
+
+		// Sometimes the keyboard closes while focus is maintained, in which case, the above code
+		// won't work, so this works in that case
+		etDirectInput.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				etDirectInput.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						etDirectInput.requestFocus();
+						imm.showSoftInput(etDirectInput, 0);
+					}
+				}, 100);
 			}
 		});
 

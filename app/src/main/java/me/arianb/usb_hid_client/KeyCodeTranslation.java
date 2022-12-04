@@ -152,6 +152,7 @@ public abstract class KeyCodeTranslation {
 
 		keyEventKeys.put(61, "tab");
 		keyEventKeys.put(62, " ");
+		keyEventKeys.put(66, "\n"); // enter
 		keyEventKeys.put(67, "backspace");
 		keyEventKeys.put(111, "escape");
 		keyEventKeys.put(112, "delete");
