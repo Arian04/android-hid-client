@@ -105,6 +105,7 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 ### Prerequisites
 
 * Rooted device running Android
+  - The only supported root method is magisk (this is because `magiskpolicy` is used)
 	- Technically supported versions: 10 - 12
 	- Tested versions: 12
 * Soft Keyboard
