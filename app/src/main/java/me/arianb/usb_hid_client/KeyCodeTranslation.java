@@ -287,7 +287,6 @@ public abstract class KeyCodeTranslation {
 		hidKeyCodes.put("up", (byte) 0x52);
 		hidKeyCodes.put("num-lock", (byte) 0x53);
 
-
 		hidKeyCodes.put("volume-up", (byte) 0x80);
 		hidKeyCodes.put("volume-down", (byte) 0x81);
 	}
