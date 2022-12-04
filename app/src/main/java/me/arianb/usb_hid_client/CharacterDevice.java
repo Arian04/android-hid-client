@@ -79,7 +79,7 @@ public class CharacterDevice {
 		try {
 			// Get selinux context for app
 			String context;
-			final String appDataDir = appContext.getDataDir().getPath(); // ex: /data/data/me.arianb.usb_hid_client
+			final String appDataDir = appContext.getDataDir().getPath(); // ex: /data/user/0/me.arianb.usb_hid_client
 			Process getContextShell = Runtime.getRuntime().exec("su");
 			DataOutputStream getContextOS = new DataOutputStream(getContextShell.getOutputStream());
 			getContextOS.writeBytes("stat -c %C " + appDataDir + "\n");
