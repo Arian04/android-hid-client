@@ -41,14 +41,15 @@ public abstract class KeyCodeTranslation {
 		if (KeyCodeTranslation.isShiftedKey(key)) {
 			keyScanCodes[0] += 0x02; // Add left-shift modifier
 			key = shiftChars.get(key);
-		} else if(key.length() == 1 && Character.isUpperCase(key.charAt(0))) {
+		} else if (key.length() == 1 && Character.isUpperCase(key.charAt(0))) {
 			keyScanCodes[0] += 0x02; // Add left-shift modifier
 			key = key.toLowerCase();
 		}
 
 		// Convert key to HID code
-		if (hidKeyCodes.containsKey(key)) {
-			keyScanCodes[1] = hidKeyCodes.get(key);
+		Byte temp = hidKeyCodes.get(key);
+		if (temp != null) {
+			keyScanCodes[1] = temp;
 		} else {
 			Timber.e("key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
 			MainActivity.makeSnackbar("key: '" + key + "' is not supported.", Snackbar.LENGTH_SHORT);
