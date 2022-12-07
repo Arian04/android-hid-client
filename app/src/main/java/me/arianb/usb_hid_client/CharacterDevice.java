@@ -66,7 +66,7 @@ public class CharacterDevice {
 			createCharDeviceOS.flush();
 			createCharDeviceOS.writeBytes("exit" + "\n");
 			createCharDeviceOS.flush();
-			Timber.d("create dev script: stdout=%s,stderr=%s", getProcessStdOutput(createCharDeviceShell), getProcessStdError(createCharDeviceShell));
+			Timber.d("create device script: stdout=%s,stderr=%s", getProcessStdOutput(createCharDeviceShell), getProcessStdError(createCharDeviceShell));
 			// TODO: process timeout + check return code
 		} catch (IOException e) {
 			Timber.e(Log.getStackTraceString(e));
