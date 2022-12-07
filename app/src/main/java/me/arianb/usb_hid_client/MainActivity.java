@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -241,9 +240,11 @@ public class MainActivity extends AppCompatActivity {
 			Intent intent = new Intent(this, SettingsActivity.class);
 			startActivity(intent);
 		} else if (itemId == R.id.menuHelp) {
-			Toast.makeText(this, "help clicked", Toast.LENGTH_SHORT).show(); // TODO: help page
+			Intent intent = new Intent(this, HelpActivity.class);
+			startActivity(intent);
 		} else if (itemId == R.id.menuInfo) {
-			Toast.makeText(this, "info clicked", Toast.LENGTH_SHORT).show(); // TODO: info page
+			Intent intent = new Intent(this, InfoActivity.class);
+			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);
 	}
