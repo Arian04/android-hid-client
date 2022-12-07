@@ -122,15 +122,22 @@ public class MainActivity extends AppCompatActivity {
 				Timber.d("onKey: %d", keyCode);
 
 				if (KeyEvent.isModifierKey(keyCode)) { // Handle modifier keys
-					byte modifier = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
-					addModifier(modifier);
-					Timber.d("modifier: %s", modifier);
+					Byte temp = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
+					if (temp != null) {
+						byte modifier = temp;
+						addModifier(modifier);
+						Timber.d("modifier: %s", modifier);
+					} else {
+						Timber.e("either keyEventModifierKeys map does not contain keyCode (%d) or hidModifierCodes doesn't contain the result", keyCode);
+						return false;
+					}
 				} else { // Handle non-modifier keys
 					if (keyEventKeys.containsKey(keyCode)) {
 						convertKeyAndSendKey(keyCode);
 						Timber.d("key: %s", keyEventKeys.get(keyCode));
 					} else {
 						Snackbar.make(parentLayout, "That key is not supported yet, file a bug report", Snackbar.LENGTH_SHORT).show();
+						return false;
 					}
 				}
 				return true;
@@ -158,8 +165,7 @@ public class MainActivity extends AppCompatActivity {
 				return 0;
 			}
 
-			public void clearMetaKeyState(View view, Editable editable, int i) {
-			}
+			public void clearMetaKeyState(View view, Editable editable, int i) {}
 		});
 
 		// Detect when Direct Input gets focus, since for some reason, the keyboard doesn't open
@@ -246,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
 	private void convertKeyAndSendKey(int keyCode) {
 		// If key is volume (up or down) key and volume key passthrough is not enabled
 		// then increase phone volume like normal (must be done manually since KeyListener consumes it)
-		if( (keyCode == 24 || keyCode == 25) && !preferences.getBoolean("volume_button_passthrough", false) ) {
+		if ((keyCode == 24 || keyCode == 25) && !preferences.getBoolean("volume_button_passthrough", false)) {
 			Timber.d("volume key: %s", keyCode);
 			switch (keyCode) {
 				case 24: // Volume up
@@ -265,11 +271,11 @@ public class MainActivity extends AppCompatActivity {
 		// Sum all modifiers in modifiers Set
 		Iterator<Byte> modifiersIterator = modifiers.iterator();
 		byte modifiersSum = 0;
-		while(modifiersIterator.hasNext()) {
+		while (modifiersIterator.hasNext()) {
 			modifiersSum += modifiersIterator.next();
 		}
 
-		byte modifierHIDCode = (byte)(tempHIDCodes[0] + modifiersSum);
+		byte modifierHIDCode = (byte) (tempHIDCodes[0] + modifiersSum);
 		keySender.addKey(modifierHIDCode, keyHIDCode);
 		modifiers.clear();
 	}
@@ -282,11 +288,11 @@ public class MainActivity extends AppCompatActivity {
 		// Sum all modifiers in modifiers Set
 		Iterator<Byte> modifiersIterator = modifiers.iterator();
 		byte modifiersSum = 0;
-		while(modifiersIterator.hasNext()) {
+		while (modifiersIterator.hasNext()) {
 			modifiersSum += modifiersIterator.next();
 		}
 
-		byte modifierHIDCode = (byte)(tempHIDCodes[0] + modifiersSum);
+		byte modifierHIDCode = (byte) (tempHIDCodes[0] + modifiersSum);
 		keySender.addKey(modifierHIDCode, keyHIDCode);
 		modifiers.clear();
 	}

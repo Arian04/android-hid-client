@@ -34,8 +34,6 @@ public class SettingsActivity extends AppCompatActivity {
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.root_preferences, rootKey);
-
-			SwitchPreference clearInputSwitch = findPreference("clear_manual_input");
 		}
 	}
 

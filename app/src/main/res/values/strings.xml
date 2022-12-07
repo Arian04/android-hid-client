@@ -2,14 +2,10 @@
     <string name="app_name">USB HID Client</string>
     <string name="direct_input">Direct Input</string>
     <string name="manual_input">Manual Input</string>
-    <string name="default_output">No Output</string>
     <string name="send">Send</string>
-    <string name="logging_level">Logging Level</string>
     <string name="settings">Settings</string>
     <string name="help">Help</string>
     <string name="info">Info</string>
-    <string name="debug">Debug</string>
-    <string name="ignore">Ignore</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
     <!-- Preference Titles -->

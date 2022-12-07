@@ -54,6 +54,7 @@ public class CharacterDevice {
 			fos.close();
 		} catch (IOException e) {
 			Timber.e(Log.getStackTraceString(e));
+			return false;
 		}
 		File file = appContext.getFileStreamPath(SCRIPT_FILENAME);
 		file.setExecutable(true);
@@ -69,8 +70,8 @@ public class CharacterDevice {
 			// TODO: process timeout + check return code
 		} catch (IOException e) {
 			Timber.e(Log.getStackTraceString(e));
+			return false;
 		}
-
 		return true;
 	}
 
