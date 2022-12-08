@@ -7,7 +7,6 @@ import android.view.MenuItem;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SwitchPreference;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -16,7 +15,7 @@ public class SettingsActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.settings_activity);
 
-		setTitle("Settings");
+		setTitle(R.string.settings);
 
 		if (savedInstanceState == null) {
 			getSupportFragmentManager()
@@ -41,7 +40,6 @@ public class SettingsActivity extends AppCompatActivity {
 		// Make activity back button work
 		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
 		startActivity(intent);
-
 		return true;
 	}
 }
