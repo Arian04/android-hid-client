@@ -18,6 +18,7 @@ public class InfoActivity extends AppCompatActivity {
 
 		setTitle(R.string.info);
 
+		// Enable back button
 		ActionBar actionBar = getSupportActionBar();
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
