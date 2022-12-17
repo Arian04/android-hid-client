@@ -19,6 +19,6 @@
 
     <!-- Info Activity -->
     <string name="info_icon_description">App icon (Keyboard)</string>
-    <string name="info_description">Allows you to use your phone to fully emulate a USB keyboard without requiring any software on the connected device, allowing it to even work in the BIOS/UEFI of the connected device!</string>
+    <string name="info_description">This app allows you to use your phone to fully emulate a USB keyboard without requiring any software on the connected device, allowing it to even work in the BIOS/UEFI of the connected device!</string>
     <string name="info_source">The source code of the application is available <a href="https://github.com/Arian04/android-hid-client">here</a></string>
 </resources>
