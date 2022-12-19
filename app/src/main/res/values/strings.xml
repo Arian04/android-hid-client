@@ -1,6 +1,8 @@
 <resources>
+    <!-- Note: Remember to escape quotes, I forgot one time and Android Studio didn't give me a warning and I just got an unbelievably unhelpful build error -->
+
     <!-- Main Activity -->
-    <string name="app_name">USB HID Client</string>
+    <string name="app_name" translatable="false">USB HID Client</string>
     <string name="direct_input">Direct Input</string>
     <string name="manual_input">Manual Input</string>
     <string name="send">Send</string>
@@ -21,4 +23,14 @@
     <string name="info_icon_description">App icon (Keyboard)</string>
     <string name="info_description">This app allows you to use your phone to fully emulate a USB keyboard without requiring any software on the connected device, allowing it to even work in the BIOS/UEFI of the connected device!</string>
     <string name="info_source">The source code of the application is available <a href="https://github.com/Arian04/android-hid-client">here</a></string>
+
+    <!-- Help Activity -->
+    <string name="help_faq_q1">How do I report bugs or submit feature requests?</string>
+    <string name="help_faq_a1">You can create an issue <a href="https://github.com/Arian04/android-hid-client/issues">here</a>. Just make sure it hasn\'t already been reported.</string>
+
+    <string name="help_faq_q2">How do I use the app?</string>
+    <string name="help_faq_a2">Manual Input: Type into the textbox and click the "send" button when you\'re done, at which point the text will be typed into the connected device all at once.\n\nDirect Input: Type into the textbox and the keys will be relayed to the connected device in realtime.</string>
+
+    <string name="help_faq_q3">The app isn\'t working properly, how do I fix it?</string>
+    <string name="help_faq_a3">First, make sure your device satisfies all prerequisites listed <a href="https://github.com/Arian04/android-hid-client">here</a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report as explained above.</string>
 </resources>
