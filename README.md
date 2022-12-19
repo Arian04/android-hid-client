@@ -27,11 +27,10 @@
 <br />
 <div align="center">
   <a href="https://github.com/Arian04/android-hid-client">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" alt="App Icon" width="80" height="80">
   </a>
 
 <h3 align="center">USB HID Client</h3>
-
   <p align="center">
     Android app that allows you to easily use your phone as a keyboard
     <br />
@@ -72,14 +71,15 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[<img src="images/app-screenshot.png"
+[<img src="images/app-screenshot1.png"
 alt="Main screen"
-height="350">](images/app-screenshot.png)
+height="350">](images/app-screenshot1.png)
 [<img src="images/app-screenshot2.png"
-alt="Main screen with logs"
+alt="Main screen with menu open"
 height="350">](images/app-screenshot2.png)
-
-*UI subject to change since app isn't stable yet*
+[<img src="images/app-screenshot3.png"
+alt="Help screen with frequently asked questions"
+height="350">](images/app-screenshot3.png)
 
 This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a
 character device that allows your phone to send keys to a connected host device. It presents itself
@@ -221,5 +221,3 @@ Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
 [license-shield]: https://img.shields.io/github/license/Arian04/android-hid-client.svg?style=for-the-badge
 
 [license-url]: https://github.com/Arian04/android-hid-client/blob/master/LICENSE.txt
-
-[product-screenshot]: images/app-screenshot.png
