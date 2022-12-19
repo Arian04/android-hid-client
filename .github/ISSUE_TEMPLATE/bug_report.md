@@ -26,6 +26,7 @@ If applicable, add screenshots to help explain your problem.
 **Device details (please complete the following information):**
  - Device: [e.g. Google Pixel 5]
  - OS: [e.g. Android 12, LineageOS 19]
+ - Soft Keyboard: [e.g. Hacker's Keyboard]
  - Are You Rooted? [Yes/No]
  - Root Method: [e.g. Magisk] 
 
