@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain your problem.
  - Device: [e.g. Google Pixel 5]
  - OS: [e.g. Android 12, LineageOS 19]
  - Are You Rooted? [Yes/No]
-- Root Method: [e.g. Magisk] 
+ - Root Method: [e.g. Magisk] 
 
 **Additional context**
 Add any other context about the problem here.
