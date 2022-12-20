@@ -32,5 +32,5 @@
     <string name="help_faq_a2">Manual Input: Type into the textbox and click the "send" button when you\'re done, at which point the text will be typed into the connected device all at once.\n\nDirect Input: Type into the textbox and the keys will be relayed to the connected device in realtime.</string>
 
     <string name="help_faq_q3">The app isn\'t working properly, how do I fix it?</string>
-    <string name="help_faq_a3">First, make sure your device satisfies all prerequisites listed <a href="https://github.com/Arian04/android-hid-client">here</a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report as explained above.</string>
+    <string name="help_faq_a3">First, make sure your device satisfies all prerequisites listed <a href="https://github.com/Arian04/android-hid-client#prerequisites">here</a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report as explained above.</string>
 </resources>
