@@ -10,6 +10,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.USBHIDClient">
         <activity
+            android:name=".OnboardingActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".InfoActivity"
             android:exported="false">
             <meta-data

@@ -50,11 +50,12 @@ public class MainActivity extends AppCompatActivity {
 	private EditText etManualInput;
 	private static View parentLayout;
 
+	private SharedPreferences preferences;
+
+	// Contains modifiers of the current key as its being processed
 	private Set<Byte> modifiers;
 
 	private KeySender keySender;
-
-	private SharedPreferences preferences;
 
 	private AudioManager audioManager;
 
@@ -70,19 +71,31 @@ public class MainActivity extends AppCompatActivity {
 
 		setContentView(R.layout.activity_main);
 
+		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+		// If this is the first time the app has been opened, then show OnboardingActivity
+		if (!preferences.getBoolean("onboarding_done", false)) {
+			// Start OnboardingActivity
+			Intent intent = new Intent(this, OnboardingActivity.class);
+			startActivity(intent);
+
+			// TODO: create a "save settings/finish" button in SetupActivity and make it run this code
+			//SharedPreferences.Editor preferencesEditor = preferences.edit();
+			//preferencesEditor.putBoolean("onboarding_done", true);
+			//preferencesEditor.apply();
+		}
+
+		modifiers = new HashSet<>();
+
+		audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+
+		characterDevice = new CharacterDevice(getApplicationContext());
+
 		// Initialize UI elements
 		etDirectInput = findViewById(R.id.etDirectInput);
 		btnSubmit = findViewById(R.id.btnKeyboard);
 		etManualInput = findViewById(R.id.etManualInput);
 		parentLayout = findViewById(android.R.id.content);
-
-		modifiers = new HashSet<>();
-
-		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-
-		audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-
-		characterDevice = new CharacterDevice(getApplicationContext());
 
 		// Start thread to send keys
 		keySender = new KeySender();
