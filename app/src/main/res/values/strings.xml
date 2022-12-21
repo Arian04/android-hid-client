@@ -20,6 +20,11 @@
     <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
     <string name="automatically_create_character_device_title">Automatically create character device on boot</string>
     <string name="automatically_create_character_device_summary">The character device cannot persist between reboots, so it must be recreated. This setting allows it to be recreated automatically on every reboot.</string>
+    <string-array name="default_error_action">
+        <item>Ask Every Time</item>
+        <item>Fix</item>
+        <item>Ignore</item>
+    </string-array>
 
     <!-- Info Activity -->
     <string name="info_icon_description">App icon (Keyboard)</string>

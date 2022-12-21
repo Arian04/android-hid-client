@@ -16,6 +16,15 @@
             app:title="@string/automatically_create_character_device_title"
             app:summary="@string/automatically_create_character_device_summary" />
 
+        <DropDownPreference
+            app:defaultValue="Ask Every Time"
+            app:entries="@array/default_error_action"
+            app:entryValues="@array/default_error_action"
+            app:key="issue_prompt_action"
+            app:persistent="true"
+            app:title="Error Prompt Behavior"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

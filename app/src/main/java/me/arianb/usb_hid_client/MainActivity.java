@@ -210,26 +210,7 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		// Warns user if character device doesn't exist and shows a button to fix it
-		if (onboardingDone) {
-			if (!CharacterDevice.characterDeviceExists(KEYBOARD_DEVICE_PATH)) { // If it doesn't exist
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle("Error: Nonexistent character device");
-				builder.setMessage(String.format("%s does not exist, would you like for it to be created for you?\n\n" +
-						"Don't decline unless you would rather create it yourself and know how to do that.", KEYBOARD_DEVICE_PATH));
-				builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						if (!characterDevice.createCharacterDevice()) {
-							Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
-						}
-						dialog.dismiss();
-					}
-				});
-				builder.setNegativeButton("NO", null);
-				AlertDialog alert = builder.create();
-				alert.show();
-			}
-		}
+		promptUserIfNonExistentCharacterDevice(onboardingDone);
 	}
 
 	// method to inflate the options menu when
@@ -256,6 +237,40 @@ public class MainActivity extends AppCompatActivity {
 			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void promptUserIfNonExistentCharacterDevice(boolean onboardingDone) {
+		if (!onboardingDone) {
+			return;
+		}
+		String default_prompt_action_pref = preferences.getString("issue_prompt_action", "Ask Every Time");
+		if (default_prompt_action_pref.equals("Ignore")) {
+			return;
+		}
+		// Warns user if character device doesn't exist and shows a button to fix it
+		if (!CharacterDevice.characterDeviceExists(KEYBOARD_DEVICE_PATH)) { // If it doesn't exist
+			if (default_prompt_action_pref.equals("Fix")) {
+				if (!characterDevice.createCharacterDevice()) {
+					Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
+				}
+			} else { // If pref isn't "ignore" or "fix" then it's "ask every time", so ask
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("Error: Nonexistent character device");
+				builder.setMessage(String.format("%s does not exist, would you like for it to be created for you?\n\n" +
+						"Don't decline unless you would rather create it yourself and know how to do that.", KEYBOARD_DEVICE_PATH));
+				builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						if (!characterDevice.createCharacterDevice()) {
+							Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
+						}
+						dialog.dismiss();
+					}
+				});
+				builder.setNegativeButton("NO", null);
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
+		}
 	}
 
 	// Converts (int) KeyEvent code to (byte) key scan code and (byte) modifier scan code and add to queue
