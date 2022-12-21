@@ -35,5 +35,8 @@
     <string name="help_faq_a3">First, make sure your device satisfies all prerequisites listed <a href="https://github.com/Arian04/android-hid-client#prerequisites">here</a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report as explained above.</string>
 
     <!-- Onboarding Activity -->
-
+    <string name="onboarding_title">Before you start using the app…</string>
+    <string name="onboarding_create_character_device_description">Click here to create character device necessary to use the app. Only ignore this button if you really know what you\'re doing.</string>
+    <string name="onboarding_create_character_device_btn">Create</string>
+    <string name="onboarding_persistence_description">The character device will not persist on reboot. Should the app automatically recreate this on every boot for you?</string>
 </resources>

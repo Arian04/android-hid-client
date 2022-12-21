@@ -8,7 +8,7 @@
 
     <TextView
         android:id="@+id/tvOnboardingTitle"
-        android:text="Before you start using the app..."
+        android:text="@string/onboarding_title"
         android:textSize="@dimen/fontsize_large"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -27,7 +27,7 @@
         android:layout_marginStart="@dimen/margin_normal"
         android:layout_marginTop="@dimen/margin_normal"
         android:layout_marginEnd="@dimen/margin_normal"
-        android:text="Click here to create character device necessary to use the app. Only ignore this button if you really know what you're doing."
+        android:text="@string/onboarding_create_character_device_description"
         app:layout_constrainedWidth="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btnOnboardingCreateCharDevice"
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_normal"
-        android:text="Create"
+        android:text="@string/onboarding_create_character_device_btn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tvOnboardingCreateCharDevice"
         app:layout_constraintBottom_toBottomOf="@id/tvOnboardingCreateCharDevice" />
@@ -48,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_large"
-        android:text="The character device will not persist on reboot. Should the app automatically recreate this on every boot for you?"
+        android:text="@string/onboarding_persistence_description"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toStartOf="@id/btnOnboardingCreateCharDevice"
         app:layout_constraintStart_toStartOf="@id/tvOnboardingCreateCharDevice"
