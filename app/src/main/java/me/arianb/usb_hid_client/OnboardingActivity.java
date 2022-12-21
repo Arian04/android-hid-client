@@ -22,10 +22,7 @@ public class OnboardingActivity extends AppCompatActivity {
 		SwitchMaterial switchOnboardingCreateDeviceOnBoot = findViewById(R.id.switchOnboardingCreateDeviceOnBoot);
 		Button btnOnboardingContinue = findViewById(R.id.btnOnboardingContinue);
 
-		btnOnboardingCreateCharDevice.setOnClickListener(view -> {
-			CharacterDevice characterDevice = new CharacterDevice(getApplicationContext());
-			characterDevice.createCharacterDevice();
-		});
+		btnOnboardingCreateCharDevice.setOnClickListener(view -> MainActivity.characterDevice.createCharacterDevice());
 
 		switchOnboardingCreateDeviceOnBoot.setOnClickListener(view -> {
 			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

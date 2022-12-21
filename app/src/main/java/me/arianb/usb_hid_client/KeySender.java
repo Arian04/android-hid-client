@@ -1,6 +1,10 @@
 package me.arianb.usb_hid_client;
 
+import static me.arianb.usb_hid_client.CharacterDevice.KEYBOARD_DEVICE_PATH;
+import static me.arianb.usb_hid_client.CharacterDevice.MOUSE_DEVICE_PATH;
+
 import android.util.Log;
+import android.view.View;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -20,7 +24,10 @@ public class KeySender implements Runnable {
 	private static final ReentrantLock queueLock = new ReentrantLock(true);
 	private static final Condition queueNotEmptyCondition = queueLock.newCondition();
 
-	public KeySender() {
+	private final View parentLayout;
+
+	public KeySender(View parentLayout) {
+		this.parentLayout = parentLayout;
 		modQueue = new LinkedList<>();
 		keyQueue = new LinkedList<>();
 	}
@@ -76,19 +83,35 @@ public class KeySender implements Runnable {
 		} catch (IOException e) {
 			String stacktrace = Log.getStackTraceString(e);
 			if (stacktrace.toLowerCase().contains("errno 108")) {
-				MainActivity.makeSnackbar("ERROR: Your device seems to be disconnected. If not, try reseating the usb cable", Snackbar.LENGTH_LONG);
+				makeSnackbar("ERROR: Your device seems to be disconnected. If not, try reseating the usb cable", Snackbar.LENGTH_LONG);
 			} else if (stacktrace.toLowerCase().contains("permission denied")) {
 				if (device.equals(CharacterDevice.KEYBOARD_DEVICE_PATH)) {
-					MainActivity.makeFixKeyboardPermissionsSnackbar();
+					makeFixKeyboardPermissionsSnackbar();
 				} else if (device.equals(CharacterDevice.MOUSE_DEVICE_PATH)) {
-					MainActivity.makeFixMousePermissionsSnackbar();
+					makeFixMousePermissionsSnackbar();
 				} else {
 					Timber.e("ERROR: permission denied and writeHIDReport called with invalid device path");
 				}
 			} else {
-				MainActivity.makeSnackbar("ERROR: Failed to send key.", Snackbar.LENGTH_SHORT);
+				makeSnackbar("ERROR: Failed to send key.", Snackbar.LENGTH_SHORT);
 			}
 			Timber.e(stacktrace);
 		}
+	}
+
+	public void makeSnackbar(String message, int length) {
+		Snackbar.make(parentLayout, message, length).show();
+	}
+
+	public void makeFixKeyboardPermissionsSnackbar() {
+		Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
+		snackbar.setAction("FIX", v -> MainActivity.characterDevice.fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH));
+		snackbar.show();
+	}
+
+	public void makeFixMousePermissionsSnackbar() {
+		Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
+		snackbar.setAction("FIX", v -> MainActivity.characterDevice.fixCharacterDevicePermissions(MOUSE_DEVICE_PATH));
+		snackbar.show();
 	}
 }

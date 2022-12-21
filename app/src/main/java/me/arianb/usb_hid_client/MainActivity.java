@@ -1,14 +1,12 @@
 package me.arianb.usb_hid_client;
 
 import static me.arianb.usb_hid_client.CharacterDevice.KEYBOARD_DEVICE_PATH;
-import static me.arianb.usb_hid_client.CharacterDevice.MOUSE_DEVICE_PATH;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.convertKeyToScanCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.hidModifierCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventKeys;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventModifierKeys;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
@@ -44,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 	private EditText etDirectInput;
 	private Button btnSubmit;
 	private EditText etManualInput;
-	private static View parentLayout;
+	private View parentLayout;
 
 	private SharedPreferences preferences;
 
@@ -55,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private AudioManager audioManager;
 
-	private static CharacterDevice characterDevice;
+	public static CharacterDevice characterDevice;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
 		parentLayout = findViewById(android.R.id.content);
 
 		// Start thread to send keys
-		keySender = new KeySender();
+		keySender = new KeySender(parentLayout);
 		new Thread(keySender).start();
 
 		// Button sends text in manualInput TextView
@@ -117,35 +115,32 @@ public class MainActivity extends AppCompatActivity {
 
 		// Listens for keys pressed while the "Direct Input" EditText is focused and adds them to
 		// the queue of keys
-		etDirectInput.setOnKeyListener(new View.OnKeyListener() {
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if (event.getAction() != KeyEvent.ACTION_DOWN) {
+		etDirectInput.setOnKeyListener((v, keyCode, event) -> {
+			if (event.getAction() != KeyEvent.ACTION_DOWN) {
+				return false;
+			}
+			Timber.d("onKey: %d", keyCode);
+
+			if (KeyEvent.isModifierKey(keyCode)) { // Handle modifier keys
+				Byte temp = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
+				if (temp != null) {
+					byte modifier = temp;
+					addModifier(modifier);
+					Timber.d("modifier: %s", modifier);
+				} else {
+					Timber.e("either keyEventModifierKeys map does not contain keyCode (%d) or hidModifierCodes doesn't contain the result", keyCode);
 					return false;
 				}
-				Timber.d("onKey: %d", keyCode);
-
-				if (KeyEvent.isModifierKey(keyCode)) { // Handle modifier keys
-					Byte temp = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
-					if (temp != null) {
-						byte modifier = temp;
-						addModifier(modifier);
-						Timber.d("modifier: %s", modifier);
-					} else {
-						Timber.e("either keyEventModifierKeys map does not contain keyCode (%d) or hidModifierCodes doesn't contain the result", keyCode);
-						return false;
-					}
-				} else { // Handle non-modifier keys
-					if (keyEventKeys.containsKey(keyCode)) {
-						convertKeyAndSendKey(keyCode);
-						Timber.d("key: %s", keyEventKeys.get(keyCode));
-					} else {
-						Snackbar.make(parentLayout, "That key is not supported yet, file a bug report", Snackbar.LENGTH_SHORT).show();
-						return false;
-					}
+			} else { // Handle non-modifier keys
+				if (keyEventKeys.containsKey(keyCode)) {
+					convertKeyAndSendKey(keyCode);
+					Timber.d("key: %s", keyEventKeys.get(keyCode));
+				} else {
+					Snackbar.make(parentLayout, "That key is not supported yet, file a bug report", Snackbar.LENGTH_SHORT).show();
+					return false;
 				}
-				return true;
 			}
+			return true;
 		});
 
 		// For some reason, the onKeyListener doesn't work properly at all unless this is also set
@@ -174,36 +169,24 @@ public class MainActivity extends AppCompatActivity {
 
 		// Detect when Direct Input gets focus, since for some reason, the keyboard doesn't open
 		// when the EditText is focused after I made it use a KeyListener
-		etDirectInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				if (hasFocus) {
-					InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-					etDirectInput.postDelayed(new Runnable() {
-						@Override
-						public void run() {
-							etDirectInput.requestFocus();
-							imm.showSoftInput(etDirectInput, 0);
-						}
-					}, 100);
-				}
+		etDirectInput.setOnFocusChangeListener((v, hasFocus) -> {
+			if (hasFocus) {
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				etDirectInput.postDelayed(() -> {
+					etDirectInput.requestFocus();
+					imm.showSoftInput(etDirectInput, 0);
+				}, 100);
 			}
 		});
 
 		// Sometimes the keyboard closes while focus is maintained, in which case, the above code
 		// won't work, so this works in that case
-		etDirectInput.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-				etDirectInput.postDelayed(new Runnable() {
-					@Override
-					public void run() {
-						etDirectInput.requestFocus();
-						imm.showSoftInput(etDirectInput, 0);
-					}
-				}, 100);
-			}
+		etDirectInput.setOnClickListener(v -> {
+			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			etDirectInput.postDelayed(() -> {
+				etDirectInput.requestFocus();
+				imm.showSoftInput(etDirectInput, 0);
+			}, 100);
 		});
 
 		promptUserIfNonExistentCharacterDevice(onboardingDone);
@@ -254,13 +237,11 @@ public class MainActivity extends AppCompatActivity {
 				builder.setTitle("Error: Nonexistent character device");
 				builder.setMessage(String.format("%s does not exist, would you like for it to be created for you?\n\n" +
 						"Don't decline unless you would rather create it yourself and know how to do that.", KEYBOARD_DEVICE_PATH));
-				builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						if (!characterDevice.createCharacterDevice()) {
-							Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
-						}
-						dialog.dismiss();
+				builder.setPositiveButton("YES", (dialog, which) -> {
+					if (!characterDevice.createCharacterDevice()) {
+						Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
 					}
+					dialog.dismiss();
 				});
 				builder.setNegativeButton("NO", null);
 				AlertDialog alert = builder.create();
@@ -329,23 +310,4 @@ public class MainActivity extends AppCompatActivity {
 			modifiers.add(modifier);
 		}
 	}
-
-	// These are messy and I don't like it but I can't figure out another way to handle showing
-	// snackbars for errors within KeySender, if anyone is reading this and knows how, tell me please :)
-	public static void makeSnackbar(String message, int length) {
-		Snackbar.make(parentLayout, message, length).show();
-	}
-
-	public static void makeFixKeyboardPermissionsSnackbar() {
-		Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
-		snackbar.setAction("FIX", v -> characterDevice.fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH));
-		snackbar.show();
-	}
-
-	public static void makeFixMousePermissionsSnackbar() {
-		Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
-		snackbar.setAction("FIX", v -> characterDevice.fixCharacterDevicePermissions(MOUSE_DEVICE_PATH));
-		snackbar.show();
-	}
-
 }
