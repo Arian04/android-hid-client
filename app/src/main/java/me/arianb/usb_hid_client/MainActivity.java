@@ -268,6 +268,13 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		byte[] tempHIDCodes = convertKeyToScanCodes(keyEventKeys.get(keyCode));
+
+		// If convertKeyToScanCodes returns null then an error has occurred in translation
+		if (tempHIDCodes == null) {
+			Snackbar.make(parentLayout, "key: '" + keyEventKeys.get(keyCode) + "' is not supported.", Snackbar.LENGTH_SHORT).show();
+			return;
+		}
+
 		byte keyHIDCode = tempHIDCodes[1];
 
 		// Sum all modifiers in modifiers Set
