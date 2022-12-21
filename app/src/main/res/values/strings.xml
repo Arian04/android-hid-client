@@ -18,6 +18,8 @@
     <string name="clear_manual_input_title">Clear manual input text box on send</string>
     <string name="volume_button_passthrough_title">Volume button passthrough</string>
     <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
+    <string name="automatically_create_character_device_title">Automatically create character device on boot</string>
+    <string name="automatically_create_character_device_summary">The character device cannot persist between reboots, so it must be recreated. This setting allows it to be recreated automatically on every reboot.</string>
 
     <!-- Info Activity -->
     <string name="info_icon_description">App icon (Keyboard)</string>

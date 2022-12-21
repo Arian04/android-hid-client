@@ -1,5 +1,4 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="@string/misc_header">
 
@@ -10,7 +9,12 @@
         <SwitchPreference
             app:key="volume_button_passthrough"
             app:title="@string/volume_button_passthrough_title"
-            app:summary="@string/volume_button_passthrough_summary"/>
+            app:summary="@string/volume_button_passthrough_summary" />
+
+        <SwitchPreference
+            app:key="create_character_device_on_boot"
+            app:title="@string/automatically_create_character_device_title"
+            app:summary="@string/automatically_create_character_device_summary" />
 
     </PreferenceCategory>
 

@@ -72,7 +72,10 @@ public class CharacterDevice {
 			Timber.e(Log.getStackTraceString(e));
 			return false;
 		}
-		return true;
+		boolean returnVal;
+		returnVal = fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH);
+		//returnVal = returnVal && fixCharacterDevicePermissions(MOUSE_DEVICE_PATH);
+		return returnVal;
 	}
 
 	// TODO: add more error handling

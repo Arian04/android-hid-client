@@ -221,8 +221,6 @@ public class MainActivity extends AppCompatActivity {
 					public void onClick(DialogInterface dialog, int which) {
 						if (!characterDevice.createCharacterDevice()) {
 							Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
-						} else if (!characterDevice.fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH)) {
-							Snackbar.make(parentLayout, "ERROR: Failed to fix character device permissions.", Snackbar.LENGTH_SHORT).show();
 						}
 						dialog.dismiss();
 					}
