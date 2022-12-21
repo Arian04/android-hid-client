@@ -8,36 +8,11 @@
     tools:context=".MainActivity">
 
     <EditText
-        android:id="@+id/etDirectInput"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:ems="10"
-        android:hint="@string/direct_input"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        android:minHeight="48dp"
-        android:text=""
-        android:textColorHint="#757575"
-        app:layout_constraintStart_toStartOf="@+id/etManualInput"
-        app:layout_constraintTop_toBottomOf="@+id/etManualInput" />
-
-    <Button
-        android:id="@+id/btnKeyboard"
-        android:layout_width="82dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:text="@string/send"
-        app:layout_constraintStart_toEndOf="@+id/etManualInput"
-        app:layout_constraintTop_toTopOf="@+id/etManualInput"
-        tools:ignore="SpeakableTextPresentCheck" />
-
-    <EditText
         android:id="@+id/etManualInput"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_normal"
         android:autofillHints="emailAddress,name"
         android:ems="10"
         android:gravity="start|top"
@@ -47,5 +22,30 @@
         android:textColorHint="#757575"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnKeyboard"
+        android:layout_width="82dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:text="@string/send"
+        app:layout_constraintStart_toEndOf="@+id/etManualInput"
+        app:layout_constraintTop_toTopOf="@+id/etManualInput"
+        tools:ignore="SpeakableTextPresentCheck" />
+
+    <EditText
+        android:id="@+id/etDirectInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxlarge"
+        android:ems="10"
+        android:hint="@string/direct_input"
+        android:importantForAutofill="no"
+        android:inputType="textMultiLine"
+        android:minHeight="48dp"
+        android:text=""
+        android:textColorHint="#757575"
+        app:layout_constraintStart_toStartOf="@+id/etManualInput"
+        app:layout_constraintTop_toBottomOf="@+id/etManualInput" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
