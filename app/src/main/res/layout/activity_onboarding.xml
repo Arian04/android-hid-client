@@ -8,7 +8,7 @@
 
     <TextView
         android:id="@+id/tvOnboardingTitle"
-        android:text="@string/onboarding_title"
+        android:text="@string/onboarding_header"
         android:textSize="@dimen/fontsize_large"
         android:textStyle="bold"
         android:layout_width="wrap_content"
@@ -55,7 +55,7 @@
         app:layout_constraintTop_toBottomOf="@id/tvOnboardingCreateCharDevice" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/switch1"
+        android:id="@+id/switchOnboardingCreateDeviceOnBoot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/margin_xlarge"
@@ -63,4 +63,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tvOnboardingCreateDeviceOnBoot" />
 
+    <Button
+        android:id="@+id/btnOnboardingContinue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:layout_marginBottom="@dimen/margin_normal"
+        android:text="@string/onboarding_continue_btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

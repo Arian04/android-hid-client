@@ -74,15 +74,11 @@ public class MainActivity extends AppCompatActivity {
 		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 		// If this is the first time the app has been opened, then show OnboardingActivity
-		if (!preferences.getBoolean("onboarding_done", false)) {
+		boolean onboardingDone = preferences.getBoolean("onboarding_done", false);
+		if (!onboardingDone) {
 			// Start OnboardingActivity
 			Intent intent = new Intent(this, OnboardingActivity.class);
 			startActivity(intent);
-
-			// TODO: create a "save settings/finish" button in SetupActivity and make it run this code
-			//SharedPreferences.Editor preferencesEditor = preferences.edit();
-			//preferencesEditor.putBoolean("onboarding_done", true);
-			//preferencesEditor.apply();
 		}
 
 		modifiers = new HashSet<>();
@@ -215,24 +211,26 @@ public class MainActivity extends AppCompatActivity {
 		});
 
 		// Warns user if character device doesn't exist and shows a button to fix it
-		if (!CharacterDevice.characterDeviceExists(KEYBOARD_DEVICE_PATH)) { // If it doesn't exist
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Error: Nonexistent character device");
-			builder.setMessage(String.format("%s does not exist, would you like for it to be created for you?\n\n" +
-					"Don't decline unless you would rather create it yourself and know how to do that.", KEYBOARD_DEVICE_PATH));
-			builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					if (!characterDevice.createCharacterDevice()) {
-						Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
-					} else if (!characterDevice.fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH)) {
-						Snackbar.make(parentLayout, "ERROR: Failed to fix character device permissions.", Snackbar.LENGTH_SHORT).show();
+		if (onboardingDone) {
+			if (!CharacterDevice.characterDeviceExists(KEYBOARD_DEVICE_PATH)) { // If it doesn't exist
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("Error: Nonexistent character device");
+				builder.setMessage(String.format("%s does not exist, would you like for it to be created for you?\n\n" +
+						"Don't decline unless you would rather create it yourself and know how to do that.", KEYBOARD_DEVICE_PATH));
+				builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						if (!characterDevice.createCharacterDevice()) {
+							Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
+						} else if (!characterDevice.fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH)) {
+							Snackbar.make(parentLayout, "ERROR: Failed to fix character device permissions.", Snackbar.LENGTH_SHORT).show();
+						}
+						dialog.dismiss();
 					}
-					dialog.dismiss();
-				}
-			});
-			builder.setNegativeButton("NO", null);
-			AlertDialog alert = builder.create();
-			alert.show();
+				});
+				builder.setNegativeButton("NO", null);
+				AlertDialog alert = builder.create();
+				alert.show();
+			}
 		}
 	}
 
