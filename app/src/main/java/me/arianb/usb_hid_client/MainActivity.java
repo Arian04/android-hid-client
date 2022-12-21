@@ -36,10 +36,6 @@ import java.util.Set;
 
 import timber.log.Timber;
 
-// TODO:
-//  - Check if everything is properly explained in comments
-// 	- add general media key handling (play/pause, previous, next, etc.)
-
 // Notes on terminology:
 // 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
 // 		will be referred to as a "shifted" key. In the previous example, 2, 4, and ] would
