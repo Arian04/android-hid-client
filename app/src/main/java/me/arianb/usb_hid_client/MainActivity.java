@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 					convertKeyAndSendKey(keyCode);
 					Timber.d("key: %s", keyEventKeys.get(keyCode));
 				} else {
-					Snackbar.make(parentLayout, "That key is not supported yet, file a bug report", Snackbar.LENGTH_SHORT).show();
+					Snackbar.make(parentLayout, "That key (keycode " + keyCode + ") is not supported yet, file a bug report", Snackbar.LENGTH_SHORT).show();
 					return false;
 				}
 			}
@@ -274,8 +274,10 @@ public class MainActivity extends AppCompatActivity {
 			Snackbar.make(parentLayout, "key: '" + keyEventKeys.get(keyCode) + "' is not supported.", Snackbar.LENGTH_SHORT).show();
 			return;
 		}
-
 		byte keyHIDCode = tempHIDCodes[1];
+
+		// Add modifier to set (bypass toggle method because I don't want this to toggle it
+		modifiers.add(tempHIDCodes[0]);
 
 		// Sum all modifiers in modifiers Set
 		Iterator<Byte> modifiersIterator = modifiers.iterator();
@@ -284,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
 			modifiersSum += modifiersIterator.next();
 		}
 
-		byte modifierHIDCode = (byte) (tempHIDCodes[0] + modifiersSum);
+		byte modifierHIDCode = modifiersSum;
 		keySender.addKey(modifierHIDCode, keyHIDCode);
 		modifiers.clear();
 	}

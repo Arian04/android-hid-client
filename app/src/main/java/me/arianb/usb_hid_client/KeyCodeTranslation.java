@@ -127,6 +127,8 @@ public abstract class KeyCodeTranslation {
 		keyEventKeys.put(76, "/");
 		keyEventKeys.put(77, "@");
 
+		keyEventKeys.put(81, "+");
+
 		keyEventKeys.put(131, "f1");
 		keyEventKeys.put(132, "f2");
 		keyEventKeys.put(133, "f3");
