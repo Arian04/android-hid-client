@@ -47,7 +47,7 @@
         android:id="@+id/tvOnboardingCreateDeviceOnBoot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_large"
+        android:layout_marginTop="@dimen/margin_xxlarge"
         android:text="@string/onboarding_persistence_description"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toStartOf="@id/btnOnboardingCreateCharDevice"
@@ -62,6 +62,43 @@
         android:text=""
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tvOnboardingCreateDeviceOnBoot" />
+
+    <TextView
+        android:id="@+id/tvOnboardingErrorPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xxlarge"
+        android:text="@string/onboarding_onboarding_prompt_action_description"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@id/radioGroupErrorPromptAction"
+        app:layout_constraintStart_toStartOf="@id/tvOnboardingCreateDeviceOnBoot"
+        app:layout_constraintTop_toBottomOf="@id/tvOnboardingCreateDeviceOnBoot" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupErrorPromptAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvOnboardingErrorPrompt">
+
+        <RadioButton
+            android:id="@+id/radioErrorPromptAction_askEveryTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/error_action_ask_every_time" />
+
+        <RadioButton
+            android:id="@+id/radioErrorPromptAction_fix"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/error_action_fix" />
+
+        <RadioButton
+            android:id="@+id/radioErrorPromptAction_ignore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/error_action_ignore" />
+    </RadioGroup>
 
     <Button
         android:id="@+id/btnOnboardingContinue"

@@ -3,6 +3,7 @@ package me.arianb.usb_hid_client;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.RadioGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
@@ -20,6 +21,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
 		Button btnOnboardingCreateCharDevice = findViewById(R.id.btnOnboardingCreateCharDevice);
 		SwitchMaterial switchOnboardingCreateDeviceOnBoot = findViewById(R.id.switchOnboardingCreateDeviceOnBoot);
+		RadioGroup radioGroupErrorPromptAction = findViewById(R.id.radioGroupErrorPromptAction);
 		Button btnOnboardingContinue = findViewById(R.id.btnOnboardingContinue);
 
 		btnOnboardingCreateCharDevice.setOnClickListener(view -> MainActivity.characterDevice.createCharacterDevice());
@@ -29,6 +31,25 @@ public class OnboardingActivity extends AppCompatActivity {
 			SharedPreferences.Editor preferencesEditor = preferences.edit();
 			preferencesEditor.putBoolean("create_character_device_on_boot", switchOnboardingCreateDeviceOnBoot.isChecked());
 			preferencesEditor.apply();
+		});
+
+		radioGroupErrorPromptAction.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(RadioGroup radioGroup, int i) {
+				SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+				SharedPreferences.Editor preferencesEditor = preferences.edit();
+				if (i == R.id.radioErrorPromptAction_askEveryTime) {
+					preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ask_every_time));
+				} else if (i == R.id.radioErrorPromptAction_fix) {
+					preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_fix));
+				} else if (i == R.id.radioErrorPromptAction_ignore) {
+					preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ignore));
+				} else {
+					// i == -1
+					// All radio buttons are unchecked, so do nothing
+				}
+				preferencesEditor.apply();
+			}
 		});
 
 		btnOnboardingContinue.setOnClickListener(view -> {
