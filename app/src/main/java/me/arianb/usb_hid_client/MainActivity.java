@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
 	private void convertKeyAndSendKey(int keyCode) {
 		// If key is volume (up or down) key and volume key passthrough is not enabled
 		// then increase phone volume like normal (must be done manually since KeyListener consumes it)
-		if ((keyCode == 24 || keyCode == 25) && !preferences.getBoolean("volume_button_passthrough", false)) {
+		if ((keyCode == 24 || keyCode == 25) && preferences.getBoolean("volume_button_passthrough", false)) {
 			Timber.d("volume key: %s", keyCode);
 			switch (keyCode) {
 				case 24: // Volume up
