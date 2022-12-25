@@ -2,6 +2,7 @@ package me.arianb.usb_hid_client;
 
 import static me.arianb.usb_hid_client.CharacterDevice.KEYBOARD_DEVICE_PATH;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.convertKeyToScanCodes;
+import static me.arianb.usb_hid_client.KeyCodeTranslation.hidMediaKeyCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.hidModifierCodes;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventKeys;
 import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventModifierKeys;
@@ -252,16 +253,37 @@ public class MainActivity extends AppCompatActivity {
 
 	// Converts (int) KeyEvent code to (byte) key scan code and (byte) modifier scan code and add to queue
 	private void convertKeyAndSendKey(int keyCode) {
-		// If key is volume (up or down) key and volume key passthrough is not enabled
-		// then increase phone volume like normal (must be done manually since KeyListener consumes it)
-		if ((keyCode == 24 || keyCode == 25) && preferences.getBoolean("volume_button_passthrough", false)) {
+		// If key is volume (up or down) key
+		final int VOLUME_UP_KEYCODE = 24;
+		final int VOLUME_DOWN_KEYCODE = 25;
+		if ((keyCode == VOLUME_UP_KEYCODE || keyCode == VOLUME_DOWN_KEYCODE)) {
 			Timber.d("volume key: %s", keyCode);
 			switch (keyCode) {
-				case 24: // Volume up
-					audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+				case VOLUME_UP_KEYCODE:
+					// If volume btn passthrough enabled, then pass through volume key press
+					if (preferences.getBoolean("volume_button_passthrough", false)) {
+						Byte volumeUpScanCode = hidMediaKeyCodes.get("volume-up");
+						if (volumeUpScanCode != null) {
+							keySender.addKey((byte) 0, volumeUpScanCode, KeySender.MEDIA_KEY);
+						} else {
+							Timber.e("volume-up not found in hidMediaKeyCodes map");
+						}
+					} else { // else just raise phone volume like normal
+						audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+					}
 					break;
-				case 25: // Volume down
-					audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+				case VOLUME_DOWN_KEYCODE:
+					// If volume btn passthrough enabled, then pass through volume key press
+					if (preferences.getBoolean("volume_button_passthrough", false)) {
+						Byte volumeDownScanCode = hidMediaKeyCodes.get("volume-down");
+						if (volumeDownScanCode != null) {
+							keySender.addKey((byte) 0, volumeDownScanCode, KeySender.MEDIA_KEY);
+						} else {
+							Timber.e("volume-down not found in hidMediaKeyCodes map");
+						}
+					} else { // else just raise phone volume like normal
+						audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+					}
 					break;
 			}
 			return;
@@ -287,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		byte modifierHIDCode = modifiersSum;
-		keySender.addKey(modifierHIDCode, keyHIDCode);
+		keySender.addKey(modifierHIDCode, keyHIDCode, KeySender.STANDARD_KEY);
 		modifiers.clear();
 	}
 
@@ -304,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
 		}
 
 		byte modifierHIDCode = (byte) (tempHIDCodes[0] + modifiersSum);
-		keySender.addKey(modifierHIDCode, keyHIDCode);
+		keySender.addKey(modifierHIDCode, keyHIDCode, KeySender.STANDARD_KEY);
 		modifiers.clear();
 	}
 

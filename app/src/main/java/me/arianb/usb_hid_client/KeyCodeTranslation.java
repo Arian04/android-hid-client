@@ -10,18 +10,12 @@ import timber.log.Timber;
 // 		 current: keycode/char -> human-readable key -> hid code
 // 		 proposed: keycode/char -> hid code (comment: human-readable key)
 public abstract class KeyCodeTranslation {
-	// TODO: maybe make these private and add helper methods to do whatever needs to be done from other
-	// 		 classes to make this more abstract instead of the current mess which partially uses
-	// 		 helper methods and partially directly uses the maps
 	protected static final Map<Integer, String> keyEventModifierKeys;
 	protected static final Map<Integer, String> keyEventKeys;
 	protected static final Map<String, String> shiftChars;
 	protected static final Map<String, Byte> hidModifierCodes;
 	protected static final Map<String, Byte> hidKeyCodes;
-
-	public static boolean isShiftedKey(String key) {
-		return shiftChars.containsKey(key);
-	}
+	protected static final Map<String, Byte> hidMediaKeyCodes;
 
 	// Converts key to two scan codes
 	// First element in array is the scan code for the modifier
@@ -36,7 +30,7 @@ public abstract class KeyCodeTranslation {
 		}
 
 		// If key is shift + another key, add left-shift scan code
-		if (KeyCodeTranslation.isShiftedKey(key)) {
+		if (shiftChars.containsKey(key)) {
 			keyScanCodes[0] += 0x02; // Add left-shift modifier
 			key = shiftChars.get(key);
 		} else if (key.length() == 1 && Character.isUpperCase(key.charAt(0))) {
@@ -60,8 +54,9 @@ public abstract class KeyCodeTranslation {
 		keyEventModifierKeys = new HashMap<>();
 		keyEventKeys = new HashMap<>();
 		shiftChars = new HashMap<>();
-		hidKeyCodes = new HashMap<>();
 		hidModifierCodes = new HashMap<>();
+		hidMediaKeyCodes = new HashMap<>();
+		hidKeyCodes = new HashMap<>();
 
 		// Translate modifier keycodes into key
 		keyEventModifierKeys.put(113, "left-ctrl");
@@ -201,6 +196,13 @@ public abstract class KeyCodeTranslation {
 		hidModifierCodes.put("right-meta", (byte) 0x80);
 
 		// convert character to its HID scan code
+		hidMediaKeyCodes.put("next", (byte) 0xb5);
+		hidMediaKeyCodes.put("previous", (byte) 0xb6);
+		hidMediaKeyCodes.put("play-pause", (byte) 0xcd);
+		hidMediaKeyCodes.put("volume-up", (byte) 0xe9);
+		hidMediaKeyCodes.put("volume-down", (byte) 0xea);
+
+		// convert character to its HID scan code
 		hidKeyCodes.put("a", (byte) 0x04);
 		hidKeyCodes.put("b", (byte) 0x05);
 		hidKeyCodes.put("c", (byte) 0x06);
@@ -286,8 +288,5 @@ public abstract class KeyCodeTranslation {
 		hidKeyCodes.put("down", (byte) 0x51);
 		hidKeyCodes.put("up", (byte) 0x52);
 		hidKeyCodes.put("num-lock", (byte) 0x53);
-
-		hidKeyCodes.put("volume-up", (byte) 0x80);
-		hidKeyCodes.put("volume-down", (byte) 0x81);
 	}
 }

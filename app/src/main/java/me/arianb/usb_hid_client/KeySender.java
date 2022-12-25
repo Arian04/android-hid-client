@@ -18,8 +18,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import timber.log.Timber;
 
 public class KeySender implements Runnable {
+	// Constants that'll be passed in addKey to mark what type of key it is so I know which method
+	// to use to send it
+	public static final byte STANDARD_KEY = 0x01;
+	public static final byte MEDIA_KEY = 0x02;
+
 	private static Queue<Byte> modQueue;
 	private static Queue<Byte> keyQueue;
+	private static Queue<Byte> keyTypeQueue;
 
 	private static final ReentrantLock queueLock = new ReentrantLock(true);
 	private static final Condition queueNotEmptyCondition = queueLock.newCondition();
@@ -30,6 +36,7 @@ public class KeySender implements Runnable {
 		this.parentLayout = parentLayout;
 		modQueue = new LinkedList<>();
 		keyQueue = new LinkedList<>();
+		keyTypeQueue = new LinkedList<>();
 	}
 
 	@Override
@@ -47,37 +54,51 @@ public class KeySender implements Runnable {
 					queueLock.unlock();
 				}
 			}
-			sendKey(modQueue.remove(), keyQueue.remove());
+			sendKey(modQueue.remove(), keyQueue.remove(), keyTypeQueue.remove());
 			//Timber.d("sending key");
 			queueLock.unlock();
 		}
 	}
 
-	public void addKey(byte modifier, byte key) {
+	public void addKey(byte modifier, byte key, byte keyType) {
 		//Timber.d("trying to lock");
 		queueLock.lock();
 		modQueue.add(modifier);
 		keyQueue.add(key);
+		keyTypeQueue.add(keyType);
 		queueNotEmptyCondition.signal();
 		queueLock.unlock();
 		//Timber.d("unlocked");
 	}
 
-	public void sendKey(byte modifier, byte key) {
-		// Send key
-		writeHIDReport(CharacterDevice.KEYBOARD_DEVICE_PATH, modifier, key);
+	public void sendKey(byte modifier, byte key, byte keyType) {
+		switch (keyType) {
+			case STANDARD_KEY:
+				writeKeyHIDReport(modifier, key); // Send key
+				writeKeyHIDReport((byte) 0, (byte) 0); // Release key
+				break;
+			case MEDIA_KEY:
+				writeMediaHIDReport(key); // Send Key
+				writeMediaHIDReport((byte) 0); // Release key
+		}
+	}
 
-		// Release key
-		writeHIDReport(CharacterDevice.KEYBOARD_DEVICE_PATH, (byte) 0, (byte) 0);
+	// Writes HID reports for standard keys (a,b,%,@, etc.)
+	private void writeKeyHIDReport(byte modifier, byte key) {
+		//Timber.d("hid report: %s - %s", modifier, key);
+
+		byte[] report = new byte[]{(byte) 0x01, modifier, (byte) 0, key, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
+		writeHIDReport(KEYBOARD_DEVICE_PATH, report);
+	}
+
+	// Writes HID reports for media keys (play-pause,volume-up,volume-down, etc.)
+	public void writeMediaHIDReport(byte key) {
+		byte[] report = new byte[]{(byte) 0x02, key, (byte) 0x00};
+		writeHIDReport(KEYBOARD_DEVICE_PATH, report);
 	}
 
 	// Writes HID report to character device
-	// The modifier is first 2 bytes, the key gets the remaining 6 bytes (but they only ever use 1 byte each)
-	private void writeHIDReport(String device, byte modifier, byte key) {
-		Timber.d("hid report: %s - %s", modifier, key);
-
-		byte[] report = new byte[]{ modifier, (byte) 0, key, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
-
+	private void writeHIDReport(String device, byte[] report) {
 		try (FileOutputStream outputStream = new FileOutputStream(device)) {
 			outputStream.write(report);
 		} catch (IOException e) {
