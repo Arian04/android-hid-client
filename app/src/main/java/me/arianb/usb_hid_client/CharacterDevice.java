@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -113,13 +114,13 @@ public class CharacterDevice {
 
 			Process fixPermsShell = Runtime.getRuntime().exec("su");
 			DataOutputStream fixPermsOS = new DataOutputStream(fixPermsShell.getOutputStream());
-			fixPermsOS.writeBytes(String.format("chown %d:%d %s\n", appUID, appUID, device));
+			fixPermsOS.writeBytes(String.format(Locale.US, "chown %d:%d %s\n", appUID, appUID, device));
 			fixPermsOS.flush();
-			fixPermsOS.writeBytes(String.format("chmod 600 %s\n", device));
+			fixPermsOS.writeBytes(String.format(Locale.US, "chmod 600 %s\n", device));
 			fixPermsOS.flush();
 			fixPermsOS.writeBytes("magiskpolicy --live 'allow untrusted_app device chr_file { getattr open write }'" + "\n");
 			fixPermsOS.flush();
-			fixPermsOS.writeBytes(String.format("chcon u:object_r:device%s %s\n", context, device));
+			fixPermsOS.writeBytes(String.format(Locale.US, "chcon u:object_r:device%s %s\n", context, device));
 			fixPermsOS.flush();
 			fixPermsOS.writeBytes("exit" + "\n");
 			fixPermsOS.flush();
