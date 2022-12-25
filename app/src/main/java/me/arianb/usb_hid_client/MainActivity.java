@@ -120,6 +120,13 @@ public class MainActivity extends AppCompatActivity {
 			if (event.getAction() != KeyEvent.ACTION_DOWN) {
 				return false;
 			}
+
+			// keyCode 0 corresponds to KEYCODE_UNKNOWN which I obviously can't do anything with
+			// since I can't send an unknown key, so just ignore it
+			if (keyCode == 0) {
+				return false;
+			}
+
 			Timber.d("onKey: %d", keyCode);
 
 			if (KeyEvent.isModifierKey(keyCode)) { // Handle modifier keys
