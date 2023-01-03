@@ -33,23 +33,20 @@ public class OnboardingActivity extends AppCompatActivity {
 			preferencesEditor.apply();
 		});
 
-		radioGroupErrorPromptAction.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-			@Override
-			public void onCheckedChanged(RadioGroup radioGroup, int i) {
-				SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-				SharedPreferences.Editor preferencesEditor = preferences.edit();
-				if (i == R.id.radioErrorPromptAction_askEveryTime) {
-					preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ask_every_time));
-				} else if (i == R.id.radioErrorPromptAction_fix) {
-					preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_fix));
-				} else if (i == R.id.radioErrorPromptAction_ignore) {
-					preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ignore));
-				} else {
-					// i == -1
-					// All radio buttons are unchecked, so do nothing
-				}
-				preferencesEditor.apply();
+		radioGroupErrorPromptAction.setOnCheckedChangeListener((radioGroup, i) -> {
+			SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+			SharedPreferences.Editor preferencesEditor = preferences.edit();
+			if (i == R.id.radioErrorPromptAction_askEveryTime) {
+				preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ask_every_time));
+			} else if (i == R.id.radioErrorPromptAction_fix) {
+				preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_fix));
+			} else if (i == R.id.radioErrorPromptAction_ignore) {
+				preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ignore));
+			} else {
+				// i == -1
+				// All radio buttons are unchecked, so do nothing
 			}
+			preferencesEditor.apply();
 		});
 
 		btnOnboardingContinue.setOnClickListener(view -> {
