@@ -41,6 +41,7 @@ import timber.log.Timber;
 // 		be considered the "unshifted" keys.
 public class MainActivity extends AppCompatActivity {
 	private EditText etDirectInput;
+	@SuppressWarnings("FieldCanBeLocal") // Leaving it as is for organization purposes
 	private Button btnSubmit;
 	private EditText etManualInput;
 	private View parentLayout;
