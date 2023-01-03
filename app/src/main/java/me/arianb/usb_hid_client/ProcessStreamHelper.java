@@ -9,6 +9,7 @@ public abstract class ProcessStreamHelper {
 		BufferedReader stdInput = new BufferedReader(new
 				InputStreamReader(process.getInputStream()));
 		// Read the output from the command
+		//noinspection UnusedAssignment: I think explicitly setting = null makes the code clearer here
 		String s = null;
 		StringBuilder returnStr = new StringBuilder();
 		while ((s = stdInput.readLine()) != null) {
@@ -21,6 +22,7 @@ public abstract class ProcessStreamHelper {
 		BufferedReader stdError = new BufferedReader(new
 				InputStreamReader(process.getErrorStream()));
 		// Read any errors from the attempted command
+		//noinspection UnusedAssignment: I think explicitly setting = null makes the code clearer here
 		String s = null;
 		StringBuilder returnStr = new StringBuilder();
 		while ((s = stdError.readLine()) != null) {
