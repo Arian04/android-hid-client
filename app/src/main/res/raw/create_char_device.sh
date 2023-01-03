@@ -51,7 +51,7 @@ echo $config_name > strings/0x409/configuration
 ln -s ${usb_gadget_path}/functions/hid.keyboard ${configs_path}/hid.keyboard
 
 # Disable all gadgets
-find /config/usb_gadget/  -name UDC -type f -exec sh -c 'echo "" >  "$@"' _ {} \;
+find /config/usb_gadget/ -name UDC -type f -exec sh -c 'echo "" >  "$@"' _ {} \;
 
 # Enable this gadget
 echo "$udc" > ${usb_gadget_path}/UDC
