@@ -99,6 +99,14 @@ public class KeySender implements Runnable {
 
 	// Writes HID report to character device
 	private void writeHIDReport(String device, byte[] report) {
+		// Check if character device exists
+		if (!CharacterDevice.characterDeviceExists(KEYBOARD_DEVICE_PATH)) {
+			Timber.e("ERROR: Character device doesn't exist");
+			makeCreateKeyboardCharDeviceSnackbar();
+			return;
+		}
+
+		// Write HID report
 		try (FileOutputStream outputStream = new FileOutputStream(device)) {
 			outputStream.write(report);
 		} catch (IOException e) {
@@ -122,6 +130,12 @@ public class KeySender implements Runnable {
 
 	public void makeSnackbar(String message, int length) {
 		Snackbar.make(parentLayout, message, length).show();
+	}
+
+	public void makeCreateKeyboardCharDeviceSnackbar() {
+		Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device doesn't exist.", Snackbar.LENGTH_INDEFINITE);
+		snackbar.setAction("FIX", v -> MainActivity.characterDevice.createCharacterDevice());
+		snackbar.show();
 	}
 
 	public void makeFixKeyboardPermissionsSnackbar() {
