@@ -4,6 +4,7 @@ import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
 import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.DataOutputStream;
@@ -118,7 +119,11 @@ public class CharacterDevice {
 			fixPermsOS.flush();
 			fixPermsOS.writeBytes(String.format(Locale.US, "chmod 600 %s\n", device));
 			fixPermsOS.flush();
-			fixPermsOS.writeBytes("magiskpolicy --live 'allow untrusted_app device chr_file { getattr open write }'" + "\n");
+			if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) { // <= Android 12
+				fixPermsOS.writeBytes("magiskpolicy --live 'allow untrusted_app device chr_file { getattr open write }'" + "\n");
+			} else { // >= Android 13
+				fixPermsOS.writeBytes("magiskpolicy --live 'allow untrusted_app_30 device chr_file { getattr open write }'" + "\n");
+			}
 			fixPermsOS.flush();
 			fixPermsOS.writeBytes(String.format(Locale.US, "chcon u:object_r:device%s %s\n", context, device));
 			fixPermsOS.flush();

@@ -92,7 +92,7 @@ such as modifier and function keys).
 
 Disclaimer: This app requires your device to be rooted.
 
-Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
+Tested primarily on: Linux (Host computer) and Pixel 5 running Android 13.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -105,12 +105,14 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 12.
 ### Prerequisites
 
 * Rooted device running Android
-  - The only supported root method is magisk (this is because `magiskpolicy` is used)
-  - Technically supported Android versions: 10 - 12
-  - Tested Android versions: 12
+	- The only supported root method is magisk (this is because `magiskpolicy` is used)
+	- Tested Android versions: 13
 * Soft Keyboard
-	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better support, more keys, and [less issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A%22soft+keyboard+issue%22+is%3Aclosed).
-	- Important Hacker's Keyboard settings to change: 
+	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better
+	  support, more keys,
+	  and [less issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A%22soft+keyboard+issue%22+is%3Aclosed)
+	  .
+	- Important Hacker's Keyboard settings to change:
 		- `Key behavior settings > Ctrl key code = None (Ignored when not modifying other keys)`
 		- `Key behavior settings > Alt key code = None (Ignored when not modifying other keys)`
 		- `Key behavior settings > Meta key code = None (Ignored when not modifying other keys)`
