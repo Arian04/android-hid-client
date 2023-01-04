@@ -61,13 +61,13 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (BuildConfig.DEBUG) {
+		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+		if (BuildConfig.DEBUG || preferences.getBoolean("debug_mode", false)) {
 			Timber.plant(new Timber.DebugTree());
 		}
 
 		setContentView(R.layout.activity_main);
-
-		preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
 		// If this is the first time the app has been opened, then show OnboardingActivity
 		boolean onboardingDone = preferences.getBoolean("onboarding_done", false);

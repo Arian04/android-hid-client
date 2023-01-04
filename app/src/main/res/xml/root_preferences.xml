@@ -22,9 +22,22 @@
             app:entryValues="@array/default_error_action"
             app:key="issue_prompt_action"
             app:persistent="true"
-            app:title="Error Prompt Behavior"
+            app:title="Error prompt behavior"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>
 
+    <PreferenceCategory app:title="@string/debug_header">
+
+        <SwitchPreference
+            app:key="@string/debug_mode_key"
+            app:title="@string/debug_mode_title"
+            app:summary="@string/debug_mode_summary" />
+
+        <Preference
+            app:title="@string/export_debug_logs_btn_title"
+            app:summary="@string/export_debug_logs_btn_summary"
+            app:key="@string/export_debug_logs_btn_key" />
+
+    </PreferenceCategory>
 </PreferenceScreen>

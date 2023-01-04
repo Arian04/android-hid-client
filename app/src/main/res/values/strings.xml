@@ -13,6 +13,7 @@
     <!-- Settings Activity -->
     <!-- Preference Titles -->
     <string name="misc_header">Misc</string>
+    <string name="debug_header">Debug</string>
 
     <!-- Preferences -->
     <string name="clear_manual_input_title">Clear manual input text box on send</string>
@@ -28,6 +29,14 @@
         <item>@string/error_action_fix</item>
         <item>@string/error_action_ignore</item>
     </string-array>
+
+    <string name="debug_mode_title">Debug mode</string>
+    <string name="debug_mode_summary">Enable logging messages for debugging</string>
+    <string name="debug_mode_key">debug_mode</string>
+
+    <string name="export_debug_logs_btn_title">Export debug logs</string>
+    <string name="export_debug_logs_btn_summary">Make sure to enable debug mode prior to exporting logs.\n\nThis should only be needed if a developer requests for you to provide logs.</string>
+    <string name="export_debug_logs_btn_key">export debug logs button</string>
 
     <!-- Info Activity -->
     <string name="info_icon_description">App icon (Keyboard)</string>
