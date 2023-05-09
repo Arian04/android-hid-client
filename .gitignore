@@ -16,3 +16,4 @@
 local.properties
 
 /app/release # exclude release build of app
+/.idea/git_toolbox_prj.xml # Plugin config
