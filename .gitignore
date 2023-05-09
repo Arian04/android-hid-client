@@ -15,5 +15,8 @@
 .cxx
 local.properties
 
-/app/release # exclude release build of app
-/.idea/git_toolbox_prj.xml # Plugin config
+# exclude release build of app
+/app/release
+
+# Plugin config
+/.idea/git_toolbox_prj.xml
