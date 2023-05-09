@@ -32,11 +32,11 @@ public class CharacterDevice {
 		appUID = context.getApplicationInfo().uid;
 	}
 
-	public static boolean characterDeviceExists(String charDevicePath) {
+	public static boolean characterDeviceMissing(String charDevicePath) {
 		if (!(charDevicePath.equals(KEYBOARD_DEVICE_PATH) || charDevicePath.equals(MOUSE_DEVICE_PATH))) {
-			return false;
+			return true;
 		}
-		return new File(CharacterDevice.KEYBOARD_DEVICE_PATH).exists();
+		return !new File(CharacterDevice.KEYBOARD_DEVICE_PATH).exists();
 	}
 
 	// TODO: add more error handling
@@ -119,6 +119,7 @@ public class CharacterDevice {
 			fixPermsOS.flush();
 			fixPermsOS.writeBytes(String.format(Locale.US, "chmod 600 %s\n", device));
 			fixPermsOS.flush();
+			// Need to look into this issue a little more with multiple devices on different android versions
 			if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S) { // <= Android 12
 				fixPermsOS.writeBytes("magiskpolicy --live 'allow untrusted_app device chr_file { getattr open write }'" + "\n");
 			} else { // >= Android 13

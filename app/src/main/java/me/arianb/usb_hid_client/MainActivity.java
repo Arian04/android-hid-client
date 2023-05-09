@@ -236,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
 			return;
 		}
 		// Warns user if character device doesn't exist and shows a button to fix it
-		if (!CharacterDevice.characterDeviceExists(KEYBOARD_DEVICE_PATH)) { // If it doesn't exist
+		if (CharacterDevice.characterDeviceMissing(KEYBOARD_DEVICE_PATH)) { // If it doesn't exist
 			if (default_prompt_action_pref.equals("Fix")) {
 				if (!characterDevice.createCharacterDevice()) {
 					Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();

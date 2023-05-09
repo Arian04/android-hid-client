@@ -99,8 +99,9 @@ public class KeySender implements Runnable {
 
 	// Writes HID report to character device
 	private void writeHIDReport(String device, byte[] report) {
+		// TODO generalize this to make it work with other character devices
 		// Check if character device exists
-		if (!CharacterDevice.characterDeviceExists(KEYBOARD_DEVICE_PATH)) {
+		if (CharacterDevice.characterDeviceMissing(KEYBOARD_DEVICE_PATH)) {
 			Timber.e("ERROR: Character device doesn't exist");
 			makeCreateKeyboardCharDeviceSnackbar();
 			return;
