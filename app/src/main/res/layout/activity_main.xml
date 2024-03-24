@@ -48,4 +48,21 @@
         app:layout_constraintStart_toStartOf="@+id/etManualInput"
         app:layout_constraintTop_toBottomOf="@+id/etManualInput" />
 
+    <TextView
+        android:id="@+id/tvTouchpad"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/darker_gray"
+        android:fadingEdge="vertical"
+        android:gravity="center"
+        android:text="Touchpad"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etDirectInput" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

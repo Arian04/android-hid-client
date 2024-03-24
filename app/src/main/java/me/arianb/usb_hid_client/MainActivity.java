@@ -41,6 +41,9 @@ import java.util.Set;
 import me.arianb.usb_hid_client.hid_utils.CharacterDevice;
 import timber.log.Timber;
 
+// TODO: README updates
+//  - mention mouse support instead of only keyboard
+
 // Notes on terminology:
 // 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
 // 		will be referred to as a "shifted" key. In the previous example, 2, 4, and ] would
@@ -52,15 +55,21 @@ public class MainActivity extends AppCompatActivity {
     private EditText etManualInput;
     private View parentLayout;
 
+    private TextView touchpad;
+    private VelocityTracker mVelocityTracker = null;
+
     private SharedPreferences preferences;
 
     // Contains modifiers of the current key as its being processed
     private Set<Byte> modifiers;
 
     private KeySender keySender;
+    private MouseSender mouseSender;
 
     public static CharacterDevice characterDevice;
 
+    // TODO: address this linting issue
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,10 +99,13 @@ public class MainActivity extends AppCompatActivity {
         btnSubmit = findViewById(R.id.btnKeyboard);
         etManualInput = findViewById(R.id.etManualInput);
         parentLayout = findViewById(android.R.id.content);
+        touchpad = findViewById(R.id.tvTouchpad);
 
-        // Start thread to send keys
+        // Start threads to send key and mouse events
         keySender = new KeySender(parentLayout);
         new Thread(keySender).start();
+        mouseSender = new MouseSender(parentLayout);
+        new Thread(mouseSender).start();
 
         // Button sends text in manualInput TextView
         btnSubmit.setOnClickListener(v -> {
@@ -171,13 +183,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public boolean onKeyDown(View view, Editable editable, int i, KeyEvent keyEvent) { return false;}
+            public boolean onKeyDown(View view, Editable editable, int i, KeyEvent keyEvent) {return false;}
 
             @Override
-            public boolean onKeyUp(View view, Editable editable, int i, KeyEvent keyEvent) { return false;}
+            public boolean onKeyUp(View view, Editable editable, int i, KeyEvent keyEvent) {return false;}
 
             @Override
-            public boolean onKeyOther(View view, Editable editable, KeyEvent keyEvent) { return false;}
+            public boolean onKeyOther(View view, Editable editable, KeyEvent keyEvent) {return false;}
 
             @Override
             public void clearMetaKeyState(View view, Editable editable, int i) {}
@@ -203,6 +215,102 @@ public class MainActivity extends AppCompatActivity {
                 etDirectInput.requestFocus();
                 imm.showSoftInput(etDirectInput, 0);
             }, 100);
+        });
+
+        // TODO: on double click and drag, send report without "release" until sending release on finger up
+        GestureDetectorCompat gestureDetector = new GestureDetectorCompat(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onSingleTapConfirmed(@NonNull MotionEvent event) {
+                Timber.d("onSingleTapConfirmed: %s", event);
+
+                byte button = MouseSender.MOUSE_BUTTON_LEFT;
+                mouseSender.addReport(button, (byte) 0, (byte) 0);
+
+                return true;
+            }
+        });
+
+        touchpad.setOnTouchListener((view, motionEvent) -> {
+            if (gestureDetector.onTouchEvent(motionEvent)) {
+                return true;
+            }
+
+            int index = motionEvent.getActionIndex();
+            int action = motionEvent.getActionMasked();
+            int pointerId = motionEvent.getPointerId(index);
+            byte button; // unknown at this point
+
+            Timber.d("motionEvent %d (x, y): (%f, %f)", action, motionEvent.getX(), motionEvent.getY());
+
+            switch (action) {
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    final int POINTER_COUNT = motionEvent.getPointerCount();
+                    Timber.d("omg there's %d pointers!!!", POINTER_COUNT);
+
+                    switch (POINTER_COUNT) {
+                        case 2:
+                            button = MouseSender.MOUSE_BUTTON_RIGHT;
+                            mouseSender.addReport(button, (byte) 0, (byte) 0);
+                            break;
+//                            case 3: // FIXME: apparently, case 2 gets triggered right before case 3 gets triggered, gotta add a little timeout ig to differentiate
+//                                button = MouseSender.MOUSE_BUTTON_MIDDLE;
+//                                mouseSender.addReport(button, (byte) 0, (byte) 0);
+//                                break;
+                    }
+
+                    break;
+                case MotionEvent.ACTION_DOWN:
+                    if (mVelocityTracker == null) {
+                        // Retrieve a new VelocityTracker object to watch the velocity of a motion.
+                        mVelocityTracker = VelocityTracker.obtain();
+                    } else {
+                        // Reset the velocity tracker back to its initial state.
+                        mVelocityTracker.clear();
+                    }
+                    // Add a user's movement to the tracker.
+                    mVelocityTracker.addMovement(motionEvent);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mVelocityTracker.addMovement(motionEvent);
+
+                    // Compute velocity (cap it to byte because the report uses a byte per axis)
+                    mVelocityTracker.computeCurrentVelocity(10, Byte.MAX_VALUE);
+                    float xVelocity = mVelocityTracker.getXVelocity(pointerId);
+                    float yVelocity = mVelocityTracker.getYVelocity(pointerId);
+                    Timber.d("X,Y velocity: (%s,%s)", xVelocity, yVelocity);
+
+                    // Scale up velocities < 1 in magnitude (accounting for deadzone) to allow for precise movements
+                    final double DEADZONE = 0.3;
+                    if (Math.abs(xVelocity) != 0 && Math.abs(xVelocity) > DEADZONE) {
+                        if (xVelocity < 0) {
+                            xVelocity = (float) Math.floor(xVelocity);
+                        } else {
+                            xVelocity = (float) Math.ceil(xVelocity);
+                        }
+                    }
+                    if (Math.abs(yVelocity) != 0 && Math.abs(yVelocity) > DEADZONE) {
+                        if (yVelocity < 0) {
+                            yVelocity = (float) Math.floor(yVelocity);
+                        } else {
+                            yVelocity = (float) Math.ceil(yVelocity);
+                        }
+                    }
+
+                    // No button clicked (not handled in this section of code)
+                    button = MouseSender.MOUSE_BUTTON_NONE;
+                    byte x = (byte) xVelocity;
+                    byte y = (byte) yVelocity;
+                    Timber.d("NEW X,Y velocity: (%s,%s)", x, y);
+
+                    mouseSender.addReport(button, x, y);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_POINTER_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    break;
+            }
+            return true;
+
         });
 
         if (onboardingDone) {

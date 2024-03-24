@@ -19,7 +19,7 @@ import timber.log.Timber;
 public class CharacterDevice {
     // character device paths
     public static final String KEYBOARD_DEVICE_PATH = "/dev/hidg0";
-    public static final String MOUSE_DEVICE_PATH = "/dev/hidg1"; // TODO: implement this
+    public static final String MOUSE_DEVICE_PATH = "/dev/hidg1";
 
     private final Context appContext;
     private final int appUID;
