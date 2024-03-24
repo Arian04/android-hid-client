@@ -136,8 +136,8 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
 
-            // keyCode 0 corresponds to KEYCODE_UNKNOWN which I obviously can't do anything with, so
-            // just ignore it
+            // keyCode 0 corresponds to KEYCODE_UNKNOWN which I obviously can't do anything with
+            // since I can't send an unknown key, so just ignore it
             if (keyCode == 0) {
                 return false;
             }
@@ -145,9 +145,8 @@ public class MainActivity extends AppCompatActivity {
             Timber.d("onKey: %d", keyCode);
 
             if (KeyEvent.isModifierKey(keyCode)) { // Handle modifier keys
-                Byte temp = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
-                if (temp != null) {
-                    byte modifier = temp;
+                Byte modifier = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
+                if (modifier != null) {
                     toggleModifier(modifier);
                     Timber.d("modifier: %s", modifier);
                 } else {
@@ -195,8 +194,7 @@ public class MainActivity extends AppCompatActivity {
             public void clearMetaKeyState(View view, Editable editable, int i) {}
         });
 
-        // Detect when Direct Input gets focus, since for some reason, the keyboard doesn't open
-        // when the EditText is focused after I made it use a KeyListener
+        // Show soft keyboard when Direct Input gets focus
         etDirectInput.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -346,16 +344,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void promptUserIfNonExistentCharacterDevice() {
         String default_prompt_action_pref = preferences.getString("issue_prompt_action", "Ask Every Time");
-        if (default_prompt_action_pref.equals("Ignore")) {
-            return;
-        }
         // Warns user if character device doesn't exist and shows a button to fix it
-        if (CharacterDevice.characterDeviceMissing(KEYBOARD_DEVICE_PATH)) { // If it doesn't exist
+        if (CharacterDevice.characterDeviceMissing(KEYBOARD_DEVICE_PATH)) {
             if (default_prompt_action_pref.equals("Fix")) {
                 if (!characterDevice.createCharacterDevice()) {
                     Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
                 }
-            } else { // If pref isn't "ignore" or "fix" then it's "ask every time", so ask
+            } else { // If pref isn't "fix" then it's "ask every time", so ask
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Error: Nonexistent character device");
                 builder.setMessage(String.format("%s does not exist, would you like for it to be created for you?\n\n" +
