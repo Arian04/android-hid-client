@@ -82,6 +82,14 @@ public abstract class KeyCodeTranslation {
         keyEventKeys.put(17, "*");
         keyEventKeys.put(18, "#");
 
+        keyEventKeys.put(19, "up");
+        keyEventKeys.put(20, "down");
+        keyEventKeys.put(21, "left");
+        keyEventKeys.put(22, "right");
+
+        keyEventKeys.put(24, "volume-up");
+        keyEventKeys.put(25, "volume-down");
+
         keyEventKeys.put(29, "a");
         keyEventKeys.put(30, "b");
         keyEventKeys.put(31, "c");
@@ -137,14 +145,6 @@ public abstract class KeyCodeTranslation {
         keyEventKeys.put(141, "f11");
         keyEventKeys.put(142, "f12");
 
-        keyEventKeys.put(19, "up");
-        keyEventKeys.put(20, "down");
-        keyEventKeys.put(21, "left");
-        keyEventKeys.put(22, "right");
-
-        keyEventKeys.put(24, "volume-up");
-        keyEventKeys.put(25, "volume-down");
-
         keyEventKeys.put(61, "tab");
         keyEventKeys.put(62, " ");
         keyEventKeys.put(66, "\n"); // enter
@@ -195,7 +195,7 @@ public abstract class KeyCodeTranslation {
         hidModifierCodes.put("right-alt", (byte) 0x40);
         hidModifierCodes.put("right-meta", (byte) 0x80);
 
-        // convert character to its HID scan code
+        // convert media key name to its HID scan code
         hidMediaKeyCodes.put("next", (byte) 0xb5);
         hidMediaKeyCodes.put("previous", (byte) 0xb6);
         hidMediaKeyCodes.put("play-pause", (byte) 0xcd);

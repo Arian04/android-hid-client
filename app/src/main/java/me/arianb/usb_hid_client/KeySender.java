@@ -19,7 +19,7 @@ import timber.log.Timber;
 
 public class KeySender implements Runnable {
     // Constants that'll be passed in addKey to mark what type of key it is so I know which method
-    // to use to send it
+    // to use to send it. They are also the respective report IDs.
     public static final byte STANDARD_KEY = 0x01;
     public static final byte MEDIA_KEY = 0x02;
 
