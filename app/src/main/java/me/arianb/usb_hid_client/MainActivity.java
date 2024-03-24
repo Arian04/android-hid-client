@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 Byte temp = hidModifierCodes.get(keyEventModifierKeys.get(keyCode));
                 if (temp != null) {
                     byte modifier = temp;
-                    addModifier(modifier);
+                    toggleModifier(modifier);
                     Timber.d("modifier: %s", modifier);
                 } else {
                     Timber.e("either keyEventModifierKeys map does not contain keyCode (%d) or hidModifierCodes doesn't contain the result", keyCode);
@@ -352,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
     // In other words, if the modifier is in the set, remove it, if the modifier isn't, add it.
     // The purpose of this is so that when modifiers are pressed a second time, they get unselected
     // ex: User is using Hacker's keyboard and clicks ctrl key, then clicks it again to toggle it off
-    private void addModifier(byte modifier) {
+    private void toggleModifier(byte modifier) {
         if (modifiers.contains(modifier)) {
             modifiers.remove(modifier);
         } else {
