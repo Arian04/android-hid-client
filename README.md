@@ -105,8 +105,11 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 13.
 ### Prerequisites
 
 * Rooted device running Android
-	- The only supported root method is magisk (this is because `magiskpolicy` is used)
-	- Tested Android versions: 13
+	- Only specific root methods are supported, because I need to patch SELinux policy at runtime and am using provided tools to do so.
+      if your root method isn't on this list and provides a method for live-patching SELinux policy, feel free to create an issue.
+      - Magisk: `magiskpolicy`
+      - KernelSU: `ksud sepolicy patch`
+	- Android version that I currently test with: 14
 * Soft Keyboard
 	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better
 	  support, more keys,

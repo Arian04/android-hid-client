@@ -15,13 +15,11 @@ import androidx.preference.SwitchPreference;
 
 import com.google.android.material.snackbar.Snackbar;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
-import me.arianb.usb_hid_client.shell_utils.ProcessStreamHelper;
+import me.arianb.usb_hid_client.shell_utils.ShellCommand;
 import timber.log.Timber;
 
 public class SettingsActivity extends AppCompatActivity {
@@ -63,31 +61,16 @@ public class SettingsActivity extends AppCompatActivity {
                             // Using root to get logs instead of just $(logcat) because it was prompting
                             // the user asking for permission to view logs and I don't feel that's necessary
                             // and we already have root permissions so why not
-                            final String LOG_CONTENT;
-                            Process getLogsShell = Runtime.getRuntime().exec("su");
-                            DataOutputStream getLogsOS = new DataOutputStream(getLogsShell.getOutputStream());
-                            getLogsOS.writeBytes(String.format("logcat -d --pid=$(pidof -s %s)", BuildConfig.APPLICATION_ID) + "\n");
-                            getLogsOS.flush();
-                            getLogsOS.writeBytes("exit" + "\n");
-                            getLogsOS.flush();
+                            ShellCommand getLogsCommand = ShellCommand.runAsRoot(String.format("logcat -d --pid=$(pidof -s %s)", BuildConfig.APPLICATION_ID));
 
-                            // Error checking for getting logs
-                            if (!getLogsShell.waitFor(1000, TimeUnit.MILLISECONDS)) {
-                                String errorMessage = "Process timed out while getting logs";
-                                Timber.e(errorMessage);
-                                Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_LONG).show();
-                                getLogsShell.destroy();
-                                return;
-                            }
-                            String stderr = ProcessStreamHelper.getProcessStdError(getLogsShell);
-                            String stdout = ProcessStreamHelper.getProcessStdOutput(getLogsShell);
+                            final String stderr = getLogsCommand.stderr();
+                            final String LOG_CONTENT = getLogsCommand.stdout();;
                             if (!stderr.isEmpty()) {
                                 String errorMessage = "Error occurred while getting logs";
                                 Timber.e(errorMessage + ": " + stderr);
                                 Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_LONG).show();
                                 return;
                             }
-                            LOG_CONTENT = stdout;
 
                             // Write out file
                             OutputStream output = SettingsFragment.this.requireContext().getContentResolver().openOutputStream(uri);
@@ -95,9 +78,8 @@ public class SettingsActivity extends AppCompatActivity {
                             output.flush();
                             output.close();
                             Timber.d("Successfully exported logs");
-                        } catch (IOException e) {
-                            Timber.e("Error occurred while exporting logs: %s", Log.getStackTraceString(e));
-                        } catch (InterruptedException e) {
+                        } catch (IOException | InterruptedException e) {
+                            Timber.e("Error occurred while exporting logs");
                             Timber.e(Log.getStackTraceString(e));
                         }
                     });
