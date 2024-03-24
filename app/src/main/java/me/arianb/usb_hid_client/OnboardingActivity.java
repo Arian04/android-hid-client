@@ -8,8 +8,6 @@ import android.widget.RadioGroup;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
-import com.google.android.material.switchmaterial.SwitchMaterial;
-
 public class OnboardingActivity extends AppCompatActivity {
 
     @Override
@@ -20,18 +18,10 @@ public class OnboardingActivity extends AppCompatActivity {
         setTitle(R.string.onboarding_title);
 
         Button btnOnboardingCreateCharDevice = findViewById(R.id.btnOnboardingCreateCharDevice);
-        SwitchMaterial switchOnboardingCreateDeviceOnBoot = findViewById(R.id.switchOnboardingCreateDeviceOnBoot);
         RadioGroup radioGroupErrorPromptAction = findViewById(R.id.radioGroupErrorPromptAction);
         Button btnOnboardingContinue = findViewById(R.id.btnOnboardingContinue);
 
         btnOnboardingCreateCharDevice.setOnClickListener(view -> MainActivity.characterDevice.createCharacterDevice());
-
-        switchOnboardingCreateDeviceOnBoot.setOnClickListener(view -> {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor preferencesEditor = preferences.edit();
-            preferencesEditor.putBoolean("create_character_device_on_boot", switchOnboardingCreateDeviceOnBoot.isChecked());
-            preferencesEditor.apply();
-        });
 
         radioGroupErrorPromptAction.setOnCheckedChangeListener((radioGroup, i) -> {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());

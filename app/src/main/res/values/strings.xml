@@ -19,8 +19,6 @@
     <string name="clear_manual_input_title">Clear manual input text box on send</string>
     <string name="volume_button_passthrough_title">Volume button passthrough</string>
     <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
-    <string name="automatically_create_character_device_title">Automatically create character device on boot</string>
-    <string name="automatically_create_character_device_summary">The character device cannot persist between reboots, so it must be recreated. This setting allows it to be recreated automatically on every reboot.</string>
     <string name="error_action_ask_every_time">Ask Every Time</string>
     <string name="error_action_fix">Fix</string>
     <string name="error_action_ignore">Ignore</string>
@@ -58,7 +56,6 @@
     <string name="onboarding_header">Before you start using the app…</string>
     <string name="onboarding_create_character_device_description">Click here to create character device necessary to use the app. Only ignore this button if you really know what you\'re doing.</string>
     <string name="onboarding_create_character_device_btn">Create</string>
-    <string name="onboarding_persistence_description">The character device will not persist on reboot. Should the app automatically recreate this on every boot for you?</string>
-    <string name="onboarding_onboarding_prompt_action_description">When something goes wrong and the character device doesn\'t exist on app startup, the app normally prompts the user. Rather than doing this, would you prefer the app to silently fix the issue in the background or ignore the prompt instead?\n\nWarning: Ignoring the prompt will render the app unusable, only choose the option if you know what you\'re doing</string>
+    <string name="onboarding_onboarding_prompt_action_description">When something goes wrong or the character device doesn\'t exist on app startup, the app normally prompts the user. Rather than doing this, would you prefer the app to silently fix the issue in the background or ignore the prompt instead?\n\nWarning: Ignoring the prompt will render the app unusable, only choose the option if you know what you\'re doing</string>
     <string name="onboarding_continue_btn">Continue</string>
 </resources>

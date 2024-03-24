@@ -11,11 +11,6 @@
             app:title="@string/volume_button_passthrough_title"
             app:summary="@string/volume_button_passthrough_summary" />
 
-        <SwitchPreference
-            app:key="create_character_device_on_boot"
-            app:title="@string/automatically_create_character_device_title"
-            app:summary="@string/automatically_create_character_device_summary" />
-
         <DropDownPreference
             app:defaultValue="Ask Every Time"
             app:entries="@array/default_error_action"
