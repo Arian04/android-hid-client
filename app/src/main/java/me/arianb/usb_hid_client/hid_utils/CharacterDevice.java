@@ -37,7 +37,7 @@ public class CharacterDevice {
         if (!(charDevicePath.equals(KEYBOARD_DEVICE_PATH) || charDevicePath.equals(MOUSE_DEVICE_PATH))) {
             return true;
         }
-        return !new File(CharacterDevice.KEYBOARD_DEVICE_PATH).exists();
+        return !new File(charDevicePath).exists();
     }
 
     // TODO: add more error handling
