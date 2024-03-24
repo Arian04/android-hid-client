@@ -4,6 +4,6 @@ plugins {
     id 'com.android.library' version '8.3.0' apply false
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }

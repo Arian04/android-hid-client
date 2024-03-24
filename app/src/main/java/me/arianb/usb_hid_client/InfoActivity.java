@@ -6,6 +6,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,7 +30,7 @@ public class InfoActivity extends AppCompatActivity {
         tvInfoLink.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Make activity back button work
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);

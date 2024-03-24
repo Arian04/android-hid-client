@@ -7,23 +7,29 @@ import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.hidModifierC
 import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.keyEventKeys;
 import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.keyEventModifierKeys;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.method.KeyListener;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GestureDetectorCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -95,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             String sendStr = etManualInput.getText().toString();
 
             // If empty, don't do anything
-            if (sendStr.equals("")) {
+            if (sendStr.isEmpty()) {
                 return;
             }
 
@@ -118,8 +124,8 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
 
-            // keyCode 0 corresponds to KEYCODE_UNKNOWN which I obviously can't do anything with
-            // since I can't send an unknown key, so just ignore it
+            // keyCode 0 corresponds to KEYCODE_UNKNOWN which I obviously can't do anything with, so
+            // just ignore it
             if (keyCode == 0) {
                 return false;
             }
@@ -199,7 +205,9 @@ public class MainActivity extends AppCompatActivity {
             }, 100);
         });
 
-        promptUserIfNonExistentCharacterDevice(onboardingDone);
+        if (onboardingDone) {
+            promptUserIfNonExistentCharacterDevice();
+        }
     }
 
     // method to inflate the options menu when
@@ -228,10 +236,7 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void promptUserIfNonExistentCharacterDevice(boolean onboardingDone) {
-        if (!onboardingDone) {
-            return;
-        }
+    private void promptUserIfNonExistentCharacterDevice() {
         String default_prompt_action_pref = preferences.getString("issue_prompt_action", "Ask Every Time");
         if (default_prompt_action_pref.equals("Ignore")) {
             return;

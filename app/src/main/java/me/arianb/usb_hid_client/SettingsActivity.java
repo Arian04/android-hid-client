@@ -7,6 +7,7 @@ import android.view.MenuItem;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
@@ -64,7 +65,7 @@ public class SettingsActivity extends AppCompatActivity {
                             ShellCommand getLogsCommand = ShellCommand.runAsRoot(String.format("logcat -d --pid=$(pidof -s %s)", BuildConfig.APPLICATION_ID));
 
                             final String stderr = getLogsCommand.stderr();
-                            final String LOG_CONTENT = getLogsCommand.stdout();;
+                            final String LOG_CONTENT = getLogsCommand.stdout();
                             if (!stderr.isEmpty()) {
                                 String errorMessage = "Error occurred while getting logs";
                                 Timber.e(errorMessage + ": " + stderr);
@@ -115,7 +116,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         // Make activity back button work
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(intent);
