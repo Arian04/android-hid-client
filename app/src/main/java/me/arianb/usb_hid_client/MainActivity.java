@@ -10,7 +10,6 @@ import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventModifierKeys;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.method.KeyListener;
@@ -53,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
     private KeySender keySender;
 
-    private AudioManager audioManager;
-
     public static CharacterDevice characterDevice;
 
     @Override
@@ -78,8 +75,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         modifiers = new HashSet<>();
-
-        audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 
         characterDevice = new CharacterDevice(getApplicationContext());
 
@@ -142,6 +137,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else { // Handle non-modifier keys
                 if (keyEventKeys.containsKey(keyCode)) {
+                    // If key is volume key and user doesn't want us to pass it through, then just
+                    // ignore it and let the system handle it normally
+                    if ((keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)
+                            && !preferences.getBoolean("volume_button_passthrough", false)) {
+                        return false;
+                    }
+
                     convertKeyAndSendKey(keyCode);
                     Timber.d("key: %s", keyEventKeys.get(keyCode));
                 } else {
@@ -260,39 +262,16 @@ public class MainActivity extends AppCompatActivity {
     // Converts (int) KeyEvent code to (byte) key scan code and (byte) modifier scan code and add to queue
     private void convertKeyAndSendKey(int keyCode) {
         // If key is volume (up or down) key
-        final int VOLUME_UP_KEYCODE = 24;
-        final int VOLUME_DOWN_KEYCODE = 25;
-        if ((keyCode == VOLUME_UP_KEYCODE || keyCode == VOLUME_DOWN_KEYCODE)) {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN)) {
             Timber.d("volume key: %s", keyCode);
-            switch (keyCode) {
-                case VOLUME_UP_KEYCODE:
-                    // If volume btn passthrough enabled, then pass through volume key press
-                    if (preferences.getBoolean("volume_button_passthrough", false)) {
-                        Byte volumeUpScanCode = hidMediaKeyCodes.get("volume-up");
-                        if (volumeUpScanCode != null) {
-                            keySender.addKey((byte) 0, volumeUpScanCode, KeySender.MEDIA_KEY);
-                        } else {
-                            Timber.e("volume-up not found in hidMediaKeyCodes map");
-                        }
-                    } else { // else just raise phone volume like normal
-                        audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
-                    }
-                    break;
-                case VOLUME_DOWN_KEYCODE:
-                    // If volume btn passthrough enabled, then pass through volume key press
-                    if (preferences.getBoolean("volume_button_passthrough", false)) {
-                        Byte volumeDownScanCode = hidMediaKeyCodes.get("volume-down");
-                        if (volumeDownScanCode != null) {
-                            keySender.addKey((byte) 0, volumeDownScanCode, KeySender.MEDIA_KEY);
-                        } else {
-                            Timber.e("volume-down not found in hidMediaKeyCodes map");
-                        }
-                    } else { // else just raise phone volume like normal
-                        audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
-                    }
-                    break;
+
+            Byte volumeScanCode = hidMediaKeyCodes.get(keyEventKeys.get(keyCode));
+            if (volumeScanCode != null) {
+                keySender.addKey((byte) 0, volumeScanCode, KeySender.MEDIA_KEY);
+                return;
+            } else {
+                Timber.e("keycode (%s) not found in hidMediaKeyCodes map", keyCode);
             }
-            return;
         }
 
         byte[] tempHIDCodes = convertKeyToScanCodes(keyEventKeys.get(keyCode));
