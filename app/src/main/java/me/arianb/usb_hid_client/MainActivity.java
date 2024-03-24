@@ -1,11 +1,11 @@
 package me.arianb.usb_hid_client;
 
-import static me.arianb.usb_hid_client.CharacterDevice.KEYBOARD_DEVICE_PATH;
-import static me.arianb.usb_hid_client.KeyCodeTranslation.convertKeyToScanCodes;
-import static me.arianb.usb_hid_client.KeyCodeTranslation.hidMediaKeyCodes;
-import static me.arianb.usb_hid_client.KeyCodeTranslation.hidModifierCodes;
-import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventKeys;
-import static me.arianb.usb_hid_client.KeyCodeTranslation.keyEventModifierKeys;
+import static me.arianb.usb_hid_client.hid_utils.CharacterDevice.KEYBOARD_DEVICE_PATH;
+import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.convertKeyToScanCodes;
+import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.hidMediaKeyCodes;
+import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.hidModifierCodes;
+import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.keyEventKeys;
+import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.keyEventModifierKeys;
 
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import me.arianb.usb_hid_client.hid_utils.CharacterDevice;
 import timber.log.Timber;
 
 // Notes on terminology:

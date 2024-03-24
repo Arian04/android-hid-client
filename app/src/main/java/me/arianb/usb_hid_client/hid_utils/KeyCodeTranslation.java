@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client;
+package me.arianb.usb_hid_client.hid_utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,12 +10,12 @@ import timber.log.Timber;
 // 		 current: keycode/char -> human-readable key -> hid code
 // 		 proposed: keycode/char -> hid code (comment: human-readable key)
 public abstract class KeyCodeTranslation {
-    protected static final Map<Integer, String> keyEventModifierKeys;
-    protected static final Map<Integer, String> keyEventKeys;
-    protected static final Map<String, String> shiftChars;
-    protected static final Map<String, Byte> hidModifierCodes;
-    protected static final Map<String, Byte> hidKeyCodes;
-    protected static final Map<String, Byte> hidMediaKeyCodes;
+    public static final Map<Integer, String> keyEventModifierKeys;
+    public static final Map<Integer, String> keyEventKeys;
+    public static final Map<String, String> shiftChars;
+    public static final Map<String, Byte> hidModifierCodes;
+    public static final Map<String, Byte> hidKeyCodes;
+    public static final Map<String, Byte> hidMediaKeyCodes;
 
     // Converts key to two scan codes
     // First element in array is the scan code for the modifier

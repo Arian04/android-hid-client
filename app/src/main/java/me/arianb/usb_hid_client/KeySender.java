@@ -1,7 +1,6 @@
 package me.arianb.usb_hid_client;
 
-import static me.arianb.usb_hid_client.CharacterDevice.KEYBOARD_DEVICE_PATH;
-import static me.arianb.usb_hid_client.CharacterDevice.MOUSE_DEVICE_PATH;
+import static me.arianb.usb_hid_client.hid_utils.CharacterDevice.KEYBOARD_DEVICE_PATH;
 
 import android.util.Log;
 import android.view.View;
@@ -15,6 +14,7 @@ import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import me.arianb.usb_hid_client.hid_utils.CharacterDevice;
 import timber.log.Timber;
 
 public class KeySender implements Runnable {

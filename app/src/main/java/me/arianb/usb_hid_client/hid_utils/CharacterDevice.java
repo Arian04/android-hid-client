@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client;
+package me.arianb.usb_hid_client.hid_utils;
 
 import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
 import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Locale;
 
+import me.arianb.usb_hid_client.R;
 import timber.log.Timber;
 
 public class CharacterDevice {
