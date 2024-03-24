@@ -11,31 +11,31 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class HelpActivity extends AppCompatActivity {
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_help);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_help);
 
-		setTitle(R.string.help);
+        setTitle(R.string.help);
 
-		// Enable back button
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDisplayHomeAsUpEnabled(true);
-		}
+        // Enable back button
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
-		// Make links clickable
-		TextView tvHelpFAQ;
-		tvHelpFAQ = findViewById(R.id.tvHelpFAQ_a1);
-		tvHelpFAQ.setMovementMethod(LinkMovementMethod.getInstance());
-		tvHelpFAQ = findViewById(R.id.tvHelpFAQ_a3);
-		tvHelpFAQ.setMovementMethod(LinkMovementMethod.getInstance());
-	}
+        // Make links clickable
+        TextView tvHelpFAQ;
+        tvHelpFAQ = findViewById(R.id.tvHelpFAQ_a1);
+        tvHelpFAQ.setMovementMethod(LinkMovementMethod.getInstance());
+        tvHelpFAQ = findViewById(R.id.tvHelpFAQ_a3);
+        tvHelpFAQ.setMovementMethod(LinkMovementMethod.getInstance());
+    }
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Make activity back button work
-		Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-		startActivity(intent);
-		return true;
-	}
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Make activity back button work
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+        return true;
+    }
 }
