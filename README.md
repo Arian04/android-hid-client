@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 <div id="top"></div>
 <!--
 *** Thanks for checking out the Best-README-Template. If you have a suggestion
@@ -32,7 +33,7 @@
 
 <h3 align="center">USB HID Client</h3>
   <p align="center">
-    Android app that allows you to easily use your phone as a keyboard
+    Android app that allows you to easily use your phone as a keyboard and mouse
     <br />
     <a href="https://github.com/Arian04/android-hid-client/wiki"><strong>Explore the docs »</strong></a>
     <br />
@@ -78,19 +79,30 @@ height="350">](images/app-screenshot1.png)
 alt="Main screen with menu open"
 height="350">](images/app-screenshot2.png)
 [<img src="images/app-screenshot3.png"
-alt="Help screen with frequently asked questions"
+alt="App settings screen"
 height="350">](images/app-screenshot3.png)
+[<img src="images/app-screenshot4.png"
+alt="Help screen with frequently asked questions"
+height="350">](images/app-screenshot4.png)
 
-This Android app allows you to use your phone as a keyboard by communicating with `/dev/hidg0`, a
-character device that allows your phone to send keys to a connected host device. It presents itself
-as a standard hardware input device and therefore doesn't require any additional software to be
-installed on the computer. It is also completely functional within the connected computer's
-BIOS/UEFI. This app supports most standard keyboard keys, including a-z, 0-9, \`~!
-@#$%^&*()_+{}|:"><,.;'[]\=-, function keys, SysRq/Print Screen, and several more (I strongly
-recommend using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys
-such as modifier and function keys).
+*Note: The first two images here are out of date. I would update them, but I'm currently trying to improve the UI so it would become out of date soon afterwards*
 
-Disclaimer: This app requires your device to be rooted.
+This Android app allows you your phone to present itself to a connected device as a keyboard and mouse.
+Since this happens at a very low level, the connected device sees it exactly as a normal keyboard and mouse, meaning
+you don't need to install any software on the connected computer! For this reason, it will even work if the
+connected device is in its BIOS/UEFI. Even multimedia keys are supported, meaning you can send volume up/down
+keys to the connected computer to control media.
+
+**Disclaimers**:
+- This app requires your device to be rooted.
+- I strongly recommend using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as modifier and function keys). 
+  However, most functionality will work with any standard Android keyboard.
+
+Bonus description for nerds: This app creates (and provides a simple UI for you to communicate with) a USB HID gadget
+consisting of a keyboard and mouse character device (`/dev/hidg0` and `/dev/hidg1` respectively). If you wanted to, you could
+just use this app to create the character device, then communicate solely through some C program, shell script, or whatever else you wanted
+as long as it had the right permissions to access the character devices. Beware of SELinux policies. If anyone is actually doing that, let
+me know, I'd be glad to help if necessary.
 
 Tested primarily on: Linux (Host computer) and Pixel 5 running Android 13.
 
