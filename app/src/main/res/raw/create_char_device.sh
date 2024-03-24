@@ -1,57 +1,60 @@
 #!/system/bin/sh
 
-# This will be recognized as a "Cherry GmbH Wireless Mouse & Keyboard"
+# This will be recognized as a "Linux Foundation Multifunction Composite Gadget"
 # Source: http://www.linux-usb.org/usb.ids
-vendor_id="0x046a"
-product_id="0x002a"
+VENDOR_ID="0x1d6b"
+PRODUCT_ID="0x0104"
 
-manufacturer="Arian"
-serial_number="101" # I don't know if the value of this is important in any way so I just chose a number
-product="USB HID Client"
-config_name="Configuration"
-max_power=100 # in mA
-protocol=1 # 1 for keyboard according to USB spec
-subclass=1 # Don't know what this is for tbh
-report_length=8 # report length in bytes
-udc="$(getprop sys.usb.controller)"
+MANUFACTURER="Arian"
+SERIAL_NUMBER="101" # I don't know if the value of this is important in any way so I just chose a number
+PRODUCT="USB HID Client"
+CONFIG_NAME="Configuration"
+MAX_POWER=100 # in mA
+UDC="$(getprop sys.usb.controller)" # or `ls /sys/class/udc`
+
+KB_PROTOCOL=1 # 1 for keyboard according to USB spec
+KB_SUBCLASS=1 # Don't know what this is for tbh
+KB_REPORT_LENGTH=4 # report length in bytes
+KEYBOARD_REPORT_DESCRIPTOR='\x05\x01\x09\x06\xA1\x01\x85\x01\x75\x01\x95\x08\x05\x07\x19\xE0\x29\xE7\x15\x00\x25\x01\x81\x02\x75\x01\x95\x08\x81\x03\x95\x02\x75\x08\x15\x00\x25\xFF\x05\x07\x19\x00\x29\xFF\x81\x00\xC0\x05\x0C\x09\x01\xA1\x01\x85\x02\x75\x10\x95\x01\x26\xFF\x07\x19\x00\x2A\xFF\x07\x81\x00\xC0'
 
 # Paths
-usb_gadget_path="/config/usb_gadget/keyboard"
-configs_path="${usb_gadget_path}/configs/c.1/"
-strings_path="${usb_gadget_path}/strings/0x409/"
+USB_GADGET_PATH="/config/usb_gadget/keyboard"
+CONFIGS_PATH="${USB_GADGET_PATH}/configs/c.1/"
+STRINGS_PATH="${USB_GADGET_PATH}/strings/0x409/"
+KB_FUNCTION_PATH="${USB_GADGET_PATH}/functions/hid.keyboard"
 
-mkdir -p "${usb_gadget_path}/functions/hid.keyboard"
-cd "${usb_gadget_path}/functions/hid.keyboard" || exit 1
-echo $protocol > protocol
-echo $subclass > subclass
-echo $report_length > report_length
+mkdir -p $KB_FUNCTION_PATH
+cd $KB_FUNCTION_PATH || exit 1
+echo $KB_PROTOCOL > protocol
+echo $KB_SUBCLASS > subclass
+echo $KB_REPORT_LENGTH > report_length
 
-# report descriptor
 # shellcheck disable=SC2039
-# I'll figure out how to switch this to use printf if it causes a bug, but it works perfectly fine so far
-echo -ne \\x05\\x01\\x09\\x06\\xa1\\x01\\x85\\x01\\x75\\x01\\x95\\x08\\x05\\x07\\x19\\xe0\\x29\\xe7\\x15\\x00\\x25\\x01\\x81\\x02\\x75\\x01\\x95\\x08\\x81\\x03\\x95\\x05\\x75\\x01\\x05\\x08\\x19\\x01\\x29\\x05\\x91\\x02\\x95\\x01\\x75\\x03\\x91\\x03\\x95\\x06\\x75\\x08\\x15\\x00\\x25\\xff\\x05\\x07\\x19\\x00\\x29\\xff\\x81\\x00\\xc0\\x05\\x0c\\x09\\x01\\xa1\\x01\\x85\\x02\\x75\\x10\\x95\\x01\\x26\\xff\\x07\\x19\\x00\\x2a\\xff\\x07\\x81\\x00\\xc0 > report_desc
+# I'll figure out how to switch this to use printf if it causes a bug, but it works perfectly fine so far.
+# I also couldn't get printf working on my phone for the life of me.
+echo -ne $KEYBOARD_REPORT_DESCRIPTOR > report_desc
 
-cd $usb_gadget_path || exit 1
-echo $vendor_id > idVendor
-echo $product_id > idProduct
+cd $USB_GADGET_PATH || exit 1
+echo $VENDOR_ID > idVendor
+echo $PRODUCT_ID > idProduct
 
-mkdir $strings_path
-cd $strings_path || exit 1
-echo $manufacturer > manufacturer
-echo "$product" > product
-echo $serial_number > serialnumber
+mkdir $STRINGS_PATH
+cd $STRINGS_PATH || exit 1
+echo $MANUFACTURER > manufacturer
+echo "$PRODUCT" > product
+echo $SERIAL_NUMBER > serialnumber
 
-mkdir $configs_path
-cd $configs_path || exit 1
-echo $max_power > MaxPower
+mkdir $CONFIGS_PATH
+cd $CONFIGS_PATH || exit 1
+echo $MAX_POWER > MaxPower
 
-mkdir ${configs_path}/strings/0x409
-echo $config_name > strings/0x409/configuration
+mkdir ${CONFIGS_PATH}/strings/0x409
+echo $CONFIG_NAME > strings/0x409/configuration
 
-ln -s ${usb_gadget_path}/functions/hid.keyboard ${configs_path}/hid.keyboard
+ln -s $KB_FUNCTION_PATH ${CONFIGS_PATH}/hid.keyboard
 
 # Disable all gadgets
 find /config/usb_gadget/ -name UDC -type f -exec sh -c 'echo "" >  "$@"' _ {} \;
 
 # Enable this gadget
-echo "$udc" > ${usb_gadget_path}/UDC
+echo "$UDC" > ${USB_GADGET_PATH}/UDC

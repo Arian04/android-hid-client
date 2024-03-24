@@ -74,36 +74,25 @@ public class KeySender implements Runnable {
     public void sendKey(byte modifier, byte key, byte keyType) {
         switch (keyType) {
             case STANDARD_KEY:
-                writeKeyHIDReport(modifier, key); // Send key
-                writeKeyHIDReport((byte) 0, (byte) 0); // Release key
+                // Send key
+                writeHIDReport(KEYBOARD_DEVICE_PATH, new byte[]{STANDARD_KEY, modifier, 0, key, 0});
+
+                // Release
+                writeHIDReport(KEYBOARD_DEVICE_PATH, new byte[]{STANDARD_KEY, 0, 0, 0, 0});
+
                 break;
             case MEDIA_KEY:
-                writeMediaHIDReport(key); // Send Key
-                writeMediaHIDReport((byte) 0); // Release key
+                writeHIDReport(KEYBOARD_DEVICE_PATH, new byte[]{MEDIA_KEY, key, 0}); // Send Key
+                writeHIDReport(KEYBOARD_DEVICE_PATH, new byte[]{MEDIA_KEY, 0, 0}); // Release key
         }
-    }
-
-    // Writes HID reports for standard keys (a,b,%,@, etc.)
-    private void writeKeyHIDReport(byte modifier, byte key) {
-        //Timber.d("hid report: %s - %s", modifier, key);
-
-        byte[] report = new byte[]{(byte) 0x01, modifier, (byte) 0, key, (byte) 0, (byte) 0, (byte) 0, (byte) 0, (byte) 0};
-        writeHIDReport(KEYBOARD_DEVICE_PATH, report);
-    }
-
-    // Writes HID reports for media keys (play-pause,volume-up,volume-down, etc.)
-    public void writeMediaHIDReport(byte key) {
-        byte[] report = new byte[]{(byte) 0x02, key, (byte) 0x00};
-        writeHIDReport(KEYBOARD_DEVICE_PATH, report);
     }
 
     // Writes HID report to character device
     private void writeHIDReport(String device, byte[] report) {
-        // TODO generalize this to make it work with other character devices
         // Check if character device exists
-        if (CharacterDevice.characterDeviceMissing(KEYBOARD_DEVICE_PATH)) {
+        if (CharacterDevice.characterDeviceMissing(device)) {
             Timber.e("ERROR: Character device doesn't exist");
-            makeCreateKeyboardCharDeviceSnackbar();
+            makeCreateCharDeviceSnackbar();
             return;
         }
 
@@ -113,15 +102,9 @@ public class KeySender implements Runnable {
         } catch (IOException e) {
             String stacktrace = Log.getStackTraceString(e);
             if (stacktrace.toLowerCase().contains("errno 108")) {
-                makeSnackbar("ERROR: Your device seems to be disconnected. If not, try reseating the usb cable", Snackbar.LENGTH_LONG);
+                makeSnackbar("ERROR: Your device seems to be disconnected. If not, try reseating the USB cable", Snackbar.LENGTH_LONG);
             } else if (stacktrace.toLowerCase().contains("permission denied")) {
-                if (device.equals(CharacterDevice.KEYBOARD_DEVICE_PATH)) {
-                    makeFixKeyboardPermissionsSnackbar();
-                } else if (device.equals(CharacterDevice.MOUSE_DEVICE_PATH)) {
-                    makeFixMousePermissionsSnackbar();
-                } else {
-                    Timber.e("ERROR: permission denied and writeHIDReport called with invalid device path");
-                }
+                makeFixCharDevicePermissionsSnackbar(device);
             } else {
                 makeSnackbar("ERROR: Failed to send key.", Snackbar.LENGTH_SHORT);
             }
@@ -133,21 +116,15 @@ public class KeySender implements Runnable {
         Snackbar.make(parentLayout, message, length).show();
     }
 
-    public void makeCreateKeyboardCharDeviceSnackbar() {
+    public void makeCreateCharDeviceSnackbar() {
         Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device doesn't exist.", Snackbar.LENGTH_INDEFINITE);
         snackbar.setAction("FIX", v -> MainActivity.characterDevice.createCharacterDevice());
         snackbar.show();
     }
 
-    public void makeFixKeyboardPermissionsSnackbar() {
+    public void makeFixCharDevicePermissionsSnackbar(String devicePath) {
         Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("FIX", v -> MainActivity.characterDevice.fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH));
-        snackbar.show();
-    }
-
-    public void makeFixMousePermissionsSnackbar() {
-        Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("FIX", v -> MainActivity.characterDevice.fixCharacterDevicePermissions(MOUSE_DEVICE_PATH));
+        snackbar.setAction("FIX", v -> MainActivity.characterDevice.fixCharacterDevicePermissions(devicePath));
         snackbar.show();
     }
 }
