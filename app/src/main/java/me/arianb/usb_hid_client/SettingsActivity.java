@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import me.arianb.usb_hid_client.shell_utils.ProcessStreamHelper;
 import timber.log.Timber;
 
 public class SettingsActivity extends AppCompatActivity {

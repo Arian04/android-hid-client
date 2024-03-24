@@ -1,7 +1,7 @@
 package me.arianb.usb_hid_client.hid_utils;
 
-import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdError;
-import static me.arianb.usb_hid_client.ProcessStreamHelper.getProcessStdOutput;
+import static me.arianb.usb_hid_client.shell_utils.ProcessStreamHelper.getProcessStdError;
+import static me.arianb.usb_hid_client.shell_utils.ProcessStreamHelper.getProcessStdOutput;
 
 import android.content.Context;
 import android.os.Build;

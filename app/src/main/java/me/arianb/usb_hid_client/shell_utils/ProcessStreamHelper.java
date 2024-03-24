@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client;
+package me.arianb.usb_hid_client.shell_utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
