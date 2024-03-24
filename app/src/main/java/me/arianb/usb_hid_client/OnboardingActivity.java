@@ -30,8 +30,6 @@ public class OnboardingActivity extends AppCompatActivity {
                 preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ask_every_time));
             } else if (i == R.id.radioErrorPromptAction_fix) {
                 preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_fix));
-            } else if (i == R.id.radioErrorPromptAction_ignore) {
-                preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ignore));
             } else {
                 // i == -1
                 // All radio buttons are unchecked, so do nothing

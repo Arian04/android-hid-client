@@ -58,26 +58,21 @@
         android:id="@+id/radioGroupErrorPromptAction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:checkedButton="@id/radioErrorPromptAction_askEveryTime"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tvOnboardingErrorPrompt">
 
         <RadioButton
             android:id="@+id/radioErrorPromptAction_askEveryTime"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/error_action_ask_every_time" />
 
         <RadioButton
             android:id="@+id/radioErrorPromptAction_fix"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/error_action_fix" />
-
-        <RadioButton
-            android:id="@+id/radioErrorPromptAction_ignore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/error_action_ignore" />
     </RadioGroup>
 
     <Button
