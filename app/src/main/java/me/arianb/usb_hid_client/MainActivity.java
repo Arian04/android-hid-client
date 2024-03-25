@@ -22,6 +22,10 @@ import androidx.preference.PreferenceManager;
 import com.google.android.material.snackbar.Snackbar;
 
 import me.arianb.usb_hid_client.hid_utils.CharacterDevice;
+import me.arianb.usb_hid_client.input_views.DirectInputKeyboardView;
+import me.arianb.usb_hid_client.input_views.TouchpadView;
+import me.arianb.usb_hid_client.report_senders.KeySender;
+import me.arianb.usb_hid_client.report_senders.MouseSender;
 import timber.log.Timber;
 
 // TODO:

@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client;
+package me.arianb.usb_hid_client.input_views;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.GestureDetectorCompat;
 
+import me.arianb.usb_hid_client.report_senders.MouseSender;
 import timber.log.Timber;
 
 // TODO: address this linting issue

@@ -1,6 +1,6 @@
-package me.arianb.usb_hid_client;
+package me.arianb.usb_hid_client.report_senders;
 
-import static me.arianb.usb_hid_client.hid_utils.CharacterDevice.MOUSE_DEVICE_PATH;
+import static me.arianb.usb_hid_client.hid_utils.CharacterDevice.KEYBOARD_DEVICE_PATH;
 
 import android.util.Log;
 import android.view.View;
@@ -14,34 +14,39 @@ import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import me.arianb.usb_hid_client.MainActivity;
 import me.arianb.usb_hid_client.hid_utils.CharacterDevice;
 import timber.log.Timber;
 
-public class MouseSender implements Runnable {
-    public final static byte MOUSE_BUTTON_NONE = 0;
-    public final static byte MOUSE_BUTTON_LEFT = 1;
-    public final static byte MOUSE_BUTTON_RIGHT = 2;
-    public final static byte MOUSE_BUTTON_MIDDLE = 3;
+public class KeySender implements Runnable {
+    // Constants that'll be passed in addKey to mark what type of key it is so I know which method
+    // to use to send it. They are also the respective report IDs.
+    public static final byte STANDARD_KEY = 0x01;
+    public static final byte MEDIA_KEY = 0x02;
 
-    private static Queue<byte[]> reportQueue;
+    private static Queue<Byte> modQueue;
+    private static Queue<Byte> keyQueue;
+    private static Queue<Byte> keyTypeQueue;
 
     private static final ReentrantLock queueLock = new ReentrantLock(true);
     private static final Condition queueNotEmptyCondition = queueLock.newCondition();
 
     private final View parentLayout;
 
-    public MouseSender(View parentLayout) {
+    public KeySender(View parentLayout) {
         this.parentLayout = parentLayout;
-        reportQueue = new LinkedList<>();
+        modQueue = new LinkedList<>();
+        keyQueue = new LinkedList<>();
+        keyTypeQueue = new LinkedList<>();
     }
 
     @Override
     public void run() {
-        Timber.d("MouseSender thread started");
+        Timber.d("keySender thread started");
         while (!Thread.interrupted()) {
             queueLock.lock();
             // Wait for the queue(s) to actually contain keys
-            if (reportQueue.isEmpty()) {
+            if (keyQueue.isEmpty()) {
                 //Timber.d("Waiting for queue to not be empty.");
                 try {
                     queueNotEmptyCondition.await();
@@ -50,25 +55,37 @@ public class MouseSender implements Runnable {
                     queueLock.unlock();
                 }
             }
-            sendReport(reportQueue.remove());
+            sendKey(modQueue.remove(), keyQueue.remove(), keyTypeQueue.remove());
+            //Timber.d("sending key");
             queueLock.unlock();
         }
     }
 
-    public void addReport(byte button, byte x, byte y) {
+    public void addKey(byte modifier, byte key, byte keyType) {
         //Timber.d("trying to lock");
         queueLock.lock();
-
-        reportQueue.add(new byte[]{button, x, y});
-
+        modQueue.add(modifier);
+        keyQueue.add(key);
+        keyTypeQueue.add(keyType);
         queueNotEmptyCondition.signal();
         queueLock.unlock();
         //Timber.d("unlocked");
     }
 
-    public void sendReport(byte[] report) {
-        writeHIDReport(MOUSE_DEVICE_PATH, report); // Send
-        writeHIDReport(MOUSE_DEVICE_PATH, new byte[]{MOUSE_BUTTON_NONE, 0, 0}); // Release
+    public void sendKey(byte modifier, byte key, byte keyType) {
+        switch (keyType) {
+            case STANDARD_KEY:
+                // Send key
+                writeHIDReport(KEYBOARD_DEVICE_PATH, new byte[]{STANDARD_KEY, modifier, 0, key, 0});
+
+                // Release
+                writeHIDReport(KEYBOARD_DEVICE_PATH, new byte[]{STANDARD_KEY, 0, 0, 0, 0});
+
+                break;
+            case MEDIA_KEY:
+                writeHIDReport(KEYBOARD_DEVICE_PATH, new byte[]{MEDIA_KEY, key, 0}); // Send Key
+                writeHIDReport(KEYBOARD_DEVICE_PATH, new byte[]{MEDIA_KEY, 0, 0}); // Release key
+        }
     }
 
     // Writes HID report to character device

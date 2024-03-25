@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client;
+package me.arianb.usb_hid_client.input_views;
 
 import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.convertKeyToScanCodes;
 import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.hidMediaKeyCodes;
@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import me.arianb.usb_hid_client.report_senders.KeySender;
 import timber.log.Timber;
 
 public class DirectInputKeyboardView extends androidx.appcompat.widget.AppCompatEditText {

@@ -33,7 +33,7 @@
         app:layout_constraintTop_toTopOf="@+id/etManualInput"
         tools:ignore="SpeakableTextPresentCheck" />
 
-    <me.arianb.usb_hid_client.DirectInputKeyboardView
+    <me.arianb.usb_hid_client.input_views.DirectInputKeyboardView
         android:id="@+id/etDirectInput"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
         app:layout_constraintStart_toStartOf="@+id/etManualInput"
         app:layout_constraintTop_toBottomOf="@+id/etManualInput" />
 
-    <me.arianb.usb_hid_client.TouchpadView
+    <me.arianb.usb_hid_client.input_views.TouchpadView
         android:id="@+id/tvTouchpad"
         android:layout_width="match_parent"
         android:layout_height="400dp"
