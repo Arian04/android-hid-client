@@ -87,7 +87,7 @@ just use this app to create the character device, then communicate solely throug
 as long as it had the right permissions to access the character devices. Beware of SELinux policies. If anyone is actually doing that, let
 me know, I'd be glad to help if necessary.
 
-Tested primarily on: Linux (Host computer) and Pixel 5 running Android 13.
+Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
