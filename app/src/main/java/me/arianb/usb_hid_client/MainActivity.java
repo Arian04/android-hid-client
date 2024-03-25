@@ -42,9 +42,6 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences preferences;
 
-    private KeySender keySender;
-    private MouseSender mouseSender;
-
     public static CharacterDevice characterDevice;
 
     @Override
@@ -71,9 +68,9 @@ public class MainActivity extends AppCompatActivity {
         characterDevice = new CharacterDevice(getApplicationContext());
 
         // Start threads to send key and mouse events
-        keySender = new KeySender(parentLayout);
+        final KeySender keySender = new KeySender(parentLayout);
         new Thread(keySender).start();
-        mouseSender = new MouseSender(parentLayout);
+        final MouseSender mouseSender = new MouseSender(parentLayout);
         new Thread(mouseSender).start();
 
         // Set up input Views
@@ -82,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
         final DirectInputKeyboardView etDirectInput = findViewById(R.id.etDirectInput);
         final TouchpadView touchpad = findViewById(R.id.tvTouchpad);
 
-        setupManualKeyboardInput(etManualInput, btnSubmit);
-        setupDirectKeyboardInput(etDirectInput);
+        setupManualKeyboardInput(etManualInput, btnSubmit, keySender);
+        setupDirectKeyboardInput(etDirectInput, keySender);
         touchpad.setTouchListeners(mouseSender);
 
         if (onboardingDone) {
@@ -91,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setupManualKeyboardInput(EditText etManualInput, Button btnSubmit) {
+    private void setupManualKeyboardInput(EditText etManualInput, Button btnSubmit, KeySender keySender) {
         // Button sends text in manualInput TextView
         btnSubmit.setOnClickListener(v -> {
             // Save text to send
@@ -128,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupDirectKeyboardInput(DirectInputKeyboardView etDirectInput) {
+    private void setupDirectKeyboardInput(DirectInputKeyboardView etDirectInput, KeySender keySender) {
         etDirectInput.setKeyListeners(keySender);
 
         // TODO: move these two method calls below into DirectInputKeyboardView eventually
