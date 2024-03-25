@@ -5,6 +5,7 @@
     <string name="app_name" translatable="false">USB HID Client</string>
     <string name="direct_input">Direct Input</string>
     <string name="manual_input">Manual Input</string>
+    <string name="touchpad_label">Touchpad</string>
     <string name="send">Send</string>
     <string name="settings">Settings</string>
     <string name="help">Help</string>
