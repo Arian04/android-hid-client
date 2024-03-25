@@ -53,6 +53,7 @@
     <!-- Onboarding Activity -->
     <string name="onboarding_title">Initial Setup</string>
     <string name="onboarding_header">Before you start using the app…</string>
+    <string name="onboarding_notice">For technical reasons, either Android\'s standard USB gadget OR this app\'s keyboard/mouse USB gadget may be enabled, not both at once. This means that while this app is active, you may not use features like USB debugging, USB tethering, or any other options that show in the little notification that pops up when you normally plug your phone into another device. It\'ll still charge fine though.</string>
     <string name="onboarding_create_character_device_description">Click here to create character device necessary to use the app. Only ignore this button if you really know what you\'re doing.</string>
     <string name="onboarding_create_character_device_btn">Create</string>
     <string name="onboarding_onboarding_prompt_action_description">When something goes wrong and the character device doesn\'t exist on app startup, the app normally prompts the user. Rather than doing this, would you prefer the app to silently fix the issue in the background instead?</string>

@@ -21,17 +21,29 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
+        android:id="@+id/tvOnboardingNotice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_marginEnd="@dimen/margin_normal"
+        android:text="@string/onboarding_notice"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvOnboardingTitle" />
+
+    <TextView
         android:id="@+id/tvOnboardingCreateCharDevice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_marginTop="@dimen/margin_xxlarge"
         android:layout_marginEnd="@dimen/margin_normal"
         android:text="@string/onboarding_create_character_device_description"
         app:layout_constrainedWidth="true"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@id/tvOnboardingNotice"
         app:layout_constraintEnd_toStartOf="@id/btnOnboardingCreateCharDevice"
-        app:layout_constraintTop_toBottomOf="@id/tvOnboardingTitle" />
+        app:layout_constraintTop_toBottomOf="@id/tvOnboardingNotice" />
 
     <Button
         android:id="@+id/btnOnboardingCreateCharDevice"
