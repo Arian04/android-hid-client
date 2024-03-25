@@ -1,5 +1,7 @@
 package me.arianb.usb_hid_client.hid_utils;
 
+import androidx.annotation.NonNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +27,7 @@ public abstract class KeyCodeTranslation {
 
         //Log.d(TAG, "converting following key into scan code: " + key);
         if (key == null) {
-            Timber.e("convertKeyToScanCodes(): key is null");
+            Timber.d("convertKeyToScanCodes(): key is null");
             return null;
         }
 
@@ -46,6 +48,7 @@ public abstract class KeyCodeTranslation {
             Timber.e("key: '" + key + "' could not be converted to an HID code (it wasn't found in the map).");
             return null;
         }
+        
         return keyScanCodes;
     }
 
