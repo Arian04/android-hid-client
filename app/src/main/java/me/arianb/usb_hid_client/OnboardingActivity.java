@@ -17,11 +17,8 @@ public class OnboardingActivity extends AppCompatActivity {
 
         setTitle(R.string.onboarding_title);
 
-        Button btnOnboardingCreateCharDevice = findViewById(R.id.btnOnboardingCreateCharDevice);
         RadioGroup radioGroupErrorPromptAction = findViewById(R.id.radioGroupErrorPromptAction);
         Button btnOnboardingContinue = findViewById(R.id.btnOnboardingContinue);
-
-        btnOnboardingCreateCharDevice.setOnClickListener(view -> MainActivity.characterDevice.createCharacterDevice());
 
         radioGroupErrorPromptAction.setOnCheckedChangeListener((radioGroup, i) -> {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
