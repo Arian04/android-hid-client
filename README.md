@@ -68,8 +68,6 @@ height="350">](images/app-screenshot3.png)
 alt="Help screen with frequently asked questions"
 height="350">](images/app-screenshot4.png)
 
-*Note: The first two images here are out of date. I would update them, but I'm currently trying to improve the UI so it would become out of date soon afterwards*
-
 This Android app allows you your phone to present itself to a connected device as a keyboard and mouse.
 Since this happens at a very low level, the connected device sees it exactly as a normal keyboard and mouse, meaning
 you don't need to install any software on the connected computer! For this reason, it will even work if the
@@ -84,7 +82,7 @@ keys to the connected computer to control media.
 Bonus description for nerds: This app creates (and provides a simple UI for you to communicate with) a USB HID gadget
 consisting of a keyboard and mouse character device (`/dev/hidg0` and `/dev/hidg1` respectively). If you wanted to, you could
 just use this app to create the character device, then communicate solely through some C program, shell script, or whatever else you wanted
-as long as it had the right permissions to access the character devices. Beware of SELinux policies. If anyone is actually doing that, let
+as long as it had the right permissions to access the character devices. Beware of SELinux policies if you do that though. If anyone is actually doing that, let
 me know, I'd be glad to help if necessary.
 
 Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
