@@ -14,24 +14,24 @@ public record ShellCommand(String[] command, int exitCode, String stdout, String
     private static final TimeUnit DEFAULT_TIMEOUT_UNIT = TimeUnit.SECONDS;
 
     public static ShellCommand runAsRoot(String command) throws IOException, InterruptedException {
-        return runAsRoot(command, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
-    }
-
-    public static ShellCommand runAsRoot(String command, long timeout, TimeUnit unit) throws IOException, InterruptedException {
         String[] fullCommand = new String[]{
                 RootState.SU_BINARY,
                 "-c",
-                "'" + command + "'",
+                "'" + command + "'"
         };
-        return runShellCommand(fullCommand, timeout, unit);
+        return runShellCommand(fullCommand, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
+    }
+
+    public static ShellCommand runAsRoot(String[] command) throws IOException, InterruptedException {
+        String[] fullCommand = mergeStringArrays(new String[]{
+                RootState.SU_BINARY,
+                "-c",
+        }, command);
+        return runShellCommand(fullCommand, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
     }
 
     public static ShellCommand run(String[] command) throws IOException, InterruptedException {
-        return run(command, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
-    }
-
-    public static ShellCommand run(String[] command, long timeout, TimeUnit unit) throws IOException, InterruptedException {
-        return runShellCommand(command, timeout, unit);
+        return runShellCommand(command, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
     }
 
     private static ShellCommand runShellCommand(String[] command, long timeout, TimeUnit unit) throws IOException, InterruptedException {
@@ -84,7 +84,7 @@ public record ShellCommand(String[] command, int exitCode, String stdout, String
 
     private static String streamToString(DataInputStream stream) throws IOException {
         BufferedReader streamReader = new BufferedReader(new InputStreamReader(stream));
-        // Read any errors from the attempted command
+
         //noinspection UnusedAssignment: I think explicitly setting = null makes the code clearer here
         String s = null;
         StringBuilder returnStr = new StringBuilder();
@@ -92,5 +92,11 @@ public record ShellCommand(String[] command, int exitCode, String stdout, String
             returnStr.append(s).append("\n");
         }
         return returnStr.toString();
+    }
+
+    private static String[] mergeStringArrays(String[] first, String[] second) {
+        String[] merged = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, merged, first.length, second.length);
+        return merged;
     }
 }

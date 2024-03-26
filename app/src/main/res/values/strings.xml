@@ -58,4 +58,5 @@
     <string name="onboarding_create_character_device_btn">Create</string>
     <string name="onboarding_onboarding_prompt_action_description">When something goes wrong and the character device doesn\'t exist on app startup, the app normally prompts the user. Rather than doing this, would you prefer the app to silently fix the issue in the background instead?</string>
     <string name="onboarding_continue_btn">Continue</string>
+    <string name="menu_toggle_hid_gadget">Toggle HID Gadget</string>
 </resources>

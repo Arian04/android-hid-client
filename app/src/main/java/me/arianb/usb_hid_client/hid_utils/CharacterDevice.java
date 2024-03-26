@@ -21,6 +21,12 @@ public class CharacterDevice {
     public static final String KEYBOARD_DEVICE_PATH = "/dev/hidg0";
     public static final String MOUSE_DEVICE_PATH = "/dev/hidg1";
 
+    // gadget paths
+    public static final String ANDROID_GADGET_DIR = "/config/usb_gadget/g1";
+    public static final String ANDROID_GADGET_UDC_PATH = ANDROID_GADGET_DIR + "/UDC";
+    public static final String HID_GADGET_DIR = "/config/usb_gadget/keyboard";
+    public static final String HID_GADGET_UDC_PATH = HID_GADGET_DIR + "/UDC";
+
     private final Context appContext;
     private final int appUID;
 
@@ -122,5 +128,48 @@ public class CharacterDevice {
             Timber.e("Failed to get app's selinux context");
         }
         return categories;
+    }
+
+    public static void disableGadget() {
+        try {
+            ShellCommand command = ShellCommand.runAsRoot(new String[]{
+                    "echo",
+                    "",
+                    ">",
+                    HID_GADGET_UDC_PATH
+            });
+//            Timber.d("--- Command Details: %s", command.command());
+//            Timber.d("exit code: %s", command.exitCode());
+//            Timber.d("stdout: %s", command.stdout());
+//            Timber.d("stderr: %s", command.stderr());
+//            Timber.d("----------");
+        } catch (IOException | InterruptedException e) {
+            Timber.e("Failed to disable HID gadget");
+            Timber.e(Log.getStackTraceString(e));
+        }
+    }
+
+    public static void enableGadget() {
+        try {
+            ShellCommand command = ShellCommand.runAsRoot(new String[]{
+                    "echo",
+                    "",
+                    ">",
+                    ANDROID_GADGET_UDC_PATH,
+                    ";",
+                    "echo",
+                    "$(ls /sys/class/udc)",
+                    ">",
+                    HID_GADGET_UDC_PATH
+            });
+//            Timber.d("--- Command Details: %s", (Object[]) command.command());
+//            Timber.d("exit code: %s", command.exitCode());
+//            Timber.d("stdout: %s", command.stdout());
+//            Timber.d("stderr: %s", command.stderr());
+//            Timber.d("----------");
+        } catch (IOException | InterruptedException e) {
+            Timber.e("Failed to enable HID gadget");
+            Timber.e(Log.getStackTraceString(e));
+        }
     }
 }

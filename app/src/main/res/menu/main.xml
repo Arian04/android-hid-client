@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="@string/direct_input"
+    <item
+        android:title="@string/menu_toggle_hid_gadget"
+        android:id="@+id/toggleHIDGadgetDevice"
+        app:actionViewClass="androidx.appcompat.widget.SwitchCompat"
+        app:showAsAction="always" />
+
+    <item
+        android:title="@string/direct_input"
         android:id="@+id/menuDirectInput"
         android:icon="@drawable/keyboard"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
 
-    <item android:title="@string/settings"
+    <item
+        android:title="@string/settings"
         android:id="@+id/menuSettings"
         android:orderInCategory="100"
         app:showAsAction="never" />

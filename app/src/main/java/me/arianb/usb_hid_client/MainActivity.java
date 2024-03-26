@@ -12,11 +12,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -137,7 +139,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
+
+        // Set up menu switch that can toggle the HID gadget
+        final MenuItem itemSwitch = menu.findItem(R.id.toggleHIDGadgetDevice);
+
+        final SwitchCompat menuSwitchToggleGadget = itemSwitch.getActionView().findViewById(R.id.toggleHIDGadgetDevice);
+        menuSwitchToggleGadget.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Timber.d("menu switch toggled");
+            if (isChecked) {
+                CharacterDevice.enableGadget();
+            } else {
+                CharacterDevice.disableGadget();
+            }
+        });
+
+        return true;
     }
 
     // Run code on menu item selected
