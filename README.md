@@ -138,8 +138,7 @@ on your Android device
 
 ## Usage
 
-Typing in the "Direct Input" text box will immediately relay the keys that you press to the
-connected device. The keys will not be displayed in the text box as you type them.
+To relay keys in real-time as soon as you press them, click on the keyboard icon in the menu bar. It should pull up your keyboard. Now you can just start typing!
 
 Typing in the "Manual Input" text box will send all the characters that you've typed into the box to
 the connected device once you hit the "send" button.
