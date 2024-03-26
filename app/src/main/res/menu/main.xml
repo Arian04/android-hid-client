@@ -4,12 +4,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:title="@string/menu_toggle_hid_gadget"
-        android:id="@+id/toggleHIDGadgetDevice"
-        app:actionViewClass="androidx.appcompat.widget.SwitchCompat"
-        app:showAsAction="always" />
-
-    <item
         android:title="@string/direct_input"
         android:id="@+id/menuDirectInput"
         android:icon="@drawable/keyboard"

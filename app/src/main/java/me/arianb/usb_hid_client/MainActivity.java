@@ -138,20 +138,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-
-        // Set up menu switch that can toggle the HID gadget
-        final MenuItem itemSwitch = menu.findItem(R.id.toggleHIDGadgetDevice);
-
-        final SwitchCompat menuSwitchToggleGadget = itemSwitch.getActionView().findViewById(R.id.toggleHIDGadgetDevice);
-        menuSwitchToggleGadget.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Timber.d("menu switch toggled");
-            if (isChecked) {
-                CharacterDevice.enableGadget();
-            } else {
-                CharacterDevice.disableGadget();
-            }
-        });
-
         return true;
     }
 

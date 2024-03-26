@@ -53,7 +53,7 @@
     <!-- Onboarding Activity -->
     <string name="onboarding_title">Initial Setup</string>
     <string name="onboarding_header">Before you start using the app…</string>
-    <string name="onboarding_notice">For technical reasons, either Android\'s standard USB gadget OR this app\'s keyboard/mouse USB gadget may be enabled, not both at once.\n\nThis means that while this app is active, you may not use features like USB debugging, USB tethering, or any other options that show in the little notification that pops up when you normally plug your phone into another device. It\'ll still charge fine though.\n\nFor this reason, the app provides a switch on the top app bar that can be used to toggle the HID gadget. The switch understandably must be enabled for this app to work.</string>
+    <string name="onboarding_notice">Any mention of \"Direct Input\" refers to the keyboard icon in the menu bar that can be selected to pull up your keyboard and relay your keystrokes in real-time.\n\nAny mention \"Manual Input\" refers to the textbox that you can put text into and have it send all at once when you click the button beside it.</string>
     <string name="onboarding_onboarding_prompt_action_description">When something goes wrong, the app normally prompts the user. Rather than doing this, would you prefer the app to attempt to silently fix the issue in the background instead?</string>
     <string name="onboarding_continue_btn">Continue</string>
     <string name="menu_toggle_hid_gadget">Toggle HID Gadget</string>
