@@ -35,7 +35,6 @@ import timber.log.Timber;
 //  - improve touchpad click handling
 //      - I want a single tap to be sent immediately, I don't want to handle double taps or anything like that
 //      - However, if multiple fingers tap at once, I do want to handle that in a special way (2 = right click, 3 = middle click)
-//  - Convert my customized Views into fully custom View subclasses to move that code out of this cluttered MainActivity
 
 // Notes on terminology:
 // 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
@@ -43,6 +42,7 @@ import timber.log.Timber;
 // 		be considered the "unshifted" keys.
 public class MainActivity extends AppCompatActivity {
     private View parentLayout;
+    private DirectInputKeyboardView etDirectInput;
 
     private SharedPreferences preferences;
 
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         // Set up input Views
         final Button btnSubmit = findViewById(R.id.btnKeyboard);
         final EditText etManualInput = findViewById(R.id.etManualInput);
-        final DirectInputKeyboardView etDirectInput = findViewById(R.id.etDirectInput);
+        etDirectInput = findViewById(R.id.etDirectInput);
         final TouchpadView touchpad = findViewById(R.id.tvTouchpad);
 
         setupManualKeyboardInput(etManualInput, btnSubmit, keySender);
@@ -131,28 +131,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupDirectKeyboardInput(DirectInputKeyboardView etDirectInput, KeySender keySender) {
         etDirectInput.setKeyListeners(keySender);
-
-        // TODO: move these two method calls below into DirectInputKeyboardView eventually
-        // Show soft keyboard when Direct Input gets focus
-        etDirectInput.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus) {
-                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                etDirectInput.postDelayed(() -> {
-                    etDirectInput.requestFocus();
-                    imm.showSoftInput(etDirectInput, 0);
-                }, 100);
-            }
-        });
-
-        // Sometimes the keyboard closes while focus is maintained, in which case, the above code
-        // won't work, so this works in that case
-        etDirectInput.setOnClickListener(v -> {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            etDirectInput.postDelayed(() -> {
-                etDirectInput.requestFocus();
-                imm.showSoftInput(etDirectInput, 0);
-            }, 100);
-        });
     }
 
     // Inflate the options menu when the user opens it for the first time
@@ -167,7 +145,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
 
-        if (itemId == R.id.menuSettings) {
+        if (itemId == R.id.menuDirectInput) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            etDirectInput.postDelayed(() -> {
+                etDirectInput.requestFocus();
+                imm.showSoftInput(etDirectInput, 0);
+            }, 100);
+        } else if (itemId == R.id.menuSettings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         } else if (itemId == R.id.menuHelp) {

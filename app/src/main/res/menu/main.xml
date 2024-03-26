@@ -2,6 +2,11 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:title="@string/direct_input"
+        android:id="@+id/menuDirectInput"
+        android:icon="@drawable/keyboard"
+        app:showAsAction="ifRoom" />
+
     <item android:title="@string/settings"
         android:id="@+id/menuSettings"
         android:orderInCategory="100"

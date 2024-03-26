@@ -9,60 +9,59 @@
 
     <EditText
         android:id="@+id/etManualInput"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_normal"
-        android:layout_marginTop="@dimen/margin_normal"
+        android:layout_margin="@dimen/margin_normal"
         android:autofillHints="emailAddress,name"
-        android:ems="10"
         android:gravity="start|top"
         android:hint="@string/manual_input"
         android:inputType="textMultiLine"
-        android:minHeight="48dp"
+        android:minHeight="@dimen/margin_xxlarge"
         android:textColorHint="#757575"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@+id/btnKeyboard"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="488dp" />
 
     <Button
         android:id="@+id/btnKeyboard"
-        android:layout_width="82dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="@dimen/margin_normal"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/margin_xxlarge"
+        android:layout_margin="@dimen/margin_normal"
+        android:maxWidth="80dp"
         android:text="@string/send"
-        app:layout_constraintStart_toEndOf="@+id/etManualInput"
-        app:layout_constraintTop_toTopOf="@+id/etManualInput"
-        tools:ignore="SpeakableTextPresentCheck" />
+        app:layout_constraintBottom_toBottomOf="@+id/etManualInput"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/etManualInput" />
 
     <me.arianb.usb_hid_client.input_views.DirectInputKeyboardView
         android:id="@+id/etDirectInput"
+        android:screenReaderFocusable="false"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_xxlarge"
-        android:ems="10"
-        android:hint="@string/direct_input"
+        android:text=""
         android:importantForAutofill="no"
         android:inputType="textMultiLine"
-        android:minHeight="48dp"
-        android:text=""
-        android:textColorHint="#757575"
+        android:hint=""
         app:layout_constraintStart_toStartOf="@+id/etManualInput"
         app:layout_constraintTop_toBottomOf="@+id/etManualInput" />
 
     <me.arianb.usb_hid_client.input_views.TouchpadView
         android:id="@+id/tvTouchpad"
         android:layout_width="match_parent"
-        android:layout_height="400dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="16dp"
-        android:background="@android:color/darker_gray"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/margin_normal"
+        android:background="@color/material_dynamic_neutral30"
         android:fadingEdge="vertical"
         android:gravity="center"
         android:text="@string/touchpad_label"
         android:textAlignment="center"
-        android:textSize="24sp"
+        android:textSize="@dimen/fontsize_xlarge"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etDirectInput" />
+        app:layout_constraintTop_toBottomOf="@+id/etManualInput" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
