@@ -21,9 +21,9 @@ output.json
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+/.idea/misc.xml
+/.idea/deploymentTargetDropDown.xml
+#render.experimental.xml
 
 # Log/OS Files
 *.log
