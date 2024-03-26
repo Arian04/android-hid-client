@@ -34,28 +34,6 @@
         app:layout_constraintTop_toBottomOf="@id/tvOnboardingTitle" />
 
     <TextView
-        android:id="@+id/tvOnboardingCreateCharDevice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_xxlarge"
-        android:layout_marginEnd="@dimen/margin_normal"
-        android:text="@string/onboarding_create_character_device_description"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintStart_toStartOf="@id/tvOnboardingNotice"
-        app:layout_constraintEnd_toStartOf="@id/btnOnboardingCreateCharDevice"
-        app:layout_constraintTop_toBottomOf="@id/tvOnboardingNotice" />
-
-    <Button
-        android:id="@+id/btnOnboardingCreateCharDevice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/margin_normal"
-        android:text="@string/onboarding_create_character_device_btn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvOnboardingCreateCharDevice"
-        app:layout_constraintBottom_toBottomOf="@id/tvOnboardingCreateCharDevice" />
-
-    <TextView
         android:id="@+id/tvOnboardingErrorPrompt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -63,8 +41,8 @@
         android:text="@string/onboarding_onboarding_prompt_action_description"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toStartOf="@id/radioGroupErrorPromptAction"
-        app:layout_constraintStart_toStartOf="@id/tvOnboardingCreateCharDevice"
-        app:layout_constraintTop_toBottomOf="@id/tvOnboardingCreateCharDevice" />
+        app:layout_constraintStart_toStartOf="@id/tvOnboardingNotice"
+        app:layout_constraintTop_toBottomOf="@id/tvOnboardingNotice" />
 
     <RadioGroup
         android:id="@+id/radioGroupErrorPromptAction"
