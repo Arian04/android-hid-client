@@ -56,5 +56,4 @@
     <string name="onboarding_notice">Any mention of \"Direct Input\" refers to the keyboard icon in the menu bar that can be selected to pull up your keyboard and relay your keystrokes in real-time.\n\nAny mention \"Manual Input\" refers to the textbox that you can put text into and have it send all at once when you click the button beside it.</string>
     <string name="onboarding_onboarding_prompt_action_description">When something goes wrong, the app normally prompts the user. Rather than doing this, would you prefer the app to attempt to silently fix the issue in the background instead?</string>
     <string name="onboarding_continue_btn">Continue</string>
-    <string name="menu_toggle_hid_gadget">Toggle HID Gadget</string>
 </resources>
