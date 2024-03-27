@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="direct_input">直接输入</string>
+    <string name="manual_input">手动输入</string>
+    <string name="send">发送</string>
+    <string name="settings">设置</string>
+    <string name="help">帮助</string>
+    <string name="info">关于</string>
+    <string name="misc_header">杂项</string>
+    <string name="debug_header">调试</string>
+    <string name="clear_manual_input_title">发送后自动清空输入框内容</string>
+    <string name="volume_button_passthrough_title">音量按钮透传</string>
+    <string name="volume_button_passthrough_summary">按下音量按钮时更改已连接设备的音量（仅在直接输入启用时适用）</string>
+    <string name="error_action_ask_every_time">每次均询问</string>
+    <string name="error_action_fix">修复</string>
+    <string name="debug_mode_title">调试模式</string>
+    <string name="debug_mode_summary">为调试启用日志信息</string>
+    <string name="debug_mode_key">debug_mode</string>
+    <string name="export_debug_logs_btn_title">导出调试日志</string>
+    <string name="export_debug_logs_btn_summary">启用调试模式以记录用于导出的日志\n\n这个仅在开发者要求提供日志时启用</string>
+    <string name="export_debug_logs_btn_key">导出调试日志按钮</string>
+    <string name="info_icon_description">应用图标（键盘）</string>
+    <string name="info_description">这个软件可以将你的手机变为一个模拟键盘进而控制连接的设备而不需要在受控设备上安装额外的软件，甚至可以用于操作连接设备的BIOS或UEFI设置！</string>
+    <string name="info_source">源代码可在 <a href="https://github.com/Arian04/android-hid-client">此处</a> 查看</string>
+    <string name="help_faq_q1">我如何提交BUG反馈和功能建议？</string>
+    <string name="help_faq_a1">你可以在<a href="https://github.com/Arian04/android-hid-client/issues">这里</a>创建issue. 确保这样的问题并未被提及过</string>
+    <string name="help_faq_q2">如何用好这个软件？</string>
+    <string name="help_faq_a2">手动输入: 在输入框中输入要发送的字符并点击“发送”按钮，此时输入的字符就会发送到连接的设备\n\n直接输入: 在输入框中输入的字符会向连接的设备实时发送</string>
+    <string name="help_faq_q3">这个软件似乎出问题了，怎么做？</string>
+    <string name="help_faq_a3">首先，确保你的设备满足在 <a href="https://github.com/Arian04/android-hid-client#prerequisites">这里</a> 列出的全部要求并阅读软件使用问答. 若软件不起作用，我推荐按照上述内容提交BUG反馈</string>
+    <string name="onboarding_title">初始配置</string>
+    <string name="onboarding_header">开始之前…</string>
+    <string name="onboarding_create_character_device_description">点击此处创建运行此软件必要的设备. 仅在你真的清楚自己在做什么时忽略此步骤.</string>
+    <string name="onboarding_create_character_device_btn">创建</string>
+    <string name="onboarding_onboarding_prompt_action_description">当应用启动时出现问题而导致字符设备不存在，应用通常会提醒用户. 与其如此，你是否希望应用在后台自动修复问题？</string>
+    <string name="onboarding_continue_btn">继续</string>
+</resources>
