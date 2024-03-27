@@ -30,8 +30,6 @@
     <string name="help_faq_a3">首先，确保你的设备满足在 <a href="https://github.com/Arian04/android-hid-client#prerequisites">这里</a> 列出的全部要求并阅读软件使用问答. 若软件不起作用，我推荐按照上述内容提交BUG反馈</string>
     <string name="onboarding_title">初始配置</string>
     <string name="onboarding_header">开始之前…</string>
-    <string name="onboarding_create_character_device_description">点击此处创建运行此软件必要的设备. 仅在你真的清楚自己在做什么时忽略此步骤.</string>
-    <string name="onboarding_create_character_device_btn">创建</string>
     <string name="onboarding_onboarding_prompt_action_description">当应用启动时出现问题而导致字符设备不存在，应用通常会提醒用户. 与其如此，你是否希望应用在后台自动修复问题？</string>
     <string name="onboarding_continue_btn">继续</string>
 </resources>
