@@ -19,7 +19,7 @@ public record ShellCommand(String[] command, int exitCode, String stdout, String
                 "-c",
                 "'" + command + "'"
         };
-        return runShellCommand(fullCommand, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
+        return runShellCommand(fullCommand);
     }
 
     public static ShellCommand runAsRoot(String[] command) throws IOException, InterruptedException {
@@ -27,23 +27,27 @@ public record ShellCommand(String[] command, int exitCode, String stdout, String
                 RootState.SU_BINARY,
                 "-c",
         }, command);
-        return runShellCommand(fullCommand, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
+        return runShellCommand(fullCommand);
     }
 
     public static ShellCommand run(String[] command) throws IOException, InterruptedException {
-        return runShellCommand(command, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
+        return runShellCommand(command);
     }
 
-    private static ShellCommand runShellCommand(String[] command, long timeout, TimeUnit unit) throws IOException, InterruptedException {
+    private static ShellCommand runShellCommand(String[] command) throws IOException, InterruptedException {
         Timber.d("running command: %s", Arrays.toString(command));
 
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command(command);
 
         final Process shellProcess = processBuilder.start();
-        if (!shellProcess.waitFor(timeout, unit)) {
-            Timber.e("Command timed out after: %s %s", timeout, unit);
+        if (!shellProcess.waitFor(DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT)) {
+            Timber.e("Command timed out after: %s %s", DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
             shellProcess.destroyForcibly();
+            if (!shellProcess.waitFor(DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT)) {
+                Timber.e("Forceful destruction of command process timed out after: %s %s", DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
+                throw new IOException("Forceful destruction of command process timed out");
+            }
         }
 
         // NOTE: stdout and stdin stream names are weirdly the opposite of what you'd expect

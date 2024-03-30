@@ -48,6 +48,10 @@ public class RootShell {
             if (!shellProcess.waitFor(DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT)) {
                 Timber.e("Command timed out after: %s %s", DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
                 shellProcess.destroyForcibly();
+                if (!shellProcess.waitFor(DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT)) {
+                    Timber.e("Forceful destruction of command process timed out after: %s %s", DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_UNIT);
+                    throw new IOException("Forceful destruction of command process timed out");
+                }
             }
         } catch (InterruptedException e) {
             Timber.e("Failed to close shell");
