@@ -14,7 +14,11 @@ import androidx.core.view.GestureDetectorCompat;
 import me.arianb.usb_hid_client.report_senders.MouseSender;
 import timber.log.Timber;
 
-// TODO: address this linting issue
+// TODO:
+//  - improve touchpad click handling
+//      - I want a single tap to be sent immediately, I don't want to handle double taps or anything like that
+//      - However, if multiple fingers tap at once, I do want to handle that in a special way (2 = right click, 3 = middle click)
+//  - address the linting issue below
 @SuppressLint("ClickableViewAccessibility")
 public class TouchpadView extends androidx.appcompat.widget.AppCompatTextView {
     private VelocityTracker mVelocityTracker = null;

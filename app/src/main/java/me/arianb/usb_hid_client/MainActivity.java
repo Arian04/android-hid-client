@@ -31,11 +31,6 @@ import timber.log.Timber;
 
 // TODO:
 //  - properly handle the case of the app not being given root permissions. Currently it just fails a lot.
-//  - add a switch in the app for disabling/enabling the character device so you can use USB debugging again
-//  - improve UI a lot
-//  - improve touchpad click handling
-//      - I want a single tap to be sent immediately, I don't want to handle double taps or anything like that
-//      - However, if multiple fingers tap at once, I do want to handle that in a special way (2 = right click, 3 = middle click)
 
 // Notes on terminology:
 // 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)

@@ -58,6 +58,10 @@ public class SettingsActivity extends AppCompatActivity {
                         }
 
                         try {
+                            // TODO: after coming back to this at a later date, I think I should change this to not use
+                            //       root because a permission prompt is (imo) better than unnecessarily using root, because
+                            //       my app only really requires root at character device creation time + for fixing their
+                            //       permissions.
                             // Get logs
                             // Using root to get logs instead of just $(logcat) because it was prompting
                             // the user asking for permission to view logs and I don't feel that's necessary
