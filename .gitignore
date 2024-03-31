@@ -7,11 +7,10 @@
 local.properties
 
 # Android Studio generated files and folders
+app/release
 captures/
-.externalNativeBuild/
-.cxx/
-*.apk
-output.json
+#.externalNativeBuild/
+#.cxx/
 
 # IntelliJ
 *.iml
