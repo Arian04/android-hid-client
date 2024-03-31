@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         // Set up input Views
         final Button btnSubmit = findViewById(R.id.btnKeyboard);
         final EditText etManualInput = findViewById(R.id.etManualInput);
-        etDirectInput = findViewById(R.id.etDirectInput);
+        etDirectInput = findViewById(R.id.etDirectInput); // can't be a local var because menu item needs access to it
         final TouchpadView touchpad = findViewById(R.id.tvTouchpad);
 
         setupManualKeyboardInput(etManualInput, btnSubmit, keySender);
