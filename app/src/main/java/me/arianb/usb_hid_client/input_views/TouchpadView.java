@@ -43,8 +43,7 @@ public class TouchpadView extends androidx.appcompat.widget.AppCompatTextView {
             public boolean onSingleTapConfirmed(@NonNull MotionEvent event) {
                 Timber.d("onSingleTapConfirmed: %s", event);
 
-                byte button = MouseSender.MOUSE_BUTTON_LEFT;
-                mouseSender.addReport(button, (byte) 0, (byte) 0);
+                mouseSender.click(MouseSender.MOUSE_BUTTON_LEFT);
 
                 return true;
             }
@@ -60,7 +59,7 @@ public class TouchpadView extends androidx.appcompat.widget.AppCompatTextView {
             int pointerId = motionEvent.getPointerId(index);
             byte button; // unknown at this point
 
-            Timber.d("motionEvent %d (x, y): (%f, %f)", action, motionEvent.getX(), motionEvent.getY());
+            //Timber.d("motionEvent %d (x, y): (%f, %f)", action, motionEvent.getX(), motionEvent.getY());
 
             switch (action) {
                 case MotionEvent.ACTION_POINTER_DOWN:
@@ -69,8 +68,7 @@ public class TouchpadView extends androidx.appcompat.widget.AppCompatTextView {
 
                     switch (POINTER_COUNT) {
                         case 2:
-                            button = MouseSender.MOUSE_BUTTON_RIGHT;
-                            mouseSender.addReport(button, (byte) 0, (byte) 0);
+                            mouseSender.click(MouseSender.MOUSE_BUTTON_RIGHT);
                             break;
 //                            case 3: // FIXME: apparently, case 2 gets triggered right before case 3 gets triggered, gotta add a little timeout ig to differentiate
 //                                button = MouseSender.MOUSE_BUTTON_MIDDLE;
@@ -97,19 +95,18 @@ public class TouchpadView extends androidx.appcompat.widget.AppCompatTextView {
                     mVelocityTracker.computeCurrentVelocity(10, Byte.MAX_VALUE);
                     float xVelocity = mVelocityTracker.getXVelocity(pointerId);
                     float yVelocity = mVelocityTracker.getYVelocity(pointerId);
-                    Timber.d("X,Y velocity: (%s,%s)", xVelocity, yVelocity);
+                    //Timber.d("X,Y velocity: (%s,%s)", xVelocity, yVelocity);
 
                     // Scale up velocities < 1 in magnitude (accounting for deadzone) to allow for precise movements
                     xVelocity = scaleWithDeadzone(xVelocity);
                     yVelocity = scaleWithDeadzone(yVelocity);
 
                     // No button clicked (not handled in this section of code)
-                    button = MouseSender.MOUSE_BUTTON_NONE;
                     byte x = (byte) xVelocity;
                     byte y = (byte) yVelocity;
-                    Timber.d("NEW X,Y velocity: (%s,%s)", x, y);
+                    //Timber.d("NEW X,Y velocity: (%s,%s)", x, y);
 
-                    mouseSender.addReport(button, x, y);
+                    mouseSender.move(x, y);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_POINTER_UP:

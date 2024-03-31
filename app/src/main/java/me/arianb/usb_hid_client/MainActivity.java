@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 byte modifierScanCode = tempScanCodes[0];
                 byte keyScanCode = tempScanCodes[1];
 
-                keySender.addKey(modifierScanCode, keyScanCode, KeySender.STANDARD_KEY);
+                keySender.addStandardKey(modifierScanCode, keyScanCode);
             }
         });
     }

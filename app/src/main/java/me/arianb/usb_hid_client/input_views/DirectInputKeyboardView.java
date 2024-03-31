@@ -126,26 +126,26 @@ public class DirectInputKeyboardView extends androidx.appcompat.widget.AppCompat
 
             Byte volumeScanCode = hidMediaKeyCodes.get(keyEventKeys.get(keyCode));
             if (volumeScanCode != null) {
-                keySender.addKey((byte) 0, volumeScanCode, KeySender.MEDIA_KEY);
+                keySender.addMediaKey(volumeScanCode);
                 return;
             } else {
                 Timber.e("keycode (%s) not found in hidMediaKeyCodes map", keyCode);
             }
         }
 
-        byte[] tempHIDCodes = convertKeyToScanCodes(keyEventKeys.get(keyCode));
+        byte[] tempScanCodeBytes = convertKeyToScanCodes(keyEventKeys.get(keyCode));
 
         // If convertKeyToScanCodes returns null then an error has occurred in translation
-        if (tempHIDCodes == null) {
+        if (tempScanCodeBytes == null) {
             String error = "key: '" + keyEventKeys.get(keyCode) + "' is not supported.";
             Timber.e(error);
             Snackbar.make(parentLayout, error, Snackbar.LENGTH_SHORT).show();
             return;
         }
-        byte keyHIDCode = tempHIDCodes[1];
+        byte keyScanCode = tempScanCodeBytes[1];
 
         // Add modifier to set (bypass toggle method because I don't want this to toggle it
-        modifiers.add(tempHIDCodes[0]);
+        modifiers.add(tempScanCodeBytes[0]);
 
         // Sum all modifiers in modifiers Set
         Iterator<Byte> modifiersIterator = modifiers.iterator();
@@ -154,8 +154,8 @@ public class DirectInputKeyboardView extends androidx.appcompat.widget.AppCompat
             modifiersSum += modifiersIterator.next();
         }
 
-        byte modifierHIDCode = modifiersSum;
-        keySender.addKey(modifierHIDCode, keyHIDCode, KeySender.STANDARD_KEY);
+        byte modifierScanCode = modifiersSum;
+        keySender.addStandardKey(modifierScanCode, keyScanCode);
         modifiers.clear();
     }
 
