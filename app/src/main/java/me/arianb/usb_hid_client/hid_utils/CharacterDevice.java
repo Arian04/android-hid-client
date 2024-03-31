@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 import me.arianb.usb_hid_client.R;
@@ -20,17 +22,20 @@ public class CharacterDevice {
     // character device paths
     public static final String KEYBOARD_DEVICE_PATH = "/dev/hidg0";
     public static final String MOUSE_DEVICE_PATH = "/dev/hidg1";
+    public static final List<String> ALL_CHARACTER_DEVICE_PATHS = Arrays.asList(KEYBOARD_DEVICE_PATH, MOUSE_DEVICE_PATH);
+
+    private static final String SCRIPT_FILENAME = "create_char_devices.sh";
 
     private final Context appContext;
     private final int appUID;
 
     public CharacterDevice(Context context) {
-        this.appContext = context;
+        appContext = context;
         appUID = context.getApplicationInfo().uid;
     }
 
     public static boolean characterDeviceMissing(String charDevicePath) {
-        if (!(charDevicePath.equals(KEYBOARD_DEVICE_PATH) || charDevicePath.equals(MOUSE_DEVICE_PATH))) {
+        if (!(ALL_CHARACTER_DEVICE_PATHS.contains(charDevicePath))) {
             return true;
         }
         return !new File(charDevicePath).exists();
@@ -38,7 +43,6 @@ public class CharacterDevice {
 
     // TODO: add more error handling
     public boolean createCharacterDevice() {
-        final String SCRIPT_FILENAME = "create_char_devices.sh";
         final String SCRIPT_PATH = appContext.getFilesDir().getPath() + "/" + SCRIPT_FILENAME;
 
         // TODO: change this to copy over in chunks. Doesn't really matter right now since I'm copying
@@ -90,8 +94,8 @@ public class CharacterDevice {
             // Set SELinux permissions -> only my app's selinux context can r/w to the char device
             final String SELINUX_CATEGORIES = getSelinuxCategories();
             final String SELINUX_DOMAIN = "appdomain";
-            final String selinuxPolicy = String.format("allow %s device chr_file { getattr open write }", SELINUX_DOMAIN);
-            fixPermissionsShell.addSelinuxPolicy(selinuxPolicy);
+            final String SELINUX_POLICY = String.format("allow %s device chr_file { getattr open write }", SELINUX_DOMAIN);
+            fixPermissionsShell.addSelinuxPolicy(SELINUX_POLICY);
             fixPermissionsShell.run(String.format(Locale.US, "chcon u:object_r:device:s0:%s %s", SELINUX_CATEGORIES, device));
 
             fixPermissionsShell.close();
