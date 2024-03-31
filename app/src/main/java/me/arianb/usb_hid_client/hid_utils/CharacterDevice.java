@@ -12,8 +12,10 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeoutException;
 
 import me.arianb.usb_hid_client.R;
+import me.arianb.usb_hid_client.shell_utils.NoRootPermissionsException;
 import me.arianb.usb_hid_client.shell_utils.RootShell;
 import me.arianb.usb_hid_client.shell_utils.ShellCommand;
 import timber.log.Timber;
@@ -41,8 +43,16 @@ public class CharacterDevice {
         return !new File(charDevicePath).exists();
     }
 
-    // TODO: add more error handling
-    public boolean createCharacterDevice() {
+    public static boolean anyCharacterDeviceMissing() {
+        for (String charDevicePath : ALL_CHARACTER_DEVICE_PATHS) {
+            if (!new File(charDevicePath).exists()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean createCharacterDevice() throws NoRootPermissionsException {
         final String SCRIPT_PATH = appContext.getFilesDir().getPath() + "/" + SCRIPT_FILENAME;
 
         // TODO: change this to copy over in chunks. Doesn't really matter right now since I'm copying
@@ -69,6 +79,7 @@ public class CharacterDevice {
         scriptFile.setExecutable(true);
 
         try {
+            // Run script to create character devices
             ShellCommand createCharDevice = ShellCommand.runAsRoot(SCRIPT_PATH);
             Timber.d("create device script: stdout=%s,stderr=%s", createCharDevice.stdout(), createCharDevice.stderr());
         } catch (IOException | InterruptedException e) {
@@ -77,13 +88,49 @@ public class CharacterDevice {
             return false;
         }
 
-        boolean returnVal;
-        returnVal = fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH);
-        returnVal = fixCharacterDevicePermissions(MOUSE_DEVICE_PATH) && returnVal;
-        return returnVal;
+        // TODO: improve this code
+        //  - switch to WatchService
+        //  - make it not run on the main thread
+        try {
+            // Verify that character devices exist, exiting if they don't exist after TIMEOUT milliseconds.
+            // during my testing it took around 500ms for the devices to show up
+            boolean keyboardDeviceCreated = false;
+            boolean mouseDeviceCreated = false;
+            final long TIMEOUT = 1000;
+            final long startTimeMillis = System.currentTimeMillis();
+            while (!(keyboardDeviceCreated && mouseDeviceCreated)) {
+                if (!keyboardDeviceCreated) {
+                    if (new File(KEYBOARD_DEVICE_PATH).exists()) {
+                        keyboardDeviceCreated = true;
+                    } else {
+                        Timber.d("keyboard device missing!!");
+                    }
+                }
+                if (!mouseDeviceCreated) {
+                    if (new File(MOUSE_DEVICE_PATH).exists()) {
+                        mouseDeviceCreated = true;
+                    } else {
+                        Timber.d("mouse device missing!!");
+                    }
+                }
+
+                final long timeElapsedMillis = System.currentTimeMillis() - startTimeMillis;
+                if (timeElapsedMillis > TIMEOUT) {
+                    throw new TimeoutException();
+                }
+            }
+        } catch (TimeoutException e) {
+            Timber.e("Shell script ran, but character devices were not created.");
+            Timber.e(Log.getStackTraceString(e));
+            return false;
+        }
+
+        fixCharacterDevicePermissions(KEYBOARD_DEVICE_PATH);
+        fixCharacterDevicePermissions(MOUSE_DEVICE_PATH);
+        return true;
     }
 
-    public boolean fixCharacterDevicePermissions(String device) {
+    public boolean fixCharacterDevicePermissions(String device) throws NoRootPermissionsException {
         try {
             RootShell fixPermissionsShell = new RootShell();
 

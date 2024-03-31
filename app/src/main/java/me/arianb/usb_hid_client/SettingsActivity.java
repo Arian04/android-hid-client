@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Locale;
 
+import me.arianb.usb_hid_client.shell_utils.NoRootPermissionsException;
 import me.arianb.usb_hid_client.shell_utils.ShellCommand;
 import timber.log.Timber;
 
@@ -86,6 +87,9 @@ public class SettingsActivity extends AppCompatActivity {
                         } catch (IOException | InterruptedException e) {
                             Timber.e("Error occurred while exporting logs");
                             Timber.e(Log.getStackTraceString(e));
+                        } catch (NoRootPermissionsException e) {
+                            Timber.e("Failed to export logs, missing root permissions");
+                            Snackbar.make(requireView(), "ERROR: Missing root permissions.", Snackbar.LENGTH_INDEFINITE).show();
                         }
                     });
 

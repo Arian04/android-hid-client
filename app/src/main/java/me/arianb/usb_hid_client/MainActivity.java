@@ -1,6 +1,6 @@
 package me.arianb.usb_hid_client;
 
-import static me.arianb.usb_hid_client.hid_utils.CharacterDevice.KEYBOARD_DEVICE_PATH;
+import static me.arianb.usb_hid_client.hid_utils.CharacterDevice.anyCharacterDeviceMissing;
 import static me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation.convertKeyToScanCodes;
 
 import android.content.Context;
@@ -17,7 +17,6 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -27,15 +26,15 @@ import me.arianb.usb_hid_client.input_views.DirectInputKeyboardView;
 import me.arianb.usb_hid_client.input_views.TouchpadView;
 import me.arianb.usb_hid_client.report_senders.KeySender;
 import me.arianb.usb_hid_client.report_senders.MouseSender;
+import me.arianb.usb_hid_client.shell_utils.NoRootPermissionsException;
 import timber.log.Timber;
 
-// TODO:
-//  - properly handle the case of the app not being given root permissions. Currently it just fails a lot.
+// TODO: move all misc strings used in snackbars and alerts throughout the app into strings.xml for translation purposes.
 
 // Notes on terminology:
-// 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift, etc.)
-// 		will be referred to as a "shifted" key. In the previous example, 2, 4, and ] would
-// 		be considered the "unshifted" keys.
+// 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift)
+// 		will be referred to as a "shifted" key. In the previous example, 2, 4, and ] would be considered
+// 		the "un-shifted" keys.
 public class MainActivity extends AppCompatActivity {
     private View parentLayout;
     private DirectInputKeyboardView etDirectInput;
@@ -83,8 +82,11 @@ public class MainActivity extends AppCompatActivity {
         setupDirectKeyboardInput(etDirectInput, keySender);
         touchpad.setTouchListeners(mouseSender);
 
-        if (onboardingDone) {
-            promptUserIfNonExistentCharacterDevice();
+        // TODO: if this fails here, I need to make it incredibly clear that the app will not work.
+        //       right now, you can still try to use it and it'll fail. It should just "lock" the inputs
+        //       if this fails I think.
+        if (anyCharacterDeviceMissing()) {
+            showCreateCharDevicesPrompt();
         }
     }
 
@@ -160,29 +162,52 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void promptUserIfNonExistentCharacterDevice() {
+    private void showCreateCharDevicesPrompt() {
         String default_prompt_action_pref = preferences.getString("issue_prompt_action", "Ask Every Time");
+
         // Warns user if character device doesn't exist and shows a button to fix it
-        if (CharacterDevice.characterDeviceMissing(KEYBOARD_DEVICE_PATH)) {
-            if (default_prompt_action_pref.equals("Fix")) {
+        if (default_prompt_action_pref.equals("Fix")) {
+            try {
                 if (!characterDevice.createCharacterDevice()) {
-                    Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_INDEFINITE).show();
                 }
-            } else { // If pref isn't "fix" then it's "ask every time", so ask
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Error: Nonexistent character device");
-                builder.setMessage(String.format("%s does not exist, would you like for it to be created for you?\n\n" +
-                        "Don't decline unless you would rather create it yourself and know how to do that.", KEYBOARD_DEVICE_PATH));
-                builder.setPositiveButton("YES", (dialog, which) -> {
-                    if (!characterDevice.createCharacterDevice()) {
-                        Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_SHORT).show();
-                    }
-                    dialog.dismiss();
-                });
-                builder.setNegativeButton("NO", null);
-                AlertDialog alert = builder.create();
-                alert.show();
+            } catch (NoRootPermissionsException e) {
+                Timber.e("Failed to create character device, missing root permissions");
+                Snackbar.make(parentLayout, "ERROR: Missing root permissions.", Snackbar.LENGTH_INDEFINITE).show();
             }
+        } else { // If pref isn't "fix" then it's "ask every time", so ask
+            AlertDialog.Builder builder = getCreateCharDevicesAlert();
+            builder.show();
         }
+    }
+
+    @NonNull
+    private AlertDialog.Builder getCreateCharDevicesAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Character device(s) do not exist");
+        builder.setMessage("Add HID functions to the default USB gadget? This must be re-done after every reboot.\n\n**The app will not work if you decline**");
+
+        builder.setPositiveButton("YES", (dialog, which) -> {
+            try {
+                if (!characterDevice.createCharacterDevice()) {
+                    Snackbar.make(parentLayout, "ERROR: Failed to create character device.", Snackbar.LENGTH_INDEFINITE).show();
+                }
+            } catch (NoRootPermissionsException e) {
+                Timber.e("Failed to create character device, missing root permissions");
+                Snackbar.make(parentLayout, "ERROR: Missing root permissions.", Snackbar.LENGTH_INDEFINITE).show();
+            } finally {
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("NO", (dialog, which) -> {
+            this.finish(); // Exit app
+
+        });
+
+        // The response to this dialog is critical for the app to function, so don't let user skip it.
+        builder.setCancelable(false);
+
+        return builder;
     }
 }

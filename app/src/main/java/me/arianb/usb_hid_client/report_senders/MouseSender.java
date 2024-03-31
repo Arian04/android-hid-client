@@ -16,6 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import me.arianb.usb_hid_client.MainActivity;
 import me.arianb.usb_hid_client.hid_utils.CharacterDevice;
+import me.arianb.usb_hid_client.shell_utils.NoRootPermissionsException;
 import timber.log.Timber;
 
 public class MouseSender implements Runnable {
@@ -41,7 +42,7 @@ public class MouseSender implements Runnable {
         Timber.d("MouseSender thread started");
         while (!Thread.interrupted()) {
             queueLock.lock();
-            // Wait for the queue(s) to actually contain keys
+            // Wait for the queue(s) to actually contain mouse events
             if (reportQueue.isEmpty()) {
                 //Timber.d("Waiting for queue to not be empty.");
                 try {
@@ -76,7 +77,7 @@ public class MouseSender implements Runnable {
     private void writeHIDReport(String device, byte[] report) {
         // Check if character device exists
         if (CharacterDevice.characterDeviceMissing(device)) {
-            Timber.e("ERROR: Character device doesn't exist");
+            Timber.wtf("Character device doesn't exist. Its existence is verified on app start, so the only reason this should happen is if it was removed *after* the app started.");
             makeCreateCharDeviceSnackbar();
             return;
         }
@@ -86,30 +87,48 @@ public class MouseSender implements Runnable {
             outputStream.write(report);
         } catch (IOException e) {
             String stacktrace = Log.getStackTraceString(e);
+            Timber.e(stacktrace);
             if (stacktrace.toLowerCase().contains("errno 108")) {
-                makeSnackbar("ERROR: Your device seems to be disconnected. If not, try reseating the USB cable", Snackbar.LENGTH_LONG);
+                showSnackbar("ERROR: Your device seems to be disconnected. If not, try reseating the USB cable", Snackbar.LENGTH_LONG);
             } else if (stacktrace.toLowerCase().contains("permission denied")) {
                 makeFixCharDevicePermissionsSnackbar(device);
             } else {
-                makeSnackbar("ERROR: Failed to send key.", Snackbar.LENGTH_SHORT);
+                showSnackbar("ERROR: Failed to send mouse report.", Snackbar.LENGTH_SHORT);
             }
-            Timber.e(stacktrace);
         }
     }
 
-    public void makeSnackbar(String message, int length) {
-        Snackbar.make(parentLayout, message, length).show();
+    private Snackbar getSnackbar(String message, int length) {
+        return Snackbar.make(parentLayout, message, length);
     }
 
-    public void makeCreateCharDeviceSnackbar() {
-        Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device doesn't exist.", Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("FIX", v -> MainActivity.characterDevice.createCharacterDevice());
+    private void showSnackbar(String message, int length) {
+        getSnackbar(message, length).show();
+    }
+
+    private void makeCreateCharDeviceSnackbar() {
+        Snackbar snackbar = getSnackbar("ERROR: Character device has disappeared since the app was started.", Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("RECREATE", v -> {
+            try {
+                MainActivity.characterDevice.createCharacterDevice();
+            } catch (NoRootPermissionsException e) {
+                Timber.e("Failed to create character device, missing root permissions");
+                Snackbar.make(parentLayout, "ERROR: Missing root permissions.", Snackbar.LENGTH_INDEFINITE).show();
+            }
+        });
         snackbar.show();
     }
 
     public void makeFixCharDevicePermissionsSnackbar(String devicePath) {
-        Snackbar snackbar = Snackbar.make(parentLayout, "ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("FIX", v -> MainActivity.characterDevice.fixCharacterDevicePermissions(devicePath));
+        Snackbar snackbar = getSnackbar("ERROR: Character device permissions seem incorrect.", Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("FIX", v -> {
+            try {
+                MainActivity.characterDevice.fixCharacterDevicePermissions(devicePath);
+            } catch (NoRootPermissionsException e) {
+                Timber.e("Failed to create character device, missing root permissions");
+                Snackbar.make(parentLayout, "ERROR: Missing root permissions.", Snackbar.LENGTH_INDEFINITE).show();
+            }
+        });
         snackbar.show();
     }
 }

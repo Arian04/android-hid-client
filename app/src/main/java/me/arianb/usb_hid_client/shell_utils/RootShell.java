@@ -19,7 +19,11 @@ public class RootShell {
     private final DataInputStream shellInputStream; // stdout
     private final DataInputStream shellErrorStream; // stderr
 
-    public RootShell() throws IOException {
+    public RootShell() throws IOException, NoRootPermissionsException {
+        if (RootState.getRootMethod() == RootState.RootMethod.UNROOTED) {
+            throw new NoRootPermissionsException();
+        }
+
         ProcessBuilder processBuilder = new ProcessBuilder(RootState.SU_BINARY);
 
         shellProcess = processBuilder.start();
@@ -62,13 +66,8 @@ public class RootShell {
     public int addSelinuxPolicy(String policy) throws IOException {
         String sepolicyCommand = RootState.getSepolicyCommand();
 
-        if (RootState.getRootMethod() == null) {
-            Timber.e("Unknown root method");
-            return 1;
-        }
-
         if (sepolicyCommand == null) {
-            Timber.e("Failed to get command for changing selinux policy");
+            Timber.e("Command for changing SELinux policy using this root method is unknown");
             return 1;
         }
 

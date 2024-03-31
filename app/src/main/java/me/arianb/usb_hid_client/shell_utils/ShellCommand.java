@@ -13,20 +13,15 @@ public record ShellCommand(String[] command, int exitCode, String stdout, String
     private static final long DEFAULT_TIMEOUT = 1;
     private static final TimeUnit DEFAULT_TIMEOUT_UNIT = TimeUnit.SECONDS;
 
-    public static ShellCommand runAsRoot(String command) throws IOException, InterruptedException {
+    public static ShellCommand runAsRoot(String command) throws IOException, InterruptedException, NoRootPermissionsException {
+        if (RootState.getRootMethod() == RootState.RootMethod.UNROOTED) {
+            throw new NoRootPermissionsException();
+        }
         String[] fullCommand = new String[]{
                 RootState.SU_BINARY,
                 "-c",
                 "'" + command + "'"
         };
-        return runShellCommand(fullCommand);
-    }
-
-    public static ShellCommand runAsRoot(String[] command) throws IOException, InterruptedException {
-        String[] fullCommand = mergeStringArrays(new String[]{
-                RootState.SU_BINARY,
-                "-c",
-        }, command);
         return runShellCommand(fullCommand);
     }
 
@@ -67,16 +62,11 @@ public record ShellCommand(String[] command, int exitCode, String stdout, String
         );
     }
 
-    public static ShellCommand addSelinuxPolicy(String policy) throws IOException, InterruptedException {
+    public static ShellCommand addSelinuxPolicy(String policy) throws IOException, InterruptedException, NoRootPermissionsException {
         String sepolicyCommand = RootState.getSepolicyCommand();
 
-        if (RootState.getRootMethod() == null) {
-            Timber.e("Unknown root method");
-            return null;
-        }
-
         if (sepolicyCommand == null) {
-            Timber.e("Failed to get command for changing selinux policy");
+            Timber.e("Command for changing SELinux policy using this root method is unknown");
             return null;
         }
 
