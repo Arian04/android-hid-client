@@ -7,7 +7,7 @@ import android.view.View;
 public class MouseSender extends ReportSender {
     public final static byte MOUSE_BUTTON_LEFT = 1;
     public final static byte MOUSE_BUTTON_RIGHT = 2;
-    public final static byte MOUSE_BUTTON_MIDDLE = 3;
+    public final static byte MOUSE_BUTTON_MIDDLE = 4;
 
     public MouseSender(View parentLayout) {
         super(MOUSE_DEVICE_PATH, false, parentLayout);
