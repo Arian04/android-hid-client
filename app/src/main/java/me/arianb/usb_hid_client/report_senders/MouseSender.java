@@ -5,9 +5,9 @@ import static me.arianb.usb_hid_client.hid_utils.CharacterDevice.MOUSE_DEVICE_PA
 import android.view.View;
 
 public class MouseSender extends ReportSender {
-    public final static byte MOUSE_BUTTON_LEFT = 1;
-    public final static byte MOUSE_BUTTON_RIGHT = 2;
-    public final static byte MOUSE_BUTTON_MIDDLE = 4;
+    public final static byte MOUSE_BUTTON_LEFT = 0b001;
+    public final static byte MOUSE_BUTTON_RIGHT = 0b010;
+    public final static byte MOUSE_BUTTON_MIDDLE = 0b100;
 
     public MouseSender(View parentLayout) {
         super(MOUSE_DEVICE_PATH, false, parentLayout);
