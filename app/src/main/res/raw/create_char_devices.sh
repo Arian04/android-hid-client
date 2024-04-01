@@ -22,6 +22,7 @@ mkdir -p $KB_FUNCTION_PATH
 cd $KB_FUNCTION_PATH || exit 1
 echo $KB_PROTOCOL > protocol
 echo $KB_SUBCLASS > subclass
+echo 1 > no_out_endpoint
 echo $KB_REPORT_LENGTH > report_length
 
 # shellcheck disable=SC2039
@@ -33,6 +34,7 @@ mkdir -p $MOUSE_FUNCTION_PATH
 cd $MOUSE_FUNCTION_PATH || exit 1
 echo $MOUSE_PROTOCOL > protocol
 echo $MOUSE_SUBCLASS > subclass
+echo 1 > no_out_endpoint
 echo $MOUSE_REPORT_LENGTH > report_length
 
 # shellcheck disable=SC2039
