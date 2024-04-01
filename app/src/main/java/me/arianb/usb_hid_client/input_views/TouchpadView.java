@@ -3,26 +3,23 @@ package me.arianb.usb_hid_client.input_views;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.GestureDetectorCompat;
 
 import me.arianb.usb_hid_client.report_senders.MouseSender;
 import timber.log.Timber;
 
-// TODO:
-//  - improve touchpad click handling
-//      - I want a single tap to be sent immediately, I don't want to handle double taps or anything like that
-//      - However, if multiple fingers tap at once, I do want to handle that in a special way (2 = right click, 3 = middle click)
-//  - address the linting issue below
+// TODO: address the linting issue below
 @SuppressLint("ClickableViewAccessibility")
 public class TouchpadView extends androidx.appcompat.widget.AppCompatTextView {
     private VelocityTracker mVelocityTracker = null;
     private static final float DEADZONE = 0.3F;
+
+    // Vars for tracking a single touch event, which I'm defining as: ACTION_DOWN, (anything), ACTION_UP
+    private int currentPointerCount;
 
     public TouchpadView(@NonNull Context context) {
         super(context);
@@ -37,80 +34,92 @@ public class TouchpadView extends androidx.appcompat.widget.AppCompatTextView {
     }
 
     public void setTouchListeners(MouseSender mouseSender) {
-        // TODO: on double click and drag, send report without "release" until sending release on finger up
-        GestureDetectorCompat gestureDetector = new GestureDetectorCompat(this.getContext(), new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onSingleTapConfirmed(@NonNull MotionEvent event) {
-                Timber.d("onSingleTapConfirmed: %s", event);
-
-                mouseSender.click(MouseSender.MOUSE_BUTTON_LEFT);
-
-                return true;
-            }
-        });
-
+        // TODO:
+        //  - add gestures
+        //      - on double click and drag, send report without "release" until sending release on finger up
+        //      - on long press and drag, send report without "release" until sending release on finger up
+        //      - on two finger scroll, send scroll events
         this.setOnTouchListener((view, motionEvent) -> {
-            if (gestureDetector.onTouchEvent(motionEvent)) {
-                return true;
-            }
-
-            int index = motionEvent.getActionIndex();
             int action = motionEvent.getActionMasked();
+            int index = motionEvent.getActionIndex();
             int pointerId = motionEvent.getPointerId(index);
-            byte button; // unknown at this point
 
             //Timber.d("motionEvent %d (x, y): (%f, %f)", action, motionEvent.getX(), motionEvent.getY());
+            //Timber.d("current pointer count: %d (pressure: %s)", currentPointerCount, motionEvent.getPressure());
 
             switch (action) {
-                case MotionEvent.ACTION_POINTER_DOWN:
-                    final int POINTER_COUNT = motionEvent.getPointerCount();
-                    Timber.d("omg there's %d pointers!!!", POINTER_COUNT);
-
-                    switch (POINTER_COUNT) {
-                        case 2:
-                            mouseSender.click(MouseSender.MOUSE_BUTTON_RIGHT);
-                            break;
-//                            case 3: // FIXME: apparently, case 2 gets triggered right before case 3 gets triggered, gotta add a little timeout ig to differentiate
-//                                button = MouseSender.MOUSE_BUTTON_MIDDLE;
-//                                mouseSender.addReport(button, (byte) 0, (byte) 0);
-//                                break;
-                    }
-
-                    break;
                 case MotionEvent.ACTION_DOWN:
+                    currentPointerCount = 1;
+                    Timber.d("Action Down");
+
                     if (mVelocityTracker == null) {
-                        // Retrieve a new VelocityTracker object to watch the velocity of a motion.
                         mVelocityTracker = VelocityTracker.obtain();
                     } else {
-                        // Reset the velocity tracker back to its initial state.
                         mVelocityTracker.clear();
                     }
-                    // Add a user's movement to the tracker.
                     mVelocityTracker.addMovement(motionEvent);
                     break;
                 case MotionEvent.ACTION_MOVE:
+                    //Timber.d("Action Move");
                     mVelocityTracker.addMovement(motionEvent);
 
                     // Compute velocity (cap it to byte because the report uses a byte per axis)
                     mVelocityTracker.computeCurrentVelocity(10, Byte.MAX_VALUE);
                     float xVelocity = mVelocityTracker.getXVelocity(pointerId);
                     float yVelocity = mVelocityTracker.getYVelocity(pointerId);
-                    //Timber.d("X,Y velocity: (%s,%s)", xVelocity, yVelocity);
 
                     // Scale up velocities < 1 in magnitude (accounting for deadzone) to allow for precise movements
                     xVelocity = scaleWithDeadzone(xVelocity);
                     yVelocity = scaleWithDeadzone(yVelocity);
 
-                    // No button clicked (not handled in this section of code)
                     byte x = (byte) xVelocity;
                     byte y = (byte) yVelocity;
-                    //Timber.d("NEW X,Y velocity: (%s,%s)", x, y);
 
                     mouseSender.move(x, y);
                     break;
                 case MotionEvent.ACTION_UP:
+                    Timber.d("Action Up (max pointer count = %d)", currentPointerCount);
+
+                    final long pointerDownTimeMillis = motionEvent.getEventTime() - motionEvent.getDownTime();
+                    Timber.d("Pointer was down for %d milliseconds", pointerDownTimeMillis);
+
+                    // If user has been holding down for a while, don't send any clicks, they're probably dragging
+                    if (pointerDownTimeMillis > 300) {
+                        break;
+                    }
+
+                    // TODO: if finger has traveled too far, don't send any click? I already have the timeout thing though.
+
+                    switch (currentPointerCount) {
+                        case 1:
+                            mouseSender.click(MouseSender.MOUSE_BUTTON_LEFT);
+                            break;
+                        case 2:
+                            mouseSender.click(MouseSender.MOUSE_BUTTON_RIGHT);
+                            break;
+                        case 3:
+                            mouseSender.click(MouseSender.MOUSE_BUTTON_MIDDLE);
+                            break;
+                    }
+
+                    currentPointerCount = 0;
+                    break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    currentPointerCount++;
+                    //Timber.d("Action Pointer Down (pointer count = %s)", motionEvent.getPointerCount());
+
+                    break;
                 case MotionEvent.ACTION_POINTER_UP:
+                    Timber.d("Action Pointer Up");
+
+                    // this pointer decrement is conceptually happening, but I'm not doing it because I want ACTION_UP
+                    // to use the max pointer count.
+                    // currentPointerCount--;
+                    break;
                 case MotionEvent.ACTION_CANCEL:
+                    Timber.d("Action Cancel");
+                    mVelocityTracker.recycle(); // Return a VelocityTracker object back to be re-used by others.
+                    currentPointerCount = 0;
                     break;
             }
             return true;
