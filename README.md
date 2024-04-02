@@ -6,6 +6,8 @@
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![GPL-3.0 License][license-shield]][license-url]
+<br />
+[![IzzyOnDroid Repo Version][izzyondroid-shield]][izzyondroid-url]
 
 <!-- PROJECT LOGO -->
 <br />
@@ -17,8 +19,6 @@
 <h3 align="center">USB HID Client</h3>
   <p align="center">
     Android app that allows you to easily use your phone as a keyboard and mouse
-    <br />
-    <a href="https://github.com/Arian04/android-hid-client/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://github.com/Arian04/android-hid-client/issues">Report Bug</a>
@@ -113,7 +113,15 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
 		- `Key behavior settings > Alt key code = None (Ignored when not modifying other keys)`
 		- `Key behavior settings > Meta key code = None (Ignored when not modifying other keys)`
 
+### Installation (Binary)<a name="installation-binary"> </a>
+
+The recommended way to install the app is through the [IzzyOnDroid repo][izzyondroid-url] via an app
+that's compatible with F-Droid style repositories, since that'll make updates much easier. However, you can also download
+the APK file from the [Github releases page](https://github.com/Arian04/android-hid-client/releases), then install it
+on your Android device.
+
 ### Installation (Source)<a name="installation-source"></a>
+
 
 Clone the repository.
 
@@ -124,15 +132,7 @@ Clone the repository.
 import into [Android Studio](https://developer.android.com/studio), build the APK, then install it
 on your Android device.
 
-### Installation (Binary)<a name="installation-binary"> </a>
-
-Download the APK file from
-the [Github releases page](https://github.com/Arian04/android-hid-client/releases), then install it
-on your Android device
-
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 <!-- USAGE EXAMPLES -->
 
@@ -163,7 +163,7 @@ the connected device once you hit the "send" button.
 - [X] Add full settings page
 - [X] Add prompt to create /dev/hidgX if not present
 
-See the [open issues](https://github.com/Arian04/android-hid-client/issues) for a full list of proposed features (and known issues).
+See the [open issues][issues-url] for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -199,6 +199,7 @@ Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
+* [IzzyOnDroid](https://floss.social/@IzzyOnDroid) for adding this app to [his F-Droid repository](https://android.izzysoft.de/repo)
 * [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -216,5 +217,6 @@ Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
 [issues-shield]: https://img.shields.io/github/issues/Arian04/android-hid-client.svg?style=for-the-badge
 [issues-url]: https://github.com/Arian04/android-hid-client/issues
 [license-shield]: https://img.shields.io/github/license/Arian04/android-hid-client.svg?style=for-the-badge
-
 [license-url]: https://github.com/Arian04/android-hid-client/blob/master/LICENSE.txt
+[izzyondroid-shield]: https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/me.arianb.usb_hid_client&style=for-the-badge
+[izzyondroid-url]: https://android.izzysoft.de/repo/apk/me.arianb.usb_hid_client
