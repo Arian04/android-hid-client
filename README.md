@@ -80,7 +80,7 @@ keys to the connected computer to control media.
   However, most functionality will work with any standard Android keyboard.
 
 Bonus description for nerds: This app adds (and provides a simple UI for you to communicate with) two character devices (`/dev/hidg0` and `/dev/hidg1` respectively) by
-adding HID functions to the default Android USB gadget. If you wanted to, you could just use this app to create the character device, then
+adding HID functions to the default Android USB gadget. If you wanted to, you could just use this app to create the character devices, then
 communicate solely through some C program, shell script, or whatever else you wanted as long as it had the right permissions to access the
 character devices and knew how to send proper reports to them. Beware of SELinux policies if you do that though. If anyone is actually doing that, let
 me know, I'd be glad to help if necessary.
