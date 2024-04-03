@@ -79,10 +79,10 @@ keys to the connected computer to control media.
 - I strongly recommend using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as modifier and function keys). 
   However, most functionality will work with any standard Android keyboard.
 
-Bonus description for nerds: This app creates (and provides a simple UI for you to communicate with) a USB HID gadget
-consisting of a keyboard and mouse character device (`/dev/hidg0` and `/dev/hidg1` respectively). If you wanted to, you could
-just use this app to create the character device, then communicate solely through some C program, shell script, or whatever else you wanted
-as long as it had the right permissions to access the character devices. Beware of SELinux policies if you do that though. If anyone is actually doing that, let
+Bonus description for nerds: This app adds (and provides a simple UI for you to communicate with) two character devices (`/dev/hidg0` and `/dev/hidg1` respectively) by
+adding HID functions to the default Android USB gadget. If you wanted to, you could just use this app to create the character device, then
+communicate solely through some C program, shell script, or whatever else you wanted as long as it had the right permissions to access the
+character devices and knew how to send proper reports to them. Beware of SELinux policies if you do that though. If anyone is actually doing that, let
 me know, I'd be glad to help if necessary.
 
 Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
