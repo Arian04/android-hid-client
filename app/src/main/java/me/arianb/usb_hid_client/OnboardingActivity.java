@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.RadioGroup;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
@@ -13,6 +14,13 @@ public class OnboardingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // This is here so the user can't click the back button to get to the MainActivity and bypass this setup screen
+        this.getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {}
+        });
+
         setContentView(R.layout.activity_onboarding);
 
         setTitle(R.string.onboarding_title);
@@ -41,12 +49,5 @@ public class OnboardingActivity extends AppCompatActivity {
             preferencesEditor.apply();
             finish();
         });
-    }
-
-    // This is here so the user can't click the back button to get to the MainActivity and bypass this
-    // setup screen
-    @Override
-    public void onBackPressed() {
-        moveTaskToBack(true);
     }
 }
