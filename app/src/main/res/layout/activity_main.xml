@@ -53,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="@dimen/margin_normal"
-        android:background="@color/material_dynamic_neutral30"
+        android:background="#454749"
         android:fadingEdge="vertical"
         android:gravity="center"
         android:text="@string/touchpad_label"
