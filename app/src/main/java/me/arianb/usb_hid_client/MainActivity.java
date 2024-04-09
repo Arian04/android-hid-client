@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.topjohnwu.superuser.Shell;
 
 import me.arianb.usb_hid_client.hid_utils.CharacterDevice;
 import me.arianb.usb_hid_client.input_views.DirectInputKeyboardView;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (BuildConfig.DEBUG || preferences.getBoolean("debug_mode", false)) {
             Timber.plant(new Timber.DebugTree());
+            Shell.enableVerboseLogging = true;
         }
 
         setContentView(R.layout.activity_main);
