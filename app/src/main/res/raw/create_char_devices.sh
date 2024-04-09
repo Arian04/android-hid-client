@@ -12,8 +12,28 @@ MOUSE_SUBCLASS=0 # Don't know what this is for tbh
 MOUSE_REPORT_LENGTH=3 # report length in bytes
 MOUSE_REPORT_DESCRIPTOR='\x05\x01\x09\x02\xA1\x01\x09\x01\xA1\x00\x05\x09\x19\x01\x29\x03\x15\x00\x25\x01\x95\x03\x75\x01\x81\x02\x95\x01\x75\x05\x81\x03\x05\x01\x09\x30\x09\x31\x15\x81\x25\x7F\x75\x08\x95\x02\x81\x06\xC0\xC0'
 
-# Paths
-USB_GADGET_PATH="/config/usb_gadget/g1"
+# Get default Android USB gadget path
+CONFIGFS_PATH="/config/usb_gadget"
+USB_GADGET_PATH="${CONFIGFS_PATH}/g1"
+# if g1 doesn't exist
+if [ ! -d $USB_GADGET_PATH ]; then
+  USB_GADGET_PATH="${CONFIGFS_PATH}/g2"
+  echo "g1 doesn't exist, trying g2"
+
+  # if g2 doesn't exist
+  if [ ! -d $USB_GADGET_PATH ]; then
+    echo "g2 doesn't exist???? never seen that before."
+    for dir in "$CONFIGFS_PATH"/*; do
+        [ -d "$dir" ] || continue
+        [ -s "$dir"/UDC ] || continue # ensure non-empty UDC file
+        USB_GADGET_PATH="${dir}"
+    done
+  fi
+fi
+
+echo "USB_GADGET_PATH = ${USB_GADGET_PATH}"
+
+# Other paths
 CONFIGS_PATH="${USB_GADGET_PATH}/configs/b.1/"
 KB_FUNCTION_PATH="${USB_GADGET_PATH}/functions/hid.keyboard"
 MOUSE_FUNCTION_PATH="${USB_GADGET_PATH}/functions/hid.mouse"
