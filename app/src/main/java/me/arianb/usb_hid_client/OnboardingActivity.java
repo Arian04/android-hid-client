@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 public class OnboardingActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,10 +34,9 @@ public class OnboardingActivity extends AppCompatActivity {
                 preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_ask_every_time));
             } else if (i == R.id.radioErrorPromptAction_fix) {
                 preferencesEditor.putString("issue_prompt_action", getString(R.string.error_action_fix));
-            } else {
-                // i == -1
-                // All radio buttons are unchecked, so do nothing
             }
+            // else: All radio buttons are unchecked, so do nothing
+
             preferencesEditor.apply();
         });
 
