@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         // If this is the first time the app has been opened, then show OnboardingActivity
         boolean onboardingDone = preferences.getBoolean("onboarding_done", false);
         if (!onboardingDone) {
-            // Start OnboardingActivity
             startActivity(new Intent(this, OnboardingActivity.class));
         }
 
@@ -91,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupManualKeyboardInput(EditText etManualInput, Button btnSubmit, KeySender keySender) {
-        // Button sends text in manualInput TextView
+        // Button sends text in "Manual Input" EditText
         btnSubmit.setOnClickListener(v -> {
             // Save text to send
             String sendStr = etManualInput.getText().toString();
