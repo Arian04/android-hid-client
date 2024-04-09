@@ -76,8 +76,7 @@ keys to the connected computer to control media.
 
 **Disclaimers**:
 - This app requires your device to be rooted.
-- I strongly recommend using [Hacker's Keyboard](https://github.com/klausw/hackerskeyboard) to use special keys such as modifier and function keys). 
-  However, most functionality will work with any standard Android keyboard.
+- I strongly recommend using a keyboard such as [Unexpected Keyboard](https://github.com/Julow/Unexpected-Keyboard) to use special keys such as modifier and function keys, but most functionality will work with any standard Android keyboard.
 
 Bonus description for nerds: This app adds (and provides a simple UI for you to communicate with) two character devices (`/dev/hidg0` and `/dev/hidg1` respectively) by
 adding HID functions to the default Android USB gadget. If you wanted to, you could just use this app to create the character devices, then
