@@ -103,7 +103,7 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
       - KernelSU: `ksud sepolicy patch`
 	- Android version that I currently test with: 14
 * Soft Keyboard
-	- I test the app with Gboard and Hacker's keyboard, but Hacker's keyboard is the one with better
+	- I test the app with Gboard, Unexpected Keyboard, and used to test Hacker's keyboard, but Unexpected Keyboard is the one with better
 	  support, more keys,
 	  and [less issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A%22soft+keyboard+issue%22+is%3Aclosed)
 	  .
