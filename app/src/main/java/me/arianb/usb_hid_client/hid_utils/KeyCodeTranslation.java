@@ -50,6 +50,10 @@ public abstract class KeyCodeTranslation {
         return keyScanCodes;
     }
 
+    public static byte[] convertKeyToScanCodes(char key) {
+        return convertKeyToScanCodes(Character.toString(key));
+    }
+
     // Fill maps
     static {
         keyEventModifierKeys = new HashMap<>();

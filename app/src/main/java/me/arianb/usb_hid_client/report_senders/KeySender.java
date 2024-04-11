@@ -4,13 +4,15 @@ import static me.arianb.usb_hid_client.hid_utils.CharacterDevice.KEYBOARD_DEVICE
 
 import android.view.View;
 
+import me.arianb.usb_hid_client.hid_utils.CharacterDevice;
+
 public class KeySender extends ReportSender {
     // Report IDs
     private static final byte STANDARD_KEY = 0x01;
     private static final byte MEDIA_KEY = 0x02;
 
-    public KeySender(View parentLayout) {
-        super(KEYBOARD_DEVICE_PATH, true, parentLayout);
+    public KeySender(CharacterDevice characterDevice, View parentLayout) {
+        super(KEYBOARD_DEVICE_PATH, true, characterDevice, parentLayout);
     }
 
     public void addStandardKey(byte modifier, byte key) {
