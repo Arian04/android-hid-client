@@ -1,0 +1,9 @@
+Features
+- now supports all Android versions > 8.0
+- improved touchpad input handling (and added middle click support)
+
+Bugfixes
+- fix crash on Android versions < 12
+- handle various errors more clearly and gracefully
+
+See Github release for more details
