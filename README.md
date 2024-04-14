@@ -218,4 +218,4 @@ Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
 [license-shield]: https://img.shields.io/github/license/Arian04/android-hid-client.svg?style=for-the-badge
 [license-url]: https://github.com/Arian04/android-hid-client/blob/master/LICENSE.txt
 [izzyondroid-shield]: https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/me.arianb.usb_hid_client&style=for-the-badge
-[izzyondroid-url]: https://android.izzysoft.de/repo/apk/me.arianb.usb_hid_client
+[izzyondroid-url]: https://apt.izzysoft.de/packages/me.arianb.usb_hid_client
