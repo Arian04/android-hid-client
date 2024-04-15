@@ -12,5 +12,9 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+    <style name="Theme.USBHIDClient" parent="Theme.Material3.Light.LightActionBar">
+    </style>
+    <style name="switch_m3" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+       
     </style>
 </resources>
