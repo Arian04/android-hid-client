@@ -12,8 +12,8 @@ android {
         applicationId = "me.arianb.usb_hid_client"
         minSdk = 26
         targetSdk = 33
-        versionCode = 220
-        versionName = "v2.2.0"
+        versionCode = 221
+        versionName = "v2.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
