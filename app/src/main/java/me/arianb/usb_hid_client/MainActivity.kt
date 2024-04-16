@@ -12,6 +12,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import com.topjohnwu.superuser.Shell
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val preferences = getPreferences(MODE_PRIVATE)
+        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         val characterDevice = CharacterDevice(applicationContext, Dispatchers.IO)
 
