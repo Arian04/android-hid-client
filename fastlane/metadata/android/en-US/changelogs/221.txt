@@ -1,0 +1,2 @@
+Bugfixes
+- Fix onboarding screen showing every time app is opened rather than only the first time
