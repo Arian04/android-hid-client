@@ -4,10 +4,13 @@
 
         <SwitchPreference
             app:key="clear_manual_input"
+            android:switchPreferenceCompatStyle="@style/switch_m3"
             app:title="@string/clear_manual_input_title" />
 
         <SwitchPreference
             app:key="volume_button_passthrough"
+
+            android:switchPreferenceCompatStyle="@style/switch_m3"
             app:title="@string/volume_button_passthrough_title"
             app:summary="@string/volume_button_passthrough_summary" />
 
@@ -25,6 +28,8 @@
     <PreferenceCategory app:title="@string/debug_header">
 
         <SwitchPreference
+
+            android:switchPreferenceCompatStyle="@style/switch_m3"
             app:key="@string/debug_mode_key"
             app:title="@string/debug_mode_title"
             app:summary="@string/debug_mode_summary" />
