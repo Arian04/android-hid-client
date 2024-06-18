@@ -20,25 +20,17 @@
     <string name="clear_manual_input_title">Clear manual input text box on send</string>
     <string name="volume_button_passthrough_title">Volume button passthrough</string>
     <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
-    <string name="error_action_ask_every_time">Ask Every Time</string>
-    <string name="error_action_fix">Fix</string>
-    <string-array name="default_error_action">
-        <item>@string/error_action_ask_every_time</item>
-        <item>@string/error_action_fix</item>
-    </string-array>
 
     <string name="debug_mode_title">Debug mode</string>
     <string name="debug_mode_summary">Enable logging messages for debugging</string>
-    <string name="debug_mode_key">debug_mode</string>
 
     <string name="export_debug_logs_btn_title">Export debug logs</string>
     <string name="export_debug_logs_btn_summary">Make sure to enable debug mode prior to exporting logs.\n\nThis should only be needed if a developer requests for you to provide logs.</string>
-    <string name="export_debug_logs_btn_key">export debug logs button</string>
 
     <!-- Info Activity -->
     <string name="info_icon_description">App icon (Keyboard)</string>
     <string name="info_description">This app allows you to use your phone to act as a USB keyboard and mouse without requiring any software on the connected device, allowing it to even work in the BIOS/UEFI of the connected device!</string>
-    <string name="info_source">The source code of the application is available <a href="https://github.com/Arian04/android-hid-client">here</a></string>
+    <string name="info_source_code_url" translatable="false">https://github.com/Arian04/android-hid-client</string>
 
     <!-- Help Activity -->
     <string name="help_faq_q1">How do I report bugs or submit feature requests?</string>
@@ -54,6 +46,5 @@
     <string name="onboarding_title">Initial Setup</string>
     <string name="onboarding_header">Before you start using the app…</string>
     <string name="onboarding_notice">Any mention of \"Direct Input\" refers to the keyboard icon in the menu bar that can be selected to pull up your keyboard and relay your keystrokes in real-time.\n\nAny mention \"Manual Input\" refers to the textbox that you can put text into and have it send all at once when you click the button beside it.</string>
-    <string name="onboarding_onboarding_prompt_action_description">When something goes wrong, the app normally prompts the user. Rather than doing this, would you prefer the app to attempt to silently fix the issue in the background instead?</string>
     <string name="onboarding_continue_btn">Continue</string>
 </resources>

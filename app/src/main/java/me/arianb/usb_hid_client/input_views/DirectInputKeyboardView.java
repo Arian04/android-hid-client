@@ -95,8 +95,8 @@ public class DirectInputKeyboardView extends androidx.appcompat.widget.AppCompat
             return true;
         });
 
-        // For some reason, the onKeyListener doesn't work properly at all unless this is also set
-        // And if I try to use this instead of the onKeyListener, tab and enter don't work
+        // The onKeyListener doesn't work properly at all unless this is also set.
+        // And if I try to use this instead of the onKeyListener, tab and enter don't work.
         this.setKeyListener(new KeyListener() {
             public int getInputType() {
                 // Forces it to not consume the keys
@@ -105,16 +105,23 @@ public class DirectInputKeyboardView extends androidx.appcompat.widget.AppCompat
             }
 
             @Override
-            public boolean onKeyDown(View view, Editable editable, int i, KeyEvent keyEvent) {return false;}
+            public boolean onKeyDown(View view, Editable editable, int i, KeyEvent keyEvent) {
+                return false;
+            }
 
             @Override
-            public boolean onKeyUp(View view, Editable editable, int i, KeyEvent keyEvent) {return false;}
+            public boolean onKeyUp(View view, Editable editable, int i, KeyEvent keyEvent) {
+                return false;
+            }
 
             @Override
-            public boolean onKeyOther(View view, Editable editable, KeyEvent keyEvent) {return false;}
+            public boolean onKeyOther(View view, Editable editable, KeyEvent keyEvent) {
+                return false;
+            }
 
             @Override
-            public void clearMetaKeyState(View view, Editable editable, int i) {}
+            public void clearMetaKeyState(View view, Editable editable, int i) {
+            }
         });
     }
 

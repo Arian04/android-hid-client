@@ -8,6 +8,7 @@ local.properties
 
 # Android Studio generated files and folders
 app/release
+app/debug
 captures/
 #.externalNativeBuild/
 #.cxx/

@@ -3,21 +3,33 @@ import java.util.Locale
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
-    compileSdk = 34
-
+    namespace = "me.arianb.usb_hid_client"
     defaultConfig {
         applicationId = "me.arianb.usb_hid_client"
+
+        // Android SDK Build Tools version
+        buildToolsVersion = "34.0.0"
+
+        // SDK support
         minSdk = 26
         targetSdk = 33
+        compileSdk = 34
+
+        // App Versioning
         versionCode = 221
         versionName = "v2.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
+    // Build configuration
     @Suppress("UnstableApiUsage")
     buildTypes {
         getByName("release") {
@@ -31,16 +43,20 @@ android {
             }
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        jniLibs.useLegacyPackaging = true
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    buildFeatures {
+        buildConfig = true
+        compose = true
+        viewBinding = true
     }
-    namespace = "me.arianb.usb_hid_client"
-    packaging.jniLibs.useLegacyPackaging = true
-    buildFeatures.buildConfig = true
+    composeCompiler {
+        enableStrongSkippingMode = true
+    }
 
     // Disable Google-encrypted binary blobs
     dependenciesInfo {
@@ -48,6 +64,15 @@ android {
         includeInApk = false
         // Disables dependency metadata when building Android App Bundles.
         includeInBundle = false
+    }
+
+    // Java version
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
     }
 
     lint.abortOnError = false
@@ -82,6 +107,8 @@ android {
                 }
             }
             groups {
+                // NOTE: Testing too many API levels in CI causes it to run out of storage, I could work
+                //       around it, but that's something for later.
                 create("ci") {
                     val apiLevelsToTestInCI = arrayOf(29, 30, 32, targetSDK)
                     for (device in localDevices) {
@@ -96,18 +123,70 @@ android {
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.12.0")
-    val libsuVersion = "5.2.2"
+    // AndroidX
+    val androidXAppCompatVersion = "1.7.0"
+    val androidXConstraintLayoutVersion = "2.1.4"
+    val androidXCoreVersion = "1.13.1"
+    val androidXLifecycleVersion = "2.8.2"
+    val androidXPreferenceVersion = "1.2.1"
+    val androidXTestJunit = "1.1.5"
+    val androidXTestEspresso = "3.5.1"
 
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.preference:preference-ktx:1.2.1")
+    // Compose
+    val composeActivityVersion = "1.9.0"
+    val composeMaterial3Version = "1.2.1"
+    val composeUIVersion = "1.6.8"
+    val composeBomVersion = "2024.06.00"
+
+    // Other libraries
+    val androidMaterialVersion = "1.12.0"
+    val junitVersion = "4.13.2"
+    val libsuVersion = "5.2.2"
+    val timberVersion = "4.7.1"
+    val voyagerVersion = "1.1.0-beta02"
+
+    implementation("com.google.android.material:material:$androidMaterialVersion")
+    implementation("androidx.appcompat:appcompat:$androidXAppCompatVersion")
+    implementation("androidx.constraintlayout:constraintlayout:$androidXConstraintLayoutVersion")
+    implementation("androidx.core:core-ktx:$androidXCoreVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$androidXLifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$androidXLifecycleVersion")
+    implementation("androidx.preference:preference-ktx:$androidXPreferenceVersion")
+
+    // Misc 3rd party
     //noinspection GradleDependency: Locked to 4.7.1 because of issue #484
-    implementation("com.jakewharton.timber:timber:4.7.1")
+    implementation("com.jakewharton.timber:timber:$timberVersion")
     implementation("com.github.topjohnwu.libsu:core:$libsuVersion")
 
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    // Compose
+    implementation("androidx.activity:activity-compose:$composeActivityVersion")
+    implementation("androidx.compose.material3:material3:$composeMaterial3Version")
+    implementation("androidx.compose.ui:ui:$composeUIVersion")
+    implementation("androidx.compose.ui:ui-graphics:$composeUIVersion")
+    implementation("androidx.compose.ui:ui-viewbinding:$composeUIVersion")
+    implementation("androidx.compose.animation:animation-core:$composeUIVersion")
+    implementation("androidx.compose.foundation:foundation-layout:$composeUIVersion")
+    implementation("androidx.compose.foundation:foundation:$composeUIVersion")
+    implementation("androidx.compose.material:material-icons-core:$composeUIVersion")
+    implementation("androidx.compose.runtime:runtime:$composeUIVersion")
+    implementation("androidx.compose.ui:ui-text:$composeUIVersion")
+    implementation("androidx.compose.ui:ui-unit:$composeUIVersion")
+    debugRuntimeOnly("androidx.compose.ui:ui-test-manifest:$composeUIVersion")
+
+    // Navigation
+    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
+    implementation("cafe.adriel.voyager:voyager-core:1.1.0-beta02")
+
+    // Android Studio Preview support
+    implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // Testing
+    testImplementation("junit:junit:$junitVersion")
+    androidTestImplementation("junit:junit:$junitVersion")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeUIVersion")
+    androidTestImplementation("androidx.test.ext:junit:$androidXTestJunit")
+    androidTestImplementation("androidx.test.espresso:espresso-core:$androidXTestEspresso")
 }

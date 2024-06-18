@@ -1,51 +1,43 @@
 package me.arianb.usb_hid_client.hid_utils
 
-import android.content.Context
+import android.app.Application
 import android.content.res.Resources
 import com.topjohnwu.superuser.Shell
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import me.arianb.usb_hid_client.R
-import me.arianb.usb_hid_client.shell_utils.NoRootPermissionsException
 import me.arianb.usb_hid_client.shell_utils.RootState
 import timber.log.Timber
 import java.io.File
 
-class CharacterDevice(context: Context, private val ioDispatcher: CoroutineDispatcher) {
-    private val appResources: Resources
-    private val appUID: Int
-    private val appDataDirPath: String
+class CharacterDeviceManager(private val application: Application) {
+    private val dispatcher = Dispatchers.IO
 
-    init {
-        appResources = context.resources
-        appUID = context.applicationInfo.uid
-        appDataDirPath = context.applicationInfo.dataDir
-    }
-
-    @Throws(NoRootPermissionsException::class)
     suspend fun createCharacterDevices(): Boolean {
-        return withContext(ioDispatcher) {
+        val appResources: Resources = application.resources
+
+        return withContext(dispatcher) {
             if (!Shell.getShell().isRoot) {
-                throw NoRootPermissionsException()
+                return@withContext false
             }
 
-            val createCharDevicesResult = Shell.cmd(appResources.openRawResource(R.raw.create_char_devices)).exec()
-            Timber.d("create device script: \nstdout=%s\nstderr=%s", createCharDevicesResult.out, createCharDevicesResult.err)
+            val commandResult = Shell.cmd(appResources.openRawResource(R.raw.create_char_devices)).exec()
+            Timber.d("create device script: \nstdout=%s\nstderr=%s", commandResult.out, commandResult.err)
 
             fixSelinuxPermissions()
 
             try {
-                withTimeout(3000) {
+                withTimeout(5000) {
                     for (devicePath in ALL_CHARACTER_DEVICE_PATHS) {
                         launch {
                             // wait until the device file exists before trying to fix its permissions
                             while (!File(devicePath).exists()) {
-                                Timber.d("$devicePath doesn't exist yet, sleeping for 50ms...")
-                                delay(100)
+                                Timber.d("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
+                                delay(200)
                             }
                             Timber.d("$devicePath exists now!!!")
                             fixCharacterDevicePermissions(devicePath)
@@ -54,23 +46,23 @@ class CharacterDevice(context: Context, private val ioDispatcher: CoroutineDispa
                 }
             } catch (e: TimeoutCancellationException) {
                 Timber.e("Shell script ran, but we timed out while waiting for character devices to be created.")
-                return@withContext false
+                // FIXME: show this error to the user
             }
+
             return@withContext true
         }
     }
 
     private fun fixSelinuxPermissions() {
-        val selinuxDomain = "appdomain"
-        val selinuxPolicy = "allow $selinuxDomain device chr_file { getattr open write }"
-        val selinuxPolicyCommand = "${RootState.getSepolicyCommand()} '$selinuxPolicy'"
+        val selinuxPolicyCommand = "${RootState.getSepolicyCommand()} '$SELINUX_POLICY'"
         Shell.cmd(selinuxPolicyCommand).exec()
     }
 
-    @Throws(NoRootPermissionsException::class)
-    fun fixCharacterDevicePermissions(device: String) {
+    fun fixCharacterDevicePermissions(device: String): Boolean {
+        val appUID: Int = application.applicationInfo.uid
+
         if (!Shell.getShell().isRoot) {
-            throw NoRootPermissionsException()
+            return false
         }
 
         // Set Linux permissions -> only my app user can r/w to the char device
@@ -82,9 +74,13 @@ class CharacterDevice(context: Context, private val ioDispatcher: CoroutineDispa
         // Set SELinux permissions -> only my app's selinux context can r/w to the char device
         val chconCommand = "chcon u:object_r:device:s0:${getSelinuxCategories()} $device"
         Shell.cmd(chconCommand).exec()
+
+        return true
     }
 
     private fun getSelinuxCategories(): String {
+        val appDataDirPath: String = application.applicationInfo.dataDir
+
         // Get selinux context for app
         val commandResult = Shell.cmd("stat -c %C $appDataDirPath").exec()
 
@@ -104,11 +100,28 @@ class CharacterDevice(context: Context, private val ioDispatcher: CoroutineDispa
         return categories
     }
 
+    fun deleteCharacterDevices(): Boolean {
+        val appResources: Resources = application.resources
+
+        if (!Shell.getShell().isRoot) {
+            return false
+        }
+
+        val commandResult = Shell.cmd(appResources.openRawResource(R.raw.delete_char_devices)).exec()
+        Timber.d("delete device script: \nstdout=%s\nstderr=%s", commandResult.out, commandResult.err)
+
+        return true
+    }
+
     companion object {
         // character device paths
         const val KEYBOARD_DEVICE_PATH = "/dev/hidg0"
         const val MOUSE_DEVICE_PATH = "/dev/hidg1"
         private val ALL_CHARACTER_DEVICE_PATHS = listOf(KEYBOARD_DEVICE_PATH, MOUSE_DEVICE_PATH)
+
+        // SeLinux stuff
+        private const val SELINUX_DOMAIN = "appdomain"
+        private const val SELINUX_POLICY = "allow $SELINUX_DOMAIN device chr_file { getattr open write }"
 
         fun characterDeviceMissing(charDevicePath: String): Boolean {
             return if (!ALL_CHARACTER_DEVICE_PATHS.contains(charDevicePath)) {
