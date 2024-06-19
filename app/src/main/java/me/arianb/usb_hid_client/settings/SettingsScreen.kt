@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import com.topjohnwu.superuser.Shell
@@ -21,6 +20,7 @@ import me.arianb.usb_hid_client.BuildConfig
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.ui.theme.BasicPage
 import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.SimpleNavTopBar
 import timber.log.Timber
 import java.io.IOException
@@ -36,7 +36,8 @@ class SettingsScreen : Screen {
 
 @Composable
 fun SettingsPage() {
-    val padding = 16.dp
+    val padding = PaddingNormal
+
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         // If the user doesn't choose a location to save the file, don't continue

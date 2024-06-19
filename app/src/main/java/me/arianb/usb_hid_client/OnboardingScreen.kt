@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -20,6 +19,7 @@ import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.BasicPage
 import me.arianb.usb_hid_client.ui.theme.BasicTopBar
 import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.theme.PaddingExtraExtraLarge
 
 class OnboardingScreen : Screen {
 
@@ -34,7 +34,7 @@ fun OnboardingPage() {
     BasicPage(
         topBar = { OnboardingTopBar() },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(48.dp, Alignment.Top),
+        verticalArrangement = Arrangement.spacedBy(PaddingExtraExtraLarge, Alignment.Top),
     ) {
         OnboardingTitle()
         InfoText()

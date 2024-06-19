@@ -15,11 +15,11 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import me.arianb.usb_hid_client.ui.theme.BasicPage
 import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.SimpleNavTopBar
 
 class InfoScreen : Screen {
@@ -71,7 +71,7 @@ fun AppSourceCodeButton() {
         Image(
             painter = painterResource(R.drawable.ic_github),
             contentDescription = "Github icon",
-            modifier = Modifier.padding(end = 16.dp),
+            modifier = Modifier.padding(end = PaddingNormal),
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primaryContainer)
         )
         Text(text = "Source Code")

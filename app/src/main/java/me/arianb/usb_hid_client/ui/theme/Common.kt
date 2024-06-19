@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 
@@ -35,9 +34,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 fun BasicPage(
     topBar: @Composable () -> Unit,
     snackbarHostState: SnackbarHostState? = null,
-    paddingAll: Dp = 24.dp,
+    paddingAll: Dp = PaddingLarge,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
-    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(16.dp, Alignment.Top),
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(PaddingNormal, Alignment.Top),
     content: @Composable (ColumnScope.() -> Unit)
 ) {
     USBHIDClientTheme {

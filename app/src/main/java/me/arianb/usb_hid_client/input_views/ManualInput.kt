@@ -14,13 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation
 import me.arianb.usb_hid_client.settings.CLEAR_MANUAL_INPUT_KEY
 import me.arianb.usb_hid_client.settings.SettingsViewModel
+import me.arianb.usb_hid_client.ui.theme.PaddingLarge
 import timber.log.Timber
 
 @Composable
@@ -32,7 +32,7 @@ fun ManualInput(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(24.dp)
+        horizontalArrangement = Arrangement.spacedBy(PaddingLarge)
     ) {
         TextField(
             modifier = Modifier

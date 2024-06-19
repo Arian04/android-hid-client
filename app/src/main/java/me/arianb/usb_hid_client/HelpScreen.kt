@@ -19,13 +19,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.widget.TextViewCompat
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import me.arianb.usb_hid_client.ui.theme.BasicPage
 import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.theme.PaddingExtraLarge
+import me.arianb.usb_hid_client.ui.theme.PaddingNone
+import me.arianb.usb_hid_client.ui.theme.PaddingNormal
+import me.arianb.usb_hid_client.ui.theme.PaddingSmall
 import me.arianb.usb_hid_client.ui.theme.SimpleNavTopBar
 
 
@@ -48,13 +51,13 @@ fun HelpPage() {
 
     BasicPage(
         topBar = { HelpTopBar() },
-        paddingAll = 16.dp,
-        verticalArrangement = Arrangement.spacedBy(0.dp, Alignment.Top),
+        paddingAll = PaddingNormal,
+        verticalArrangement = Arrangement.spacedBy(PaddingNone, Alignment.Top),
     ) {
         for (pair in questionAnswerPairs) {
             key(pair) {
                 QuestionAnswer(pair.first, pair.second)
-                Spacer(Modifier.height(32.dp))
+                Spacer(Modifier.height(PaddingExtraLarge))
             }
         }
     }
@@ -76,7 +79,7 @@ fun QuestionAnswer(questionResource: Int, answerResource: Int) {
         style = MaterialTheme.typography.bodyLarge,
         fontWeight = FontWeight.Bold
     )
-    Spacer(Modifier.height(8.dp))
+    Spacer(Modifier.height(PaddingSmall))
     ComposeTextView(
         id = answerResource,
     )
