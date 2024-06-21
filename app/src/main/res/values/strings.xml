@@ -1,23 +1,22 @@
 <resources>
     <!-- Note: Remember to escape quotes, I forgot one time and Android Studio didn't give me a warning and I just got an unbelievably unhelpful build error -->
 
-    <!-- Main Activity -->
+    <!-- Main Screen -->
     <string name="app_name" translatable="false">USB HID Client</string>
     <string name="direct_input">Direct Input</string>
     <string name="manual_input">Manual Input</string>
     <string name="touchpad_label">Touchpad</string>
     <string name="send">Send</string>
-    <string name="settings">Settings</string>
-    <string name="help">Help</string>
-    <string name="info">About</string>
 
-    <!-- Settings Activity -->
+    <!-- Settings Screen -->
+    <string name="settings">Settings</string>
     <!-- Preference Titles -->
     <string name="misc_header">Misc</string>
     <string name="debug_header">Debug</string>
 
     <!-- Preferences -->
     <string name="clear_manual_input_title">Clear manual input text box on send</string>
+
     <string name="volume_button_passthrough_title">Volume button passthrough</string>
     <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
 
@@ -27,12 +26,16 @@
     <string name="export_debug_logs_btn_title">Export debug logs</string>
     <string name="export_debug_logs_btn_summary">Make sure to enable debug mode prior to exporting logs.\n\nThis should only be needed if a developer requests for you to provide logs.</string>
 
-    <!-- Info Activity -->
+    <!-- Info ("About") Screen -->
+    <string name="info">About</string>
+
     <string name="info_icon_description">App icon (Keyboard)</string>
     <string name="info_description">This app allows you to use your phone to act as a USB keyboard and mouse without requiring any software on the connected device, allowing it to even work in the BIOS/UEFI of the connected device!</string>
     <string name="info_source_code_url" translatable="false">https://github.com/Arian04/android-hid-client</string>
 
-    <!-- Help Activity -->
+    <!-- Help Screen -->
+    <string name="help">Help</string>
+
     <string name="help_faq_q1">How do I report bugs or submit feature requests?</string>
     <string name="help_faq_a1">You can create an issue <a href="https://github.com/Arian04/android-hid-client/issues">here</a>. Just make sure it hasn\'t already been reported.</string>
 
@@ -42,8 +45,9 @@
     <string name="help_faq_q3">The app isn\'t working properly, how do I fix it?</string>
     <string name="help_faq_a3">First, make sure your device satisfies all prerequisites listed <a href="https://github.com/Arian04/android-hid-client#prerequisites">here</a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report as explained above.</string>
 
-    <!-- Onboarding Activity -->
+    <!-- Onboarding Screen -->
     <string name="onboarding_title">Initial Setup</string>
+
     <string name="onboarding_header">Before you start using the app…</string>
     <string name="onboarding_notice">Any mention of \"Direct Input\" refers to the keyboard icon in the menu bar that can be selected to pull up your keyboard and relay your keystrokes in real-time.\n\nAny mention \"Manual Input\" refers to the textbox that you can put text into and have it send all at once when you click the button beside it.</string>
     <string name="onboarding_continue_btn">Continue</string>
