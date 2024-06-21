@@ -10,21 +10,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import me.arianb.usb_hid_client.R
-import me.arianb.usb_hid_client.shell_utils.RootState
+import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.File
 
-class CharacterDeviceManager(private val application: Application) {
-    private val dispatcher = Dispatchers.IO
+// TODO: should this be CharacterDeviceManager or GadgetManager or something else? I feel like the name isn't right.
 
-    suspend fun createCharacterDevices(): Boolean {
+class CharacterDeviceManager private constructor(private val application: Application) {
+    private val dispatcher = Dispatchers.IO
+    private val rootStateHolder = RootStateHolder.getInstance()
+
+    suspend fun createCharacterDevices() {
         val appResources: Resources = application.resources
 
-        return withContext(dispatcher) {
-            if (!Shell.getShell().isRoot) {
-                return@withContext false
-            }
-
+        withContext(dispatcher) {
             val commandResult = Shell.cmd(appResources.openRawResource(R.raw.create_char_devices)).exec()
             Timber.d("create device script: \nstdout=%s\nstderr=%s", commandResult.out, commandResult.err)
 
@@ -48,22 +47,16 @@ class CharacterDeviceManager(private val application: Application) {
                 Timber.e("Shell script ran, but we timed out while waiting for character devices to be created.")
                 // FIXME: show this error to the user
             }
-
-            return@withContext true
         }
     }
 
     private fun fixSelinuxPermissions() {
-        val selinuxPolicyCommand = "${RootState.getSepolicyCommand()} '$SELINUX_POLICY'"
+        val selinuxPolicyCommand = "${rootStateHolder.sepolicyCommand} '$SELINUX_POLICY'"
         Shell.cmd(selinuxPolicyCommand).exec()
     }
 
-    fun fixCharacterDevicePermissions(device: String): Boolean {
+    fun fixCharacterDevicePermissions(device: String) {
         val appUID: Int = application.applicationInfo.uid
-
-        if (!Shell.getShell().isRoot) {
-            return false
-        }
 
         // Set Linux permissions -> only my app user can r/w to the char device
         val chownCommand = "chown ${appUID}:${appUID} $device"
@@ -75,7 +68,7 @@ class CharacterDeviceManager(private val application: Application) {
         val chconCommand = "chcon u:object_r:device:s0:${getSelinuxCategories()} $device"
         Shell.cmd(chconCommand).exec()
 
-        return true
+        return
     }
 
     private fun getSelinuxCategories(): String {
@@ -100,17 +93,31 @@ class CharacterDeviceManager(private val application: Application) {
         return categories
     }
 
-    fun deleteCharacterDevices(): Boolean {
+    fun deleteCharacterDevices() {
         val appResources: Resources = application.resources
-
-        if (!Shell.getShell().isRoot) {
-            return false
-        }
 
         val commandResult = Shell.cmd(appResources.openRawResource(R.raw.delete_char_devices)).exec()
         Timber.d("delete device script: \nstdout=%s\nstderr=%s", commandResult.out, commandResult.err)
 
-        return true
+        return
+    }
+
+    fun characterDeviceMissing(charDevicePath: String): Boolean {
+        val isCharDevMissing = if (!ALL_CHARACTER_DEVICE_PATHS.contains(charDevicePath)) {
+            true
+        } else !File(charDevicePath).exists()
+
+        return isCharDevMissing
+    }
+
+    fun anyCharacterDeviceMissing(): Boolean {
+        for (charDevicePath in ALL_CHARACTER_DEVICE_PATHS) {
+            if (!File(charDevicePath).exists()) {
+                return true
+            }
+        }
+
+        return false
     }
 
     companion object {
@@ -123,19 +130,18 @@ class CharacterDeviceManager(private val application: Application) {
         private const val SELINUX_DOMAIN = "appdomain"
         private const val SELINUX_POLICY = "allow $SELINUX_DOMAIN device chr_file { getattr open write }"
 
-        fun characterDeviceMissing(charDevicePath: String): Boolean {
-            return if (!ALL_CHARACTER_DEVICE_PATHS.contains(charDevicePath)) {
-                true
-            } else !File(charDevicePath).exists()
-        }
-
-        fun anyCharacterDeviceMissing(): Boolean {
-            for (charDevicePath in ALL_CHARACTER_DEVICE_PATHS) {
-                if (!File(charDevicePath).exists()) {
-                    return true
+        @Volatile
+        private var INSTANCE: CharacterDeviceManager? = null
+        fun getInstance(application: Application): CharacterDeviceManager {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE?.let {
+                    return it
                 }
+
+                val instance = CharacterDeviceManager(application)
+                INSTANCE = instance
+                instance
             }
-            return false
         }
     }
 }

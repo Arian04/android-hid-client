@@ -33,6 +33,7 @@ import me.arianb.usb_hid_client.input_views.DirectInputIconButton
 import me.arianb.usb_hid_client.input_views.ManualInput
 import me.arianb.usb_hid_client.input_views.Touchpad
 import me.arianb.usb_hid_client.settings.SettingsScreen
+import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import me.arianb.usb_hid_client.ui.theme.BasicPage
 import me.arianb.usb_hid_client.ui.theme.BasicTopBar
 import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
@@ -47,6 +48,8 @@ class MainScreen : Screen {
 
 @Composable
 fun MainPage(mainViewModel: MainViewModel = viewModel()) {
+    val rootStateHolder = RootStateHolder.getInstance()
+    val rootState by rootStateHolder.uiState.collectAsState()
 
     // TODO: should i do this in VM constructor? but then I cant differentiate between
     //       missing char dev on startup or a weird issue of it missing AFTER startup.
@@ -73,7 +76,7 @@ fun MainPage(mainViewModel: MainViewModel = viewModel()) {
 
         LaunchedEffect(uiState) {
             Timber.d("LAUNCHED EFFECT RUNNING WITH UI STATE = %s", uiState.toString())
-            if (uiState.missingRootPrivileges) {
+            if (rootState.missingRootPrivileges) {
                 // TODO: if this fails here, I need to make it incredibly clear that the app will not work.
                 //       right now, you can still try to use it and it'll fail. It should just "lock" the inputs
                 //       if this fails I think.
