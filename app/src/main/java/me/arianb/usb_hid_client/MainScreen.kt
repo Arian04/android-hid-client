@@ -84,6 +84,11 @@ fun MainPage(mainViewModel: MainViewModel = viewModel()) {
                     message = "Missing root permissions",
                     duration = SnackbarDuration.Long
                 )
+            } else if (uiState.isDeviceUnplugged) {
+                snackbarHostState.showSnackbar(
+                    message = "ERROR: Your device seems to be disconnected. If not, try reseating the USB cable",
+                    duration = SnackbarDuration.Long
+                )
             } else if (!showMissingCharDeviceOnStartupAlert.value && uiState.missingCharacterDevice) {
                 val result = snackbarHostState.showSnackbar(
                     message = "ERROR: Character device has disappeared since the app was started.",
@@ -109,11 +114,6 @@ fun MainPage(mainViewModel: MainViewModel = viewModel()) {
 
                     SnackbarResult.Dismissed -> {}
                 }
-            } else if (uiState.isDeviceUnplugged) {
-                snackbarHostState.showSnackbar(
-                    message = "ERROR: Your device seems to be disconnected. If not, try reseating the USB cable",
-                    duration = SnackbarDuration.Long
-                )
             }
         }
     }
