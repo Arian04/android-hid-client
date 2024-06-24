@@ -32,3 +32,13 @@ labelSmall = TextStyle(
 )
 */
 )
+
+val codeFontSize = 10.sp
+const val codeLineHeightScaleFactor = 1.2
+val codeStyle = TextStyle(
+    fontFamily = FontFamily.Monospace,
+    fontWeight = FontWeight.Normal,
+    fontSize = codeFontSize,
+    lineHeight = codeFontSize * codeLineHeightScaleFactor,
+    letterSpacing = 0.25.sp
+)

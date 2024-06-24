@@ -142,6 +142,7 @@ private fun MainTopBar() {
                 ) {
                     val menuItems = arrayOf(
                         MenuItem(SettingsScreen(), stringResource(R.string.settings)),
+                        MenuItem(TroubleshootingScreen(), stringResource(R.string.troubleshooting_title)),
                         MenuItem(HelpScreen(), stringResource(R.string.help)),
                         MenuItem(InfoScreen(), stringResource(R.string.info))
                     )
