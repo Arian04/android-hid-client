@@ -119,6 +119,8 @@ fun MainPage(mainViewModel: MainViewModel = viewModel()) {
     }
 }
 
+private typealias MenuItem = Pair<Screen, String>
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainTopBar() {
@@ -139,10 +141,9 @@ fun MainTopBar() {
                     onDismissRequest = { showDropdownMenu = false }
                 ) {
                     val menuItems = arrayOf(
-                        Pair<Screen, String>(SettingsScreen(), stringResource(R.string.settings)),
-                        Pair<Screen, String>(HelpScreen(), stringResource(R.string.help)),
-                        Pair<Screen, String>(InfoScreen(), stringResource(R.string.info))
-
+                        MenuItem(SettingsScreen(), stringResource(R.string.settings)),
+                        MenuItem(HelpScreen(), stringResource(R.string.help)),
+                        MenuItem(InfoScreen(), stringResource(R.string.info))
                     )
                     for (item in menuItems) {
                         DropdownMenuItem(
