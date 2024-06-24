@@ -131,7 +131,7 @@ fun MainTopBar() {
         title = stringResource(R.string.app_name),
         actions = {
             DirectInputIconButton()
-            IconButton(onClick = { showDropdownMenu = !showDropdownMenu }) {
+            IconButton(onClick = { showDropdownMenu = true }) {
                 Icon(
                     imageVector = Icons.Outlined.MoreVert,
                     contentDescription = "Overflow Menu",
