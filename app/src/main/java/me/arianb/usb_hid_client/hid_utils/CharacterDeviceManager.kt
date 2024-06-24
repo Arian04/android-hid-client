@@ -102,6 +102,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
         return
     }
 
+    @ModifiesStateDirectly
     fun characterDeviceMissing(charDevicePath: String): Boolean {
         val isCharDevMissing = if (!ALL_CHARACTER_DEVICE_PATHS.contains(charDevicePath)) {
             true
@@ -110,6 +111,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
         return isCharDevMissing
     }
 
+    @ModifiesStateDirectly
     fun anyCharacterDeviceMissing(): Boolean {
         for (charDevicePath in ALL_CHARACTER_DEVICE_PATHS) {
             if (!File(charDevicePath).exists()) {
@@ -145,3 +147,13 @@ class CharacterDeviceManager private constructor(private val application: Applic
         }
     }
 }
+
+// This annotation is to help me ensure that I don't accidentally bypass my ViewModel wrappers when calling certain
+// methods from inside ViewModel. For example, by calling CharacterDeviceManager.anyCharacterDeviceMissing directly without
+// updating the state at the call site.
+@Retention(value = AnnotationRetention.BINARY)
+@RequiresOptIn(
+    level = RequiresOptIn.Level.ERROR,
+    message = "Ensure to update state when calling this method. You will usually want to be calling the ViewModel wrappers instead"
+)
+annotation class ModifiesStateDirectly

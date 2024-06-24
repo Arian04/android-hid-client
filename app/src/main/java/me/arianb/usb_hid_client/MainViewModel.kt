@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
+import me.arianb.usb_hid_client.hid_utils.ModifiesStateDirectly
 import me.arianb.usb_hid_client.report_senders.KeySender
 import me.arianb.usb_hid_client.report_senders.MouseSender
 import me.arianb.usb_hid_client.report_senders.ReportSender
@@ -90,6 +91,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         characterDeviceManager.fixCharacterDevicePermissions(device)
     }
 
+    @OptIn(ModifiesStateDirectly::class)
     fun characterDeviceMissing(charDevicePath: String): Boolean {
         val result = characterDeviceManager.characterDeviceMissing(charDevicePath)
 
@@ -98,6 +100,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return result
     }
 
+    @OptIn(ModifiesStateDirectly::class)
     fun anyCharacterDeviceMissing(): Boolean {
         val result = characterDeviceManager.anyCharacterDeviceMissing()
 
