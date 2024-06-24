@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import java.util.EnumMap
 
-private enum class RootMethod {
+enum class RootMethod {
     UNKNOWN,
     UNROOTED,
     MAGISK,
@@ -53,7 +53,7 @@ class RootStateHolder private constructor() {
         return hasRootPermissions
     }
 
-    private fun detectRootMethod(): RootMethod {
+    fun detectRootMethod(): RootMethod {
         if (!hasRootPermissions()) {
             Timber.e("Failed to get root shell. Device is most likely not rooted or hasn't given the app root permissions")
             return RootMethod.UNROOTED
