@@ -3,10 +3,7 @@ package me.arianb.usb_hid_client.settings
 import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,10 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.topjohnwu.superuser.Shell
 import me.arianb.usb_hid_client.BuildConfig
+import me.arianb.usb_hid_client.ui.theme.LabeledCategory
 import timber.log.Timber
 import java.io.IOException
 
 
+// This is basically just an alias now
 @Composable
 fun PreferenceCategory(
     title: String,
@@ -29,17 +28,8 @@ fun PreferenceCategory(
     showDivider: Boolean = true,
     preferences: @Composable () -> Unit
 ) {
-    Text(
-        text = title,
-        modifier = Modifier
-            .padding()
-            .then(modifier),
-        color = MaterialTheme.colorScheme.primary,
-        style = MaterialTheme.typography.titleSmall,
-    )
-    preferences()
-    if (showDivider) {
-        HorizontalDivider()
+    LabeledCategory(title, modifier, showDivider) {
+        preferences()
     }
 }
 

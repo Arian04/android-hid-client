@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -112,6 +113,25 @@ fun BasicTopBar(
         ),
         scrollBehavior = scrollBehavior
     )
+}
+
+@Composable
+fun LabeledCategory(
+    title: String,
+    modifier: Modifier = Modifier,
+    showDivider: Boolean = true,
+    content: @Composable () -> Unit
+) {
+    Text(
+        text = title,
+        modifier = modifier,
+        color = MaterialTheme.colorScheme.primary,
+        style = MaterialTheme.typography.titleSmall,
+    )
+    content()
+    if (showDivider) {
+        HorizontalDivider()
+    }
 }
 
 @Preview(
