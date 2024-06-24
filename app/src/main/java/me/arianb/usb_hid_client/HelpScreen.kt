@@ -40,7 +40,7 @@ class HelpScreen : Screen {
 }
 
 @Composable
-fun HelpPage() {
+private fun HelpPage() {
     val questionAnswerPairs = remember {
         arrayOf(
             Pair(R.string.help_faq_q1, R.string.help_faq_a1),
@@ -65,7 +65,7 @@ fun HelpPage() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HelpTopBar() {
+private fun HelpTopBar() {
     SimpleNavTopBar(
         title = stringResource(R.string.help),
         scrollBehavior = pinnedScrollBehavior()
@@ -121,6 +121,6 @@ fun ComposeTextView(@StringRes id: Int, modifier: Modifier = Modifier) {
 
 @DarkLightModePreviews
 @Composable
-fun HelpScreenPreview() {
+private fun HelpScreenPreview() {
     Navigator(HelpScreen())
 }

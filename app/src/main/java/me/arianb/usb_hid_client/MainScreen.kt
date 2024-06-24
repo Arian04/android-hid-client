@@ -47,7 +47,7 @@ class MainScreen : Screen {
 }
 
 @Composable
-fun MainPage(mainViewModel: MainViewModel = viewModel()) {
+private fun MainPage(mainViewModel: MainViewModel = viewModel()) {
     val rootStateHolder = RootStateHolder.getInstance()
     val rootState by rootStateHolder.uiState.collectAsState()
 
@@ -123,7 +123,7 @@ private typealias MenuItem = Pair<Screen, String>
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainTopBar() {
+private fun MainTopBar() {
     val navigator = LocalNavigator.currentOrThrow
     var showDropdownMenu by remember { mutableStateOf(false) }
 
@@ -190,6 +190,6 @@ private fun CreateCharDevicesAlertDialog(showAlert: MutableState<Boolean>, mainV
 
 @DarkLightModePreviews
 @Composable
-fun MainScreenPreview() {
+private fun MainScreenPreview() {
     Navigator(MainScreen())
 }

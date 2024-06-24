@@ -22,7 +22,6 @@ import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
 import me.arianb.usb_hid_client.ui.theme.PaddingExtraExtraLarge
 
 class OnboardingScreen : Screen {
-
     @Composable
     override fun Content() {
         OnboardingPage()
@@ -30,7 +29,7 @@ class OnboardingScreen : Screen {
 }
 
 @Composable
-fun OnboardingPage() {
+private fun OnboardingPage() {
     BasicPage(
         topBar = { OnboardingTopBar() },
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -44,7 +43,7 @@ fun OnboardingPage() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OnboardingTopBar() {
+private fun OnboardingTopBar() {
     BasicTopBar(title = stringResource(R.string.onboarding_title))
 }
 
@@ -81,6 +80,6 @@ fun ContinueButton(settingsViewModel: SettingsViewModel = viewModel()) {
 
 @DarkLightModePreviews
 @Composable
-fun OnboardingScreenPreview() {
+private fun OnboardingScreenPreview() {
     Navigator(OnboardingScreen())
 }

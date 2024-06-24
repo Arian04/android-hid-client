@@ -31,7 +31,7 @@ class SettingsScreen : Screen {
 }
 
 @Composable
-fun SettingsPage() {
+private fun SettingsPage() {
     val padding = PaddingNormal
 
     BasicPage(
@@ -100,7 +100,7 @@ fun ExportLogsPreferenceButton() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsTopBar() {
+private fun SettingsTopBar() {
     SimpleNavTopBar(
         title = stringResource(R.string.settings)
     )
@@ -108,6 +108,6 @@ fun SettingsTopBar() {
 
 @DarkLightModePreviews
 @Composable
-fun SettingsScreenPreview() {
+private fun SettingsScreenPreview() {
     Navigator(SettingsScreen())
 }

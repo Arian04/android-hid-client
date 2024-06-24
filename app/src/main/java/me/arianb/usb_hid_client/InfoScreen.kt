@@ -30,7 +30,7 @@ class InfoScreen : Screen {
 }
 
 @Composable
-fun InfoPage() {
+private fun InfoPage() {
     BasicPage(
         topBar = { InfoTopBar() },
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -46,7 +46,7 @@ fun InfoPage() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InfoTopBar() {
+private fun InfoTopBar() {
     SimpleNavTopBar(
         title = stringResource(id = R.string.info)
     )
@@ -80,6 +80,6 @@ fun AppSourceCodeButton() {
 
 @DarkLightModePreviews
 @Composable
-fun InfoScreenPreview() {
+private fun InfoScreenPreview() {
     Navigator(InfoScreen())
 }
