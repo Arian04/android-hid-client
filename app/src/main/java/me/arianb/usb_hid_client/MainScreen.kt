@@ -150,7 +150,29 @@ private fun MainTopBar() {
                         DropdownMenuItem(
                             text = { Text(item.second) },
                             onClick = {
-                                navigator.push(item.first)
+                                // Navigate to screen (safely)
+                                //
+                                // NOTE:
+                                //  Extra code here is necessary because the user can spam click the DropdownMenuItem
+                                //  before the navigation has completed. This would lead to it trying to navigate to the
+                                //  same screen twice. As of right now, Voyager will crash if this happens without you
+                                //  setting unique keys in every Screen. However, even after fixing that, being able
+                                //  to navigate to the same screen multiple times is undesirable. For this reason, I have
+                                //  added extra code that makes sure the given subclass of Screen isn't already present
+                                //  in the navigation stack before we navigate.
+
+                                val thisScreen = item.first
+
+                                // Ensure that the Screen we're about to push isn't already in the navigation stack
+                                // iterates in reverse because it's more likely for the duplicate item to be at the end
+                                for (screen in navigator.items.reversed()) {
+                                    if (screen::class == thisScreen::class) {
+                                        return@DropdownMenuItem
+                                    }
+                                }
+
+                                // Navigate to screen
+                                navigator.push(thisScreen)
                                 showDropdownMenu = false
                             }
                         )
