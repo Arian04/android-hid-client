@@ -25,6 +25,18 @@ import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.IOException
 
+/**
+ * Data class that represents the UI state
+ */
+data class MyUiState(
+    // Character Device Stuff
+    val missingCharacterDevice: Boolean = false,
+    val isCharacterDevicePermissionsBroken: String? = null,
+
+    // Other Stuff
+    val isDeviceUnplugged: Boolean = false
+)
+
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(MyUiState())
     val uiState: StateFlow<MyUiState> = _uiState
