@@ -119,18 +119,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     data class DebugIssues(
         val hasRootPermissions: Boolean,
         val rootMethod: RootMethod,
-        val isEveryCharDevPresent: Boolean,
+        val isEveryCharDevPresent: Boolean?,
 
         // kernel stuff
         val kernelConfigAnnotated: AnnotatedString,
-        val hasConfigFsSupport: Boolean,
-        val hasConfigFsHidFunctionSupport: Boolean,
+        val hasConfigFsSupport: Boolean?,
+        val hasConfigFsHidFunctionSupport: Boolean?,
     )
 
     // FIXME:
     //  - finish implementation
-    //      - should i make every value nullable so I can have a way to know if the check hasn't run and
-    //        mark it in the UI with a '?'. ex: we don't have root permissions so we skipped every other check.
     //  - make this run in a coroutine in case something hangs?
     fun detectIssues(): DebugIssues {
         val rootStateHolder = RootStateHolder.getInstance()
@@ -140,21 +138,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val rootMethod = rootStateHolder.detectRootMethod()
 
         // Character device stuff
-        val isEveryCharDevPresent = !anyCharacterDeviceMissing()
+        var isEveryCharDevPresent: Boolean? = null
         // TODO: check char dev permissions. Theres a few ways I can do that:
         //  - Check it theoretically (check for presence of proper selinux policy and unix permissions)
         //  - Check it realistically (write to the devices and see what happens)
 
         // Kernel stuff
         val kernelConfig = getKernelConfig()
-        var hasConfigFsSupport = false
-        var hasConfigFsHidFunctionSupport = false
+        var hasConfigFsSupport: Boolean? = null
+        var hasConfigFsHidFunctionSupport: Boolean? = null
         val configFsKernelOption = "CONFIG_USB_CONFIGFS"
         val configFsHidKernelOption = "${configFsKernelOption}_F_HID"
         val highlightConfigLines = mutableIntSetOf()
 
         if (hasRootPermissions) {
             // is each char device present?
+            isEveryCharDevPresent = !anyCharacterDeviceMissing()
             if (isEveryCharDevPresent) {
                 // check if permissions seem good
                 val arePermissionsGood = false // TODO:

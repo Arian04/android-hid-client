@@ -68,7 +68,6 @@ private fun TroubleshootingPage() {
             GadgetActionButtons()
         }
 
-        // FIXME: first im getting this implemented, but after that I should make this look nicer
         LabeledCategory("Debugging Information") {
             DebuggingInfoList()
         }
@@ -148,10 +147,14 @@ private fun DebuggingInfoList(mainViewModel: MainViewModel = viewModel()) {
     )
     GadgetStatusItem(
         title = "Kernel Support?",
-        summary = "ConfigFS support = ${debugInfo.hasConfigFsSupport}" + "\n" +
-                "ConfigFS HID support = ${debugInfo.hasConfigFsHidFunctionSupport}",
+        summary = "ConfigFS support = ${debugInfo.hasConfigFsSupport ?: "Unknown"}" + "\n" +
+                "ConfigFS HID support = ${debugInfo.hasConfigFsHidFunctionSupport ?: "Unknown"}",
         extraInfo = debugInfo.kernelConfigAnnotated,
-        isGood = debugInfo.hasConfigFsSupport && debugInfo.hasConfigFsHidFunctionSupport
+        isGood = if (debugInfo.hasConfigFsSupport == null || debugInfo.hasConfigFsHidFunctionSupport == null) {
+            null
+        } else {
+            debugInfo.hasConfigFsSupport && debugInfo.hasConfigFsHidFunctionSupport
+        }
     )
 }
 
@@ -159,7 +162,7 @@ private fun DebuggingInfoList(mainViewModel: MainViewModel = viewModel()) {
 private fun GadgetStatusItem(
     title: String,
     summary: String? = null,
-    isGood: Boolean
+    isGood: Boolean?
 ) {
     GadgetStatusItemCommon(
         title = title,
@@ -169,20 +172,33 @@ private fun GadgetStatusItem(
             // This is here so that these icons are aligned properly with the IconButtons, since those have larger
             // minimum padding due to accessibility guidelines for touch targets. These aren't interactive components.
             val sizeModifier = Modifier.minimumInteractiveComponentSize()
-            if (isGood) {
-                Icon(
-                    modifier = sizeModifier,
-                    imageVector = Icons.Default.Check,
-                    tint = color,
-                    contentDescription = "Good"
-                )
-            } else {
-                Icon(
-                    modifier = sizeModifier,
-                    painter = painterResource(R.drawable.error_outline),
-                    tint = color,
-                    contentDescription = "Error"
-                )
+            when (isGood) {
+                true -> {
+                    Icon(
+                        modifier = sizeModifier,
+                        imageVector = Icons.Default.Check,
+                        tint = color,
+                        contentDescription = "Good"
+                    )
+                }
+
+                false -> {
+                    Icon(
+                        modifier = sizeModifier,
+                        painter = painterResource(R.drawable.priority_high),
+                        tint = color,
+                        contentDescription = "Error"
+                    )
+                }
+
+                null -> {
+                    Icon(
+                        modifier = sizeModifier,
+                        painter = painterResource(R.drawable.question_mark_outline),
+                        tint = color,
+                        contentDescription = "Unknown"
+                    )
+                }
             }
         }
     )
@@ -192,7 +208,7 @@ private fun GadgetStatusItem(
 private fun GadgetStatusItem(
     title: String,
     summary: String? = null,
-    isGood: Boolean,
+    isGood: Boolean?,
     extraInfo: AnnotatedString,
 ) {
     var isShowingInfoAlert by remember { mutableStateOf(false) }
@@ -233,10 +249,10 @@ private fun GadgetStatusItem(
 private fun GadgetStatusItemCommon(
     title: String,
     summary: String?,
-    isGood: Boolean,
+    isGood: Boolean?,
     trailingContent: @Composable ((color: Color) -> Unit)
 ) {
-    val color = if (isGood) {
+    val color = if (isGood == true) {
         LocalContentColor.current
     } else {
         MaterialTheme.colorScheme.error
