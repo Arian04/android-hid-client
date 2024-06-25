@@ -160,7 +160,8 @@ fun LabeledCategory(
 @Composable
 fun getColorByTheme(settingsViewModel: SettingsViewModel = viewModel()): Int? {
     val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
-    // Those hex values are the colors that Android would set the text to by default during my testing
+    
+    // These hex values are the colors that Android would set the text to by default during my testing
     val textColor: Int? = when (preferences.appTheme) {
         AppTheme.DarkMode -> 0xB3FFFFFF.toInt()
         AppTheme.LightMode -> 0x8A000000.toInt()
