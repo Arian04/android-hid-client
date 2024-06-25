@@ -30,6 +30,7 @@ import me.arianb.usb_hid_client.ui.theme.PaddingNone
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.PaddingSmall
 import me.arianb.usb_hid_client.ui.theme.SimpleNavTopBar
+import me.arianb.usb_hid_client.ui.theme.getColorByTheme
 
 
 class HelpScreen : Screen {
@@ -96,6 +97,7 @@ fun ComposeTextView(@StringRes id: Int, modifier: Modifier = Modifier) {
     val style = MaterialTheme.typography.bodyLarge
 
     val text = LocalContext.current.resources.getText(id)
+    val textColor = getColorByTheme()
 
     AndroidView(
         modifier = modifier,
@@ -114,6 +116,9 @@ fun ComposeTextView(@StringRes id: Int, modifier: Modifier = Modifier) {
         },
         update = {
             it.text = text
+            if (textColor != null) {
+                it.setTextColor(textColor)
+            }
         }
     )
 }

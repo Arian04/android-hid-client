@@ -10,12 +10,21 @@
 
     <!-- Settings Screen -->
     <string name="settings">Settings</string>
+
     <!-- Preference Titles -->
+    <string name="theme_header">Theme</string>
     <string name="misc_header">Misc</string>
     <string name="debug_header">Debug</string>
 
     <!-- Preferences -->
     <string name="clear_manual_input_title">Clear manual input text box on send</string>
+
+    <string name="app_theme_title">App theme</string>
+    <string name="app_theme_system">Follow system</string>
+    <string name="app_theme_dark_mode">Dark theme</string>
+    <string name="app_theme_light_mode">Light theme</string>
+
+    <string name="dynamic_colors_title">Dynamic colors</string>
 
     <string name="volume_button_passthrough_title">Volume button passthrough</string>
     <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>

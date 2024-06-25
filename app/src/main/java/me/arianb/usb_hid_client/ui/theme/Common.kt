@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,12 +26,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import me.arianb.usb_hid_client.settings.AppTheme
+import me.arianb.usb_hid_client.settings.SettingsViewModel
 
 @Composable
 fun BasicPage(
@@ -38,8 +45,15 @@ fun BasicPage(
     paddingAll: Dp = PaddingLarge,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(PaddingNormal, Alignment.Top),
+    scrollable: Boolean = false,
     content: @Composable (ColumnScope.() -> Unit)
 ) {
+    val scrollableModifier = if (scrollable) {
+        Modifier.verticalScroll(rememberScrollState())
+    } else {
+        Modifier
+    }
+
     USBHIDClientTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -57,7 +71,8 @@ fun BasicPage(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding)
-                            .padding(all = paddingAll),
+                            .padding(all = paddingAll)
+                            .then(scrollableModifier),
                         horizontalAlignment = horizontalAlignment,
                         verticalArrangement = verticalArrangement,
                     ) {
@@ -132,6 +147,27 @@ fun LabeledCategory(
     if (showDivider) {
         HorizontalDivider()
     }
+}
+
+/**
+ * Get text color as Int based on current app theme. This is meant to be used for
+ * legacy TextViews still present in the app, since they seem to only set their text color
+ * based on the system theme.
+ */
+@Composable
+fun getColorByTheme(settingsViewModel: SettingsViewModel = viewModel()): Int? {
+    val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
+    // Those hex values are the colors that Android would set the text to by default during my testing
+    val textColor: Int? = when (preferences.appTheme) {
+        AppTheme.DarkMode -> 0xB3FFFFFF.toInt()
+        AppTheme.LightMode -> 0x8A000000.toInt()
+        else -> {
+            // Just let the system sort it out
+            null
+        }
+    }
+
+    return textColor
 }
 
 @Preview(

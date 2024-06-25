@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.report_senders.MouseSender
+import me.arianb.usb_hid_client.ui.theme.getColorByTheme
 import timber.log.Timber
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -134,6 +135,8 @@ fun Touchpad(mainViewModel: MainViewModel = viewModel()) {
     val touchpadText = stringResource(R.string.touchpad_label)
     val mouseSender = mainViewModel.mouseSender
 
+    val textColor = getColorByTheme()
+
     Surface(
         modifier = Modifier
 //            .pointerInput(Unit) {
@@ -158,6 +161,11 @@ fun Touchpad(mainViewModel: MainViewModel = viewModel()) {
                     setTouchListeners(mouseSender)
                 }
             },
+            update = {
+                if (textColor != null) {
+                    it.setTextColor(textColor)
+                }
+            }
         )
     }
 }

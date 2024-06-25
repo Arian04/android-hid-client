@@ -19,9 +19,8 @@ import me.arianb.usb_hid_client.ui.theme.BasicPage
 import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.SimpleNavTopBar
+import me.arianb.usb_hid_client.ui.theme.isDynamicColorAvailable
 import timber.log.Timber
-
-// TODO: make this scrollable
 
 class SettingsScreen : Screen {
     @Composable
@@ -33,16 +32,32 @@ class SettingsScreen : Screen {
 @Composable
 private fun SettingsPage() {
     val padding = PaddingNormal
+    val paddingModifier = Modifier.padding(horizontal = padding)
 
     BasicPage(
         topBar = { SettingsTopBar() },
-//        paddingAll = padding,
         horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.spacedBy(padding, Alignment.Top),
+        scrollable = true
     ) {
         PreferenceCategory(
+            title = stringResource(R.string.theme_header),
+            modifier = paddingModifier
+        ) {
+            ListPreference(
+                title = stringResource(R.string.app_theme_title),
+                options = AppTheme.values
+            )
+            if (isDynamicColorAvailable()) {
+                SwitchPreference(
+                    title = stringResource(R.string.dynamic_colors_title),
+                    key = DYNAMIC_COLOR_KEY
+                )
+            }
+        }
+        PreferenceCategory(
             title = stringResource(R.string.misc_header),
-            modifier = Modifier.padding(horizontal = padding)
+            modifier = paddingModifier
         ) {
             SwitchPreference(
                 title = stringResource(R.string.clear_manual_input_title),
@@ -56,7 +71,7 @@ private fun SettingsPage() {
         }
         PreferenceCategory(
             title = stringResource(R.string.debug_header),
-            modifier = Modifier.padding(horizontal = padding),
+            modifier = paddingModifier,
             showDivider = false
         ) {
             SwitchPreference(

@@ -10,10 +10,15 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.arianb.usb_hid_client.settings.AppTheme
+import me.arianb.usb_hid_client.settings.SettingsViewModel
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -27,16 +32,28 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40
 )
 
-// FIXME: add preference to enable/disable dynamic color (should it be disabled by default?)
+fun isDynamicColorAvailable(): Boolean {
+    return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+}
+
 @Composable
 fun USBHIDClientTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
+    settingsViewModel: SettingsViewModel = viewModel(),
     content: @Composable () -> Unit
 ) {
+    val preferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
+
+    val darkTheme = when (preferencesState.appTheme) {
+        AppTheme.DarkMode -> true
+        AppTheme.LightMode -> false
+        else -> isSystemInDarkTheme()
+    }
+
+    val dynamicColor = preferencesState.isDynamicColorEnabled
+
     val colorScheme = when {
         // Dynamic color is available on Android 12+
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor && isDynamicColorAvailable() -> {
             val context = LocalContext.current
             if (darkTheme) {
                 dynamicDarkColorScheme(context)
