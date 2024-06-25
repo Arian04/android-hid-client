@@ -171,12 +171,11 @@ dependencies {
     implementation("androidx.compose.runtime:runtime:$composeUIVersion")
     implementation("androidx.compose.ui:ui-text:$composeUIVersion")
     implementation("androidx.compose.ui:ui-unit:$composeUIVersion")
-    debugRuntimeOnly("androidx.compose.ui:ui-test-manifest:$composeUIVersion")
 
     // Navigation
     implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
-    implementation("cafe.adriel.voyager:voyager-core:1.1.0-beta02")
+    implementation("cafe.adriel.voyager:voyager-core:$voyagerVersion")
 
     // Android Studio Preview support
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
@@ -186,7 +185,7 @@ dependencies {
     // Testing
     testImplementation("junit:junit:$junitVersion")
     androidTestImplementation("junit:junit:$junitVersion")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeUIVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeUIVersion")
     androidTestImplementation("androidx.test.ext:junit:$androidXTestJunit")
-    androidTestImplementation("androidx.test.espresso:espresso-core:$androidXTestEspresso")
 }
