@@ -130,7 +130,6 @@ dependencies {
     val androidXLifecycleVersion = "2.8.2"
     val androidXPreferenceVersion = "1.2.1"
     val androidXTestJunit = "1.1.5"
-    val androidXTestEspresso = "3.5.1"
 
     // Compose
     val composeActivityVersion = "1.9.0"
@@ -182,8 +181,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
-    // Testing
+    // Unit Testing
     testImplementation("junit:junit:$junitVersion")
+
+    // Instrumented Testing
     androidTestImplementation("junit:junit:$junitVersion")
     debugImplementation("androidx.compose.ui:ui-test-manifest:$composeUIVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeUIVersion")
