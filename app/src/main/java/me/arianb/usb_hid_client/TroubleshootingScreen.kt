@@ -39,12 +39,12 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import me.arianb.usb_hid_client.settings.ExportLogsPreferenceButton
 import me.arianb.usb_hid_client.shell_utils.RootMethod
-import me.arianb.usb_hid_client.ui.theme.BasicPage
-import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
-import me.arianb.usb_hid_client.ui.theme.LabeledCategory
-import me.arianb.usb_hid_client.ui.theme.SimpleNavTopBar
 import me.arianb.usb_hid_client.ui.theme.codeLineHeightScaleFactor
 import me.arianb.usb_hid_client.ui.theme.codeStyle
+import me.arianb.usb_hid_client.ui.utils.BasicPage
+import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.utils.LabeledCategory
+import me.arianb.usb_hid_client.ui.utils.SimpleNavTopBar
 import timber.log.Timber
 
 class TroubleshootingScreen : Screen {

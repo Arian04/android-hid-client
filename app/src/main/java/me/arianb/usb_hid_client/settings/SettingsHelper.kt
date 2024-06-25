@@ -27,7 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.topjohnwu.superuser.Shell
 import me.arianb.usb_hid_client.BuildConfig
-import me.arianb.usb_hid_client.ui.theme.LabeledCategory
+import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 import timber.log.Timber
 import java.io.IOException
 

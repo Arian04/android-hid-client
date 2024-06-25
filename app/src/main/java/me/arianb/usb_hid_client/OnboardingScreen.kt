@@ -16,10 +16,10 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.arianb.usb_hid_client.settings.ONBOARDING_DONE_KEY
 import me.arianb.usb_hid_client.settings.SettingsViewModel
-import me.arianb.usb_hid_client.ui.theme.BasicPage
-import me.arianb.usb_hid_client.ui.theme.BasicTopBar
-import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
 import me.arianb.usb_hid_client.ui.theme.PaddingExtraExtraLarge
+import me.arianb.usb_hid_client.ui.utils.BasicPage
+import me.arianb.usb_hid_client.ui.utils.BasicTopBar
+import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
 
 class OnboardingScreen : Screen {
     @Composable

@@ -23,14 +23,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.widget.TextViewCompat
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
-import me.arianb.usb_hid_client.ui.theme.BasicPage
-import me.arianb.usb_hid_client.ui.theme.DarkLightModePreviews
 import me.arianb.usb_hid_client.ui.theme.PaddingExtraLarge
 import me.arianb.usb_hid_client.ui.theme.PaddingNone
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.PaddingSmall
-import me.arianb.usb_hid_client.ui.theme.SimpleNavTopBar
-import me.arianb.usb_hid_client.ui.theme.getColorByTheme
+import me.arianb.usb_hid_client.ui.utils.BasicPage
+import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.utils.SimpleNavTopBar
+import me.arianb.usb_hid_client.ui.utils.getColorByTheme
 
 
 class HelpScreen : Screen {

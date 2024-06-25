@@ -21,7 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.report_senders.MouseSender
-import me.arianb.usb_hid_client.ui.theme.getColorByTheme
+import me.arianb.usb_hid_client.ui.utils.getColorByTheme
 import timber.log.Timber
 import kotlin.math.abs
 import kotlin.math.ceil
