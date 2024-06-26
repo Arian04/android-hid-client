@@ -135,7 +135,7 @@ dependencies {
     val androidXCoreVersion = "1.13.1"
     val androidXLifecycleVersion = "2.8.2"
     val androidXPreferenceVersion = "1.2.1"
-    val androidXTestJunit = "1.1.5"
+    val androidXTestJunit = "1.2.0"
 
     // Compose
     val composeActivityVersion = "1.9.0"
