@@ -15,15 +15,16 @@ abstract class ReportSender(
         Timber.wtf("A channel with an unlimited buffer shouldn't be failing to receive elements")
     }
 
-    suspend fun start(catch: (e: IOException) -> Unit) {
+    suspend fun start(onSuccess: () -> Unit, onException: (e: IOException) -> Unit) {
         for (report in reportsChannel) {
             try {
                 sendReport(report, characterDevicePath, usesReportIDs)
+                onSuccess()
             } catch (e: IOException) {
                 Timber.e(e)
 
                 // TODO: map exception to a sealed error type and pass that to lambda?
-                catch(e)
+                onException(e)
             }
         }
     }

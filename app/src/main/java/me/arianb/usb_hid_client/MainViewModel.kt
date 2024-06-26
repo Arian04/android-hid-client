@@ -49,14 +49,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         for (sender: ReportSender in listOf(keySender, mouseSender)) {
             viewModelScope.launch(ReportSender.dispatcher) {
-                sender.start { e ->
-                    val characterDevicePath = sender.characterDevicePath
-                    if (e is FileNotFoundException && characterDeviceMissing(characterDevicePath)) {
-                        Timber.wtf("Character device '$characterDevicePath' doesn't exist. Its existence is verified on app start, so the only reason this should happen is if it was removed *after* the app started.")
-                    } else {
-                        handleException(e, sender.characterDevicePath)
+                sender.start(
+                    onSuccess = {
+                        // This is called when no exception was thrown, meaning everything is good :)
+                        // so let's set the UI state back to default (no errors)
+                        _uiState.update { MyUiState() }
+                    },
+                    onException = { e ->
+                        val characterDevicePath = sender.characterDevicePath
+                        if (e is FileNotFoundException && characterDeviceMissing(characterDevicePath)) {
+                            Timber.wtf("Character device '$characterDevicePath' doesn't exist. Its existence is verified on app start, so the only reason this should happen is if it was removed *after* the app started.")
+                        } else {
+                            handleException(e, sender.characterDevicePath)
+                        }
                     }
-                }
+                )
             }
         }
     }
