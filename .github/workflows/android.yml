@@ -48,9 +48,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    concurrency:
-      group: test-${{ github.ref }}
-      cancel-in-progress: true
     steps:
       - name: Delete unnecessary tools to free up some space
         uses: jlumbroso/free-disk-space@v1.3.1
