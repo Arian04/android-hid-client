@@ -75,7 +75,13 @@ android {
         jvmTarget = "17"
     }
 
-    lint.abortOnError = false
+    lint {
+        checkAllWarnings = true
+
+        // I used to have this disabled, but I shouldn't. If an error is unjustified, then I should knock its severity
+        // down to "warning" or disable it. Appropriate lint errors should cause a failure.
+        //abortOnError = false
+    }
 
     @Suppress("UnstableApiUsage")
     testOptions {
