@@ -90,8 +90,8 @@ fun BasicPage(
 @Composable
 fun SimpleNavTopBar(
     title: String,
-    actions: @Composable (RowScope.() -> Unit) = {},
-    scrollBehavior: TopAppBarScrollBehavior? = null
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    actions: @Composable (RowScope.() -> Unit) = {}
 ) {
     val navigator = LocalNavigator.currentOrThrow
 
