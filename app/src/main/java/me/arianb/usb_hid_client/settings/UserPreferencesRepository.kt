@@ -96,8 +96,10 @@ class UserPreferencesRepository private constructor(application: Application) {
         }
     }
 
-    private fun editAndUpdate(commit: Boolean = false, action: SharedPreferences.Editor.() -> Unit) {
-        sharedPreferences.edit(commit = commit, action = action)
+    private inline fun editAndUpdate(commit: Boolean = false, action: SharedPreferences.Editor.() -> Unit) {
+        sharedPreferences.edit(commit = commit) {
+            action()
+        }
         _userPreferencesFlow.update { userPreferences }
     }
 
