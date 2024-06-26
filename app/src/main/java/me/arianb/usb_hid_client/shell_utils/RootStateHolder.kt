@@ -32,7 +32,7 @@ class RootStateHolder private constructor() {
         sepolicyMap[RootMethod.KERNELSU] = "ksud sepolicy patch"
 
         rootBinaryMap = HashMap()
-        rootBinaryMap["magisk"] = RootMethod.MAGISK // TODO: does this exist or did i imagine it?
+        rootBinaryMap["magisk"] = RootMethod.MAGISK
         rootBinaryMap["magiskpolicy"] = RootMethod.MAGISK
         rootBinaryMap["ksud"] = RootMethod.KERNELSU
     }
