@@ -48,7 +48,7 @@ public class DirectInputKeyboardView extends androidx.appcompat.widget.AppCompat
         super(context, attrs, defStyleAttr);
     }
 
-    public void setKeyListeners(KeySender keySender) {
+    public void setKeyListeners(@NonNull KeySender keySender) {
         this.keySender = keySender;
         preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 

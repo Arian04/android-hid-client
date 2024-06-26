@@ -1,5 +1,7 @@
 package me.arianb.usb_hid_client.hid_utils;
 
+import androidx.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +22,8 @@ public abstract class KeyCodeTranslation {
     // Converts key to two scan codes
     // First element in array is the scan code for the modifier
     // Second element in array is the scan code for the key
-    public static byte[] convertKeyToScanCodes(String key) {
+    @Nullable
+    public static byte[] convertKeyToScanCodes(@Nullable String key) {
         byte[] keyScanCodes = {0, 0};
 
         //Log.d(TAG, "converting following key into scan code: " + key);
@@ -50,6 +53,7 @@ public abstract class KeyCodeTranslation {
         return keyScanCodes;
     }
 
+    @Nullable
     public static byte[] convertKeyToScanCodes(char key) {
         return convertKeyToScanCodes(Character.toString(key));
     }
