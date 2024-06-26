@@ -147,7 +147,7 @@ dependencies {
     val androidMaterialVersion = "1.12.0"
     val junitVersion = "4.13.2"
     val libsuVersion = "5.3.0"
-    val timberVersion = "4.7.1"
+    val timberVersion = "5.0.1"
     val voyagerVersion = "1.1.0-beta02"
 
     implementation("com.google.android.material:material:$androidMaterialVersion")
@@ -159,7 +159,6 @@ dependencies {
     implementation("androidx.preference:preference-ktx:$androidXPreferenceVersion")
 
     // Misc 3rd party
-    //noinspection GradleDependency: Locked to 4.7.1 because of issue #484
     implementation("com.jakewharton.timber:timber:$timberVersion")
     implementation("com.github.topjohnwu.libsu:core:$libsuVersion")
 
