@@ -29,23 +29,23 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
             fixSelinuxPermissions()
 
-            try {
-                withTimeout(5000) {
-                    for (devicePath in ALL_CHARACTER_DEVICE_PATHS) {
-                        launch {
+            launch {
+                for (devicePath in ALL_CHARACTER_DEVICE_PATHS) {
+                    try {
+                        withTimeout(3000) {
                             // wait until the device file exists before trying to fix its permissions
                             while (!File(devicePath).exists()) {
                                 Timber.d("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
                                 delay(200)
                             }
                             Timber.d("$devicePath exists now!!!")
-                            fixCharacterDevicePermissions(devicePath)
                         }
+                        fixCharacterDevicePermissions(devicePath)
+                    } catch (e: TimeoutCancellationException) {
+                        Timber.e("Shell script ran, but we timed out while waiting for character devices to be created.")
+                        // FIXME: show this error to the user
                     }
                 }
-            } catch (e: TimeoutCancellationException) {
-                Timber.e("Shell script ran, but we timed out while waiting for character devices to be created.")
-                // FIXME: show this error to the user
             }
         }
     }
@@ -59,13 +59,13 @@ class CharacterDeviceManager private constructor(private val application: Applic
         val appUID: Int = application.applicationInfo.uid
 
         // Set Linux permissions -> only my app user can r/w to the char device
-        val chownCommand = "chown ${appUID}:${appUID} $device"
+        val chownCommand = "chown '${appUID}:${appUID}' $device"
         val chmodCommand = "chmod 600 $device"
         Shell.cmd(chownCommand).exec()
         Shell.cmd(chmodCommand).exec()
 
         // Set SELinux permissions -> only my app's selinux context can r/w to the char device
-        val chconCommand = "chcon u:object_r:device:s0:${getSelinuxCategories()} $device"
+        val chconCommand = "chcon 'u:object_r:device:s0:${getSelinuxCategories()}' $device"
         Shell.cmd(chconCommand).exec()
 
         return

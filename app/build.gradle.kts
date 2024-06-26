@@ -140,7 +140,7 @@ dependencies {
     // Other libraries
     val androidMaterialVersion = "1.12.0"
     val junitVersion = "4.13.2"
-    val libsuVersion = "5.2.2"
+    val libsuVersion = "5.3.0"
     val timberVersion = "4.7.1"
     val voyagerVersion = "1.1.0-beta02"
 
