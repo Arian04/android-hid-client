@@ -11,14 +11,14 @@ import kotlinx.coroutines.flow.update
 import me.arianb.usb_hid_client.R
 
 // keys
-// TODO: refactor to handle it in a similar way to AppTheme to ensure it's impossible to pass an unknown key to my
-//       preference getters/setters here.
-const val ONBOARDING_DONE_KEY = "onboarding_done"
-const val CLEAR_MANUAL_INPUT_KEY = "clear_manual_input"
-const val VOLUME_BUTTON_PASSTHROUGH_KEY = "volume_button_passthrough"
-const val DEBUG_MODE_KEY = "debug_mode"
-const val APP_THEME_KEY = "app_theme"
-const val DYNAMIC_COLOR_KEY = "dynamic_color"
+sealed class PreferenceKey(val key: String) {
+    data object OnboardingDoneKey : PreferenceKey("onboarding_done")
+    data object ClearManualInputKey : PreferenceKey("clear_manual_input")
+    data object VolumeButtonPassthroughKey : PreferenceKey("volume_button_passthrough")
+    data object DebugModeKey : PreferenceKey("debug_mode")
+    data object AppThemeKey : PreferenceKey("app_theme")
+    data object DynamicColorKey : PreferenceKey("dynamic_color")
+}
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
 
@@ -55,18 +55,18 @@ class UserPreferencesRepository private constructor(application: Application) {
     private val userPreferences: UserPreferences
         get() {
             return UserPreferences(
-                isOnboardingDone = getBoolean(ONBOARDING_DONE_KEY, false),
-                clearManualInput = getBoolean(CLEAR_MANUAL_INPUT_KEY, false),
-                isVolumeButtonPassthroughEnabled = getBoolean(VOLUME_BUTTON_PASSTHROUGH_KEY, false),
-                isDebugModeEnabled = getBoolean(DEBUG_MODE_KEY, false),
+                isOnboardingDone = getBoolean(PreferenceKey.OnboardingDoneKey, false),
+                clearManualInput = getBoolean(PreferenceKey.ClearManualInputKey, false),
+                isVolumeButtonPassthroughEnabled = getBoolean(PreferenceKey.VolumeButtonPassthroughKey, false),
+                isDebugModeEnabled = getBoolean(PreferenceKey.DebugModeKey, false),
                 appTheme = getAppTheme(),
-                isDynamicColorEnabled = getBoolean(DYNAMIC_COLOR_KEY, false),
+                isDynamicColorEnabled = getBoolean(PreferenceKey.DynamicColorKey, false),
             )
         }
 
     // TODO: maybe generalize this code so I can use it for any SealedString subclasses I come up with later on?
     private fun getAppTheme(): AppTheme {
-        val key = APP_THEME_KEY
+        val key = PreferenceKey.AppThemeKey.key
         val defaultValue = AppTheme.System
 
         val stringPreference = sharedPreferences.getString(key, defaultValue.key)
@@ -79,20 +79,20 @@ class UserPreferencesRepository private constructor(application: Application) {
     }
 
     fun putAppTheme(value: AppTheme) {
-        val key = APP_THEME_KEY
+        val key = PreferenceKey.AppThemeKey.key
 
         editAndUpdate {
-            putString(key, value.key)
+            this.putString(key, value.key)
         }
     }
 
-    fun getBoolean(key: String, defaultValue: Boolean): Boolean {
-        return sharedPreferences.getBoolean(key, defaultValue)
+    fun getBoolean(key: PreferenceKey, defaultValue: Boolean): Boolean {
+        return sharedPreferences.getBoolean(key.key, defaultValue)
     }
 
-    fun putBoolean(key: String, value: Boolean) {
+    fun putBoolean(key: PreferenceKey, value: Boolean) {
         editAndUpdate {
-            putBoolean(key, value)
+            this.putBoolean(key.key, value)
         }
     }
 

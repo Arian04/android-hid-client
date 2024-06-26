@@ -14,7 +14,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import me.arianb.usb_hid_client.settings.ONBOARDING_DONE_KEY
+import me.arianb.usb_hid_client.settings.PreferenceKey
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingExtraExtraLarge
 import me.arianb.usb_hid_client.ui.utils.BasicPage
@@ -70,7 +70,7 @@ fun ContinueButton(settingsViewModel: SettingsViewModel = viewModel()) {
 
     Button(
         onClick = {
-            settingsViewModel.putBoolean(ONBOARDING_DONE_KEY, true)
+            settingsViewModel.putBoolean(PreferenceKey.OnboardingDoneKey, true)
             navigator.replace(MainScreen())
         }
     ) {

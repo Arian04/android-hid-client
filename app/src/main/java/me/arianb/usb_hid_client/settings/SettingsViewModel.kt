@@ -10,9 +10,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun putAppTheme(value: AppTheme) =
         userPreferencesRepository.putAppTheme(value)
 
-    fun getBoolean(key: String, defaultValue: Boolean): Boolean =
+    fun getBoolean(key: PreferenceKey, defaultValue: Boolean): Boolean =
         userPreferencesRepository.getBoolean(key, defaultValue)
 
-    fun putBoolean(key: String, value: Boolean) =
+    fun putBoolean(key: PreferenceKey, value: Boolean) =
         userPreferencesRepository.putBoolean(key, value)
 }

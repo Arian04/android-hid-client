@@ -51,7 +51,7 @@ private fun SettingsPage() {
             if (isDynamicColorAvailable()) {
                 SwitchPreference(
                     title = stringResource(R.string.dynamic_colors_title),
-                    key = DYNAMIC_COLOR_KEY
+                    key = PreferenceKey.DynamicColorKey
                 )
             }
         }
@@ -61,12 +61,12 @@ private fun SettingsPage() {
         ) {
             SwitchPreference(
                 title = stringResource(R.string.clear_manual_input_title),
-                key = CLEAR_MANUAL_INPUT_KEY
+                key = PreferenceKey.ClearManualInputKey
             )
             SwitchPreference(
                 title = stringResource(R.string.volume_button_passthrough_title),
                 summary = stringResource(R.string.volume_button_passthrough_summary),
-                key = VOLUME_BUTTON_PASSTHROUGH_KEY
+                key = PreferenceKey.VolumeButtonPassthroughKey
             )
         }
         PreferenceCategory(
@@ -77,7 +77,7 @@ private fun SettingsPage() {
             SwitchPreference(
                 title = stringResource(R.string.debug_mode_title),
                 summary = stringResource(R.string.debug_mode_summary),
-                key = DEBUG_MODE_KEY
+                key = PreferenceKey.DebugModeKey
             )
             ExportLogsPreferenceButton()
         }

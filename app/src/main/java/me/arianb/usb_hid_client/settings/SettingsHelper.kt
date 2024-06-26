@@ -49,7 +49,7 @@ fun PreferenceCategory(
 fun SwitchPreference(
     title: String,
     summary: String? = null,
-    key: String,
+    key: PreferenceKey,
     defaultValue: Boolean = false,
     viewModel: SettingsViewModel = viewModel()
 ) {

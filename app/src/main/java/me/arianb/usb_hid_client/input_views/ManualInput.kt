@@ -18,7 +18,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation
-import me.arianb.usb_hid_client.settings.CLEAR_MANUAL_INPUT_KEY
+import me.arianb.usb_hid_client.settings.PreferenceKey
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingLarge
 import timber.log.Timber
@@ -54,7 +54,7 @@ fun ManualInput(
                 Timber.d("manual input sending string: %s", stringToSend)
 
                 // Clear EditText if the user's preference is to clear it
-                val clearManualInput = settingsViewModel.getBoolean(CLEAR_MANUAL_INPUT_KEY, false)
+                val clearManualInput = settingsViewModel.getBoolean(PreferenceKey.ClearManualInputKey, false)
                 if (clearManualInput) {
                     manualInputString = ""
                 }
