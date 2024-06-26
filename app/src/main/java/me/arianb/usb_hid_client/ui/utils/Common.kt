@@ -23,7 +23,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -125,10 +124,6 @@ fun BasicTopBar(
         },
         navigationIcon = navigationIcon,
         actions = actions,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ),
         scrollBehavior = scrollBehavior
     )
 }
@@ -160,7 +155,7 @@ fun LabeledCategory(
 @Composable
 fun getColorByTheme(settingsViewModel: SettingsViewModel = viewModel()): Int? {
     val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
-    
+
     // These hex values are the colors that Android would set the text to by default during my testing
     val textColor: Int? = when (preferences.appTheme) {
         AppTheme.DarkMode -> 0xB3FFFFFF.toInt()

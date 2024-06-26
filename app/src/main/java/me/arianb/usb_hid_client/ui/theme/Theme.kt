@@ -71,8 +71,11 @@ fun USBHIDClientTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            window.statusBarColor = colorScheme.background.toArgb()
+
+            // FIXME: I'm flipping darkTheme because for SOME REASON, this property seems to be having
+            //        the exact opposite effect of what it says it should do. Or I'm misunderstanding.
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 
