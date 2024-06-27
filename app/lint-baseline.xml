@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.3.1" type="baseline" client="gradle" dependencies="false" name="AGP (8.3.1)" variant="all" version="8.3.1">
+
+    <issue
+        id="DefaultLocale"
+        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
+        errorLine1="            key = key.toLowerCase();"
+        errorLine2="                      ~~~~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/hid_utils/KeyCodeTranslation.java"
+            line="41"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="OldTargetApi"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
+        errorLine1="        targetSdk = 33"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="19"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="ComposableLambdaParameterNaming"
+        message="Composable lambda parameter should be named `content`"
+        errorLine1="    actions: @Composable (RowScope.() -> Unit) = {}"
+        errorLine2="    ~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/ui/utils/Common.kt"
+            line="94"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ComposableLambdaParameterNaming"
+        message="Composable lambda parameter should be named `content`"
+        errorLine1="    preferences: @Composable () -> Unit"
+        errorLine2="    ~~~~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/settings/SettingsHelper.kt"
+            line="41"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ComposableLambdaParameterNaming"
+        message="Composable lambda parameter should be named `content`"
+        errorLine1="    trailingContent: @Composable (() -> Unit)? = null"
+        errorLine2="    ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/settings/SettingsHelper.kt"
+            line="178"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;touchpad_label&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;touchpad_label&quot;>Touchpad&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="8"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;theme_header&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;theme_header&quot;>Theme&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;app_theme_title&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;app_theme_title&quot;>App theme&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="22"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;app_theme_system&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;app_theme_system&quot;>Follow system&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;app_theme_dark_mode&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;app_theme_dark_mode&quot;>Dark theme&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="24"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;app_theme_light_mode&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;app_theme_light_mode&quot;>Light theme&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="25"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;dynamic_colors_title&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;dynamic_colors_title&quot;>Dynamic colors&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;onboarding_notice&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;onboarding_notice&quot;>Any mention of \&quot;Direct Input\&quot; refers to the keyboard icon in the menu bar that can be selected to pull up your keyboard and relay your keystrokes in real-time.\n\nAny mention \&quot;Manual Input\&quot; refers to the textbox that you can put text into and have it send all at once when you click the button beside it.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="61"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingTranslation"
+        message="&quot;troubleshooting_title&quot; is not translated in &quot;zh&quot; (Chinese)"
+        errorLine1="    &lt;string name=&quot;troubleshooting_title&quot;>Troubleshooting&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="65"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `HelpPage` of class `HelpScreenKt` requires synthetic accessor"
+        errorLine1="        HelpPage()"
+        errorLine2="        ~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/HelpScreen.kt"
+            line="39"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `InfoPage` of class `InfoScreenKt` requires synthetic accessor"
+        errorLine1="        InfoPage()"
+        errorLine2="        ~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/InfoScreen.kt"
+            line="28"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `MainPage` of class `MainScreenKt` requires synthetic accessor"
+        errorLine1="        MainPage()"
+        errorLine2="        ~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/MainScreen.kt"
+            line="45"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `OnboardingPage` of class `OnboardingScreenKt` requires synthetic accessor"
+        errorLine1="        OnboardingPage()"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/OnboardingScreen.kt"
+            line="27"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `writeHIDReport` of class `Companion` requires synthetic accessor"
+        errorLine1="        writeHIDReport(report, characterDevicePath)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/report_senders/ReportSender.kt"
+            line="49"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `writeHIDReport` of class `Companion` requires synthetic accessor"
+        errorLine1="        writeHIDReport(releaseReport, characterDevicePath)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/report_senders/ReportSender.kt"
+            line="56"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `SettingsPage` of class `SettingsScreenKt` requires synthetic accessor"
+        errorLine1="        SettingsPage()"
+        errorLine2="        ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/settings/SettingsScreen.kt"
+            line="28"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="SyntheticAccessor"
+        message="Access to `private` method `TroubleshootingPage` of class `TroubleshootingScreenKt` requires synthetic accessor"
+        errorLine1="        TroubleshootingPage()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/me/arianb/usb_hid_client/TroubleshootingScreen.kt"
+            line="53"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="TypographyQuotes"
+        message="Replace apostrophe (&apos;) with typographic apostrophe (’, &amp;#8217;) ?"
+        errorLine1="    &lt;string name=&quot;help_faq_a1&quot;>You can create an issue &lt;a href=&quot;https://github.com/Arian04/android-hid-client/issues&quot;>here&lt;/a>. Just make sure it hasn\&apos;t already been reported.&lt;/string>"
+        errorLine2="                                                                                                                                               ~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="49"
+            column="144"/>
+    </issue>
+
+    <issue
+        id="TypographyQuotes"
+        message="Replace apostrophe (&apos;) with typographic apostrophe (’, &amp;#8217;) ?"
+        errorLine1="    &lt;string name=&quot;help_faq_a2&quot;>Manual Input: Type into the textbox and click the \&quot;send\&quot; button when you\&apos;re done, at which point the text will be typed into the connected device all at once.\n\nDirect Input: Click on the keyboard icon in the top menu bar. Your keyboard should be pulled up. Now just start typing and the keys will be relayed to the connected device in real-time.&lt;/string>"
+        errorLine2="                                                                                                          ~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="52"
+            column="107"/>
+    </issue>
+
+    <issue
+        id="TypographyQuotes"
+        message="Replace apostrophe (&apos;) with typographic apostrophe (’, &amp;#8217;) ?"
+        errorLine1="    &lt;string name=&quot;help_faq_q3&quot;>The app isn\&apos;t working properly, how do I fix it?&lt;/string>"
+        errorLine2="                                           ~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="54"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="TypographyQuotes"
+        message="Replace apostrophe (&apos;) with typographic apostrophe (’, &amp;#8217;) ?"
+        errorLine1="    &lt;string name=&quot;help_faq_a3&quot;>First, make sure your device satisfies all prerequisites listed &lt;a href=&quot;https://github.com/Arian04/android-hid-client#prerequisites&quot;>here&lt;/a> and read the above answer about how to use the app. If that doesn\&apos;t work, I recommend submitting a bug report as explained above.&lt;/string>"
+        errorLine2="                                                                                                                                                                                                                                        ~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="55"
+            column="233"/>
+    </issue>
+
+    <issue
+        id="TypographyQuotes"
+        message="Replace straight quotes (&quot;) with directional quotes (“”, &amp;#8220; and &amp;#8221;) ?"
+        errorLine1="    &lt;string name=&quot;onboarding_notice&quot;>Any mention of \&quot;Direct Input\&quot; refers to the keyboard icon in the menu bar that can be selected to pull up your keyboard and relay your keystrokes in real-time.\n\nAny mention \&quot;Manual Input\&quot; refers to the textbox that you can put text into and have it send all at once when you click the button beside it.&lt;/string>"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="61"
+            column="38"/>
+    </issue>
+
+</issues>

@@ -78,6 +78,8 @@ android {
     lint {
         checkAllWarnings = true
 
+        baseline = file("lint-baseline.xml")
+
         // I used to have this disabled, but I shouldn't. If an error is unjustified, then I should knock its severity
         // down to "warning" or disable it. Appropriate lint errors should cause a failure.
         //abortOnError = false
