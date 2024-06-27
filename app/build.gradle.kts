@@ -30,17 +30,13 @@ android {
     }
 
     // Build configuration
-    @Suppress("UnstableApiUsage")
     buildTypes {
         getByName("release") {
-            // Minify, but do not obfuscate.
-            // Disabling obfuscation since it's open source anyway, so I don't know of any reason to obfuscate the code.
-            postprocessing {
-                isRemoveUnusedCode = true
-                isRemoveUnusedResources = true
-                isOptimizeCode = true
-                isObfuscate = false
-            }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+            )
         }
     }
     packaging {
