@@ -132,30 +132,40 @@ private fun GadgetActionButtons(mainViewModel: MainViewModel = viewModel()) {
 }
 
 @Composable
-private fun DebuggingInfoList(mainViewModel: MainViewModel = viewModel()) {
-    val debugInfo = mainViewModel.detectIssues()
+private fun DebuggingInfoList() {
+    val debugInfo = detectIssues()
     Timber.d("debug info: %s", debugInfo.toString())
 
-    GadgetStatusItem(
-        title = "Root Permissions",
-        summary = "Root Method: ${debugInfo.rootMethod.name}",
-        isGood = debugInfo.hasRootPermissions && debugInfo.rootMethod != RootMethod.UNKNOWN
-    )
-    GadgetStatusItem(
-        title = "Character Devices Present?",
-        isGood = debugInfo.isEveryCharDevPresent
-    )
-    GadgetStatusItem(
-        title = "Kernel Support?",
-        summary = "ConfigFS support = ${debugInfo.hasConfigFsSupport ?: "Unknown"}" + "\n" +
-                "ConfigFS HID support = ${debugInfo.hasConfigFsHidFunctionSupport ?: "Unknown"}",
-        extraInfo = debugInfo.kernelConfigAnnotated,
-        isGood = if (debugInfo.hasConfigFsSupport == null || debugInfo.hasConfigFsHidFunctionSupport == null) {
-            null
-        } else {
-            debugInfo.hasConfigFsSupport && debugInfo.hasConfigFsHidFunctionSupport
+    with(debugInfo.rootPermissionInfo) {
+        GadgetStatusItem(
+            title = "Root Permission Info",
+            summary = "Root Method: ${rootMethod.name}",
+            isGood = hasRootPermissions && rootMethod != RootMethod.UNKNOWN
+        )
+    }
+
+    debugInfo.characterDevicesInfoList?.let {
+        for (characterDevice in it) {
+            GadgetStatusItem(
+                title = "Character Devices Info",
+                isGood = characterDevice.isEveryCharDevPresent
+            )
         }
-    )
+    }
+
+    debugInfo.kernelInfo?.let {
+        GadgetStatusItem(
+            title = "Kernel Support Info",
+            summary = "ConfigFS support: ${it.hasConfigFsSupport ?: "Unknown"}" + "\n" +
+                    "ConfigFS HID support: ${it.hasConfigFsHidFunctionSupport ?: "Unknown"}",
+            extraInfo = it.kernelConfigAnnotated,
+            isGood = if (it.hasConfigFsSupport == null || it.hasConfigFsHidFunctionSupport == null) {
+                null
+            } else {
+                it.hasConfigFsSupport && it.hasConfigFsHidFunctionSupport
+            }
+        )
+    }
 }
 
 @Composable

@@ -31,8 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.topjohnwu.superuser.Shell
 import me.arianb.usb_hid_client.BuildConfig
-import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
+import me.arianb.usb_hid_client.TroubleshootingInfo
+import me.arianb.usb_hid_client.detectIssues
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 import timber.log.Timber
 import java.io.IOException
@@ -210,8 +211,8 @@ fun OnClickPreference(
 }
 
 @Composable
-fun ExportLogsPreferenceButton(mainViewModel: MainViewModel = viewModel()) {
-    val debugIssues = mainViewModel.detectIssues()
+fun ExportLogsPreferenceButton() {
+    val troubleshootingInfo = detectIssues()
 
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -219,7 +220,7 @@ fun ExportLogsPreferenceButton(mainViewModel: MainViewModel = viewModel()) {
         val uri = result.data?.data ?: return@rememberLauncherForActivityResult
 
         Timber.d("selected file URI: %s", uri)
-        saveLogFile(context, uri)
+        saveLogFile(context, uri, troubleshootingInfo)
     }
 
     OnClickPreference(
@@ -240,7 +241,9 @@ fun ExportLogsPreferenceButton(mainViewModel: MainViewModel = viewModel()) {
     )
 }
 
-private fun saveLogFile(context: Context, uri: Uri) {
+private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: TroubleshootingInfo) {
+    // TODO: use troubleshootingInfo instead of running random commands
+
     try {
         val stringBuilder = StringBuilder()
         var command: String
