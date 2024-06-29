@@ -1,7 +1,10 @@
 package me.arianb.usb_hid_client.settings
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,10 +26,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.topjohnwu.superuser.Shell
 import me.arianb.usb_hid_client.BuildConfig
+import me.arianb.usb_hid_client.MainViewModel
+import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 import timber.log.Timber
 import java.io.IOException
@@ -203,7 +209,38 @@ fun OnClickPreference(
     )
 }
 
-fun saveLogFile(context: Context, uri: Uri) {
+@Composable
+fun ExportLogsPreferenceButton(mainViewModel: MainViewModel = viewModel()) {
+    val debugIssues = mainViewModel.detectIssues()
+
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        // If the user doesn't choose a location to save the file, don't continue
+        val uri = result.data?.data ?: return@rememberLauncherForActivityResult
+
+        Timber.d("selected file URI: %s", uri)
+        saveLogFile(context, uri)
+    }
+
+    OnClickPreference(
+        title = stringResource(R.string.export_debug_logs_btn_title),
+        summary = stringResource(R.string.export_debug_logs_btn_summary),
+        onClick = {
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "text/plain"
+
+                val unixTime = System.currentTimeMillis() / 1000
+                val filename = "debug_log_${BuildConfig.APPLICATION_ID}_${unixTime}.txt"
+                putExtra(Intent.EXTRA_TITLE, filename)
+            }
+
+            launcher.launch(intent)
+        }
+    )
+}
+
+private fun saveLogFile(context: Context, uri: Uri) {
     try {
         val stringBuilder = StringBuilder()
         var command: String
@@ -247,10 +284,11 @@ fun saveLogFile(context: Context, uri: Uri) {
             }
             outputStream.write(stringBuilder.toString().toByteArray())
         }
+
         Timber.d("Successfully exported logs")
     } catch (e: IOException) {
         Timber.e(e)
-        Timber.e("Error occurred while exporting logs")
+        Timber.e("IOException occurred while exporting logs")
     }
 }
 

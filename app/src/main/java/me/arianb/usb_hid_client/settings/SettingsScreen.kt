@@ -1,26 +1,20 @@
 package me.arianb.usb_hid_client.settings
 
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
-import me.arianb.usb_hid_client.BuildConfig
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.isDynamicColorAvailable
 import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
 import me.arianb.usb_hid_client.ui.utils.SimpleNavTopBar
-import timber.log.Timber
 
 class SettingsScreen : Screen {
     @Composable
@@ -82,35 +76,6 @@ private fun SettingsPage() {
             ExportLogsPreferenceButton()
         }
     }
-}
-
-@Composable
-fun ExportLogsPreferenceButton() {
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // If the user doesn't choose a location to save the file, don't continue
-        val uri = result.data?.data ?: return@rememberLauncherForActivityResult
-
-        Timber.d("selected file URI: %s", uri)
-        saveLogFile(context, uri)
-    }
-
-    OnClickPreference(
-        title = stringResource(R.string.export_debug_logs_btn_title),
-        summary = stringResource(R.string.export_debug_logs_btn_summary),
-        onClick = {
-            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "text/plain"
-
-                val unixTime = System.currentTimeMillis() / 1000
-                val filename = "debug_log_${BuildConfig.APPLICATION_ID}_${unixTime}.txt"
-                putExtra(Intent.EXTRA_TITLE, filename)
-            }
-
-            launcher.launch(intent)
-        }
-    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
