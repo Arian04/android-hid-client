@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // This is separated from the production logging code below in the off chance that I need to see something
-        // that's been logged before preferences are read.
+        // that's been logged before preferences are read. Otherwise I'd just add it as an `else` branch below.
         if (BuildConfig.DEBUG) {
             Timber.plant(DebugTree())
             Shell.enableVerboseLogging = true
@@ -47,7 +47,7 @@ fun Entrypoint(settingsViewModel: SettingsViewModel = viewModel()) {
     if (!BuildConfig.DEBUG) {
         val isDebugModeEnabled = userPreferencesState.isDebugModeEnabled
         if (isDebugModeEnabled) {
-            Timber.plant(DebugTree())
+            Timber.plant(ProductionTree())
             Shell.enableVerboseLogging = true
         } else {
             Timber.uprootAll()

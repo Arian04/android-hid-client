@@ -21,7 +21,7 @@ abstract class ReportSender(
                 sendReport(report, characterDevicePath, usesReportIDs)
                 onSuccess()
             } catch (e: IOException) {
-                Timber.e(e)
+                Timber.d(e)
 
                 // TODO: map exception to a sealed error type and pass that to lambda?
                 onException(e)

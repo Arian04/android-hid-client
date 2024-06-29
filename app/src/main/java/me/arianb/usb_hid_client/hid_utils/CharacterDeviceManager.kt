@@ -88,7 +88,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         // If it hasn't changed, then the previous piece of code failed to get the substring
         if (categories == contextFromCommand) {
-            Timber.e("Failed to get app's selinux context")
+            Timber.wtf("Failed to get app's selinux context")
         }
         return categories
     }
@@ -96,8 +96,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
     fun deleteCharacterDevices() {
         val appResources: Resources = application.resources
 
-        val commandResult = Shell.cmd(appResources.openRawResource(R.raw.delete_char_devices)).exec()
-        Timber.d("delete device script: \nstdout=%s\nstderr=%s", commandResult.out, commandResult.err)
+        Shell.cmd(appResources.openRawResource(R.raw.delete_char_devices)).exec()
 
         return
     }

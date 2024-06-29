@@ -58,7 +58,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     onException = { e ->
                         val characterDevicePath = sender.characterDevicePath
                         if (e is FileNotFoundException && characterDeviceMissing(characterDevicePath)) {
-                            Timber.wtf("Character device '$characterDevicePath' doesn't exist. Its existence is verified on app start, so the only reason this should happen is if it was removed *after* the app started.")
+                            Timber.i("Character device '$characterDevicePath' doesn't exist. The user probably skipped the character device creation prompt.")
                         } else {
                             handleException(e, sender.characterDevicePath)
                         }
@@ -72,15 +72,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val lowercaseStacktrace = Log.getStackTraceString(e).lowercase()
 
         if (lowercaseStacktrace.contains("errno 108")) {
-            Timber.d("device might be unplugged")
+            Timber.i("device might be unplugged")
             _uiState.update { uiState.value.copy(isDeviceUnplugged = true) }
         } else if (lowercaseStacktrace.contains("permission denied")) {
-            Timber.d("char dev perms are wrong")
+            Timber.i("char dev perms are wrong")
             _uiState.update { uiState.value.copy(isCharacterDevicePermissionsBroken = devicePath) }
         } else if (lowercaseStacktrace.contains("enxio")) {
-            Timber.d("somehow the HID gadget is disabled but the character devices are still present")
+            Timber.i("somehow the HID gadget is disabled but the character devices are still present")
         } else {
-            Timber.d("something else is wrong, idk")
+            Timber.e(e)
+            Timber.e("unknown error has occurred while trying to write to character device")
 //            showSnackbar("ERROR: Failed to send mouse report.", Snackbar.LENGTH_SHORT)
         }
 
@@ -90,7 +91,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // Character Device Manager
     fun createCharacterDevices() {
         if (!rootStateHolder.hasRootPermissions()) {
-            Timber.e("Can't create character devices, missing root permissions")
+            Timber.w("Can't create character devices, missing root permissions")
             return
         }
 
@@ -104,7 +105,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteCharacterDevices() {
         if (!rootStateHolder.hasRootPermissions()) {
-            Timber.e("Can't delete character devices, missing root permissions")
+            Timber.w("Can't delete character devices, missing root permissions")
             return
         }
 
@@ -116,7 +117,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun fixCharacterDevicePermissions(device: String) {
         if (!rootStateHolder.hasRootPermissions()) {
-            Timber.e("Can't fix character device permissions, missing root permissions")
+            Timber.w("Can't fix character device permissions, missing root permissions")
             return
         }
 

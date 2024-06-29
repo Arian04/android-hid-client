@@ -55,7 +55,7 @@ class RootStateHolder private constructor() {
 
     fun detectRootMethod(): RootMethod {
         if (!hasRootPermissions()) {
-            Timber.e("Failed to get root shell. Device is most likely not rooted or hasn't given the app root permissions")
+            Timber.i("Failed to get root shell. Device is most likely not rooted or hasn't given the app root permissions")
             return RootMethod.UNROOTED
         }
 
@@ -63,7 +63,7 @@ class RootStateHolder private constructor() {
             //Timber.d("checking for binary: %s", binary);
             val commandResult = Shell.cmd("type $binary").exec()
             if (commandResult.code == 0) {
-                Timber.d("Detected root method as: %s", matchingRootMethod)
+                Timber.i("Detected root method as: %s", matchingRootMethod)
                 return matchingRootMethod
             }
         }
