@@ -1,0 +1,8 @@
+Completely rewrote the majority of the app. If there are any bugs, please let me know.
+
+Features
+- New screen that provides troubleshooting information to help troubleshoot device-specific issues
+- Support for "Material You" AKA dynamic colors
+- Support for switching between light/dark mode irrespective of system setting
+
+See Github release for more details
