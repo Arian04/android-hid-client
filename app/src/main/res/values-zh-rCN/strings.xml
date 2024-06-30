@@ -7,14 +7,11 @@
     <string name="help">帮助</string>
     <string name="info">关于</string>
     <string name="misc_header">杂项</string>
-    <string name="debug_header">调试</string>
     <string name="clear_manual_input_title">发送后自动清空输入框内容</string>
     <string name="volume_button_passthrough_title">音量按钮透传</string>
     <string name="volume_button_passthrough_summary">按下音量按钮时更改已连接设备的音量（仅在直接输入启用时适用）</string>
-    <string name="debug_mode_title">调试模式</string>
-    <string name="debug_mode_summary">为调试启用日志信息</string>
     <string name="export_debug_logs_btn_title">导出调试日志</string>
-    <string name="export_debug_logs_btn_summary">启用调试模式以记录用于导出的日志\n\n这个仅在开发者要求提供日志时启用</string>
+    <string name="export_debug_logs_btn_summary">这个仅在开发者要求提供日志时启用</string>
     <string name="info_icon_description">应用图标（键盘）</string>
     <string name="info_description">这个软件可以将你的手机变为一个模拟键盘进而控制连接的设备而不需要在受控设备上安装额外的软件，甚至可以用于操作连接设备的BIOS或UEFI设置！</string>
     <string name="help_faq_q1">我如何提交BUG反馈和功能建议？</string>

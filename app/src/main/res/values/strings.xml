@@ -14,7 +14,6 @@
     <!-- Preference Titles -->
     <string name="theme_header">Theme</string>
     <string name="misc_header">Misc</string>
-    <string name="debug_header">Debug</string>
 
     <!-- Preferences -->
     <string name="clear_manual_input_title">Clear manual input text box on send</string>
@@ -28,12 +27,6 @@
 
     <string name="volume_button_passthrough_title">Volume button passthrough</string>
     <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
-
-    <string name="debug_mode_title">Debug mode</string>
-    <string name="debug_mode_summary">Enable logging messages for debugging</string>
-
-    <string name="export_debug_logs_btn_title">Export debug logs</string>
-    <string name="export_debug_logs_btn_summary">Make sure to enable debug mode prior to exporting logs.\n\nThis should only be needed if a developer requests for you to provide logs.</string>
 
     <!-- Info ("About") Screen -->
     <string name="info">About</string>
@@ -63,5 +56,7 @@
 
     <!-- Troubleshooting Screen -->
     <string name="troubleshooting_title">Troubleshooting</string>
+    <string name="export_debug_logs_btn_title">Export debug logs</string>
+    <string name="export_debug_logs_btn_summary">This should only be needed if a developer requests for you to provide logs.</string>
 
 </resources>

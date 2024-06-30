@@ -15,7 +15,6 @@ sealed class PreferenceKey(val key: String) {
     data object OnboardingDoneKey : PreferenceKey("onboarding_done")
     data object ClearManualInputKey : PreferenceKey("clear_manual_input")
     data object VolumeButtonPassthroughKey : PreferenceKey("volume_button_passthrough")
-    data object DebugModeKey : PreferenceKey("debug_mode")
     data object AppThemeKey : PreferenceKey("app_theme")
     data object DynamicColorKey : PreferenceKey("dynamic_color")
 }
@@ -41,7 +40,6 @@ data class UserPreferences(
     val isOnboardingDone: Boolean,
     val clearManualInput: Boolean,
     val isVolumeButtonPassthroughEnabled: Boolean,
-    val isDebugModeEnabled: Boolean,
     val appTheme: AppTheme,
     val isDynamicColorEnabled: Boolean,
 )
@@ -58,7 +56,6 @@ class UserPreferencesRepository private constructor(application: Application) {
                 isOnboardingDone = getBoolean(PreferenceKey.OnboardingDoneKey, false),
                 clearManualInput = getBoolean(PreferenceKey.ClearManualInputKey, false),
                 isVolumeButtonPassthroughEnabled = getBoolean(PreferenceKey.VolumeButtonPassthroughKey, false),
-                isDebugModeEnabled = getBoolean(PreferenceKey.DebugModeKey, false),
                 appTheme = getAppTheme(),
                 isDynamicColorEnabled = getBoolean(PreferenceKey.DynamicColorKey, false),
             )

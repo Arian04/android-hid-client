@@ -51,7 +51,8 @@ private fun SettingsPage() {
         }
         PreferenceCategory(
             title = stringResource(R.string.misc_header),
-            modifier = paddingModifier
+            modifier = paddingModifier,
+            showDivider = false
         ) {
             SwitchPreference(
                 title = stringResource(R.string.clear_manual_input_title),
@@ -62,18 +63,6 @@ private fun SettingsPage() {
                 summary = stringResource(R.string.volume_button_passthrough_summary),
                 key = PreferenceKey.VolumeButtonPassthroughKey
             )
-        }
-        PreferenceCategory(
-            title = stringResource(R.string.debug_header),
-            modifier = paddingModifier,
-            showDivider = false
-        ) {
-            SwitchPreference(
-                title = stringResource(R.string.debug_mode_title),
-                summary = stringResource(R.string.debug_mode_summary),
-                key = PreferenceKey.DebugModeKey
-            )
-            ExportLogsPreferenceButton()
         }
     }
 }
