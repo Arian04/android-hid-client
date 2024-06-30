@@ -23,7 +23,9 @@ captures/
 /.idea/assetWizardSettings.xml
 /.idea/misc.xml
 /.idea/deploymentTargetDropDown.xml
-#render.experimental.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/other.xml
+render.experimental.xml
 
 # Log/OS Files
 *.log
