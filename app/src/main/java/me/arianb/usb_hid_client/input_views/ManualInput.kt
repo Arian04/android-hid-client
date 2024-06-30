@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,7 +33,8 @@ fun ManualInput(
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(PaddingLarge)
+        horizontalArrangement = Arrangement.spacedBy(PaddingLarge),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         TextField(
             modifier = Modifier
@@ -44,10 +46,10 @@ fun ManualInput(
         )
         Button(
             modifier = Modifier.wrapContentSize(),
-            onClick = {
+            onClick = onClick@{
                 // If empty, don't do anything
                 if (manualInputString.isEmpty()) {
-                    return@Button
+                    return@onClick
                 }
 
                 val stringToSend = manualInputString
@@ -68,7 +70,7 @@ fun ManualInput(
                         Timber.e(error)
                         // FIXME: snackbar
 //                        Snackbar.make(parentLayout, error, Snackbar.LENGTH_SHORT).show()
-                        return@Button
+                        return@onClick
                     }
                     val modifierScanCode = tempScanCodes[0]
                     val keyScanCode = tempScanCodes[1]
