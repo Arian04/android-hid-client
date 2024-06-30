@@ -244,7 +244,6 @@ fun ExportLogsPreferenceButton() {
 private inline fun StringBuilder.appendDivider(): StringBuilder =
     appendLine().appendLine("------------------------------")
 
-// FIXME: finish rewriting this
 private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: TroubleshootingInfo) {
     try {
         val stringBuilder = buildString {
