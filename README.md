@@ -13,7 +13,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Arian04/android-hid-client">
-    <img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" alt="App Icon" width="80" height="80">
+    <img src="images/app-icon-round.png" alt="App Icon" width="80" height="80">
   </a>
 
 <h3 align="center">USB HID Client</h3>
