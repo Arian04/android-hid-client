@@ -15,7 +15,6 @@ import cafe.adriel.voyager.transitions.SlideTransition
 import com.topjohnwu.superuser.Shell
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import timber.log.Timber
-import timber.log.Timber.DebugTree
 
 // TODO: move all misc strings used in snackbars and alerts throughout the app into strings.xml for translation purposes.
 
@@ -27,12 +26,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // This is separated from the production logging code below in the off chance that I need to see something
-        // that's been logged before preferences are read. Otherwise I'd just add it as an `else` branch below.
         if (BuildConfig.DEBUG) {
-            Timber.plant(DebugTree())
+            Timber.plant(Timber.DebugTree())
             Shell.enableVerboseLogging = true
         }
+
+        Timber.plant(ProductionTree())
 
         setContent {
             Entrypoint()
@@ -43,17 +42,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Entrypoint(settingsViewModel: SettingsViewModel = viewModel()) {
     val userPreferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
-
-    if (!BuildConfig.DEBUG) {
-        val isDebugModeEnabled = userPreferencesState.isDebugModeEnabled
-        if (isDebugModeEnabled) {
-            Timber.plant(ProductionTree())
-            Shell.enableVerboseLogging = true
-        } else {
-            Timber.uprootAll()
-            Shell.enableVerboseLogging = false
-        }
-    }
 
     // If this is the first time the app has been opened, then show OnboardingActivity
     val onboardingDone = userPreferencesState.isOnboardingDone

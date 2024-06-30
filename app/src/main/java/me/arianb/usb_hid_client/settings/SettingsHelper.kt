@@ -29,8 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.topjohnwu.superuser.Shell
 import me.arianb.usb_hid_client.BuildConfig
+import me.arianb.usb_hid_client.LogBuffer
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.TroubleshootingInfo
 import me.arianb.usb_hid_client.detectIssues
@@ -241,43 +241,60 @@ fun ExportLogsPreferenceButton() {
     )
 }
 
-private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: TroubleshootingInfo) {
-    // TODO: use troubleshootingInfo instead of running random commands
+private inline fun StringBuilder.appendDivider(): StringBuilder =
+    appendLine().appendLine("------------------------------")
 
+// FIXME: finish rewriting this
+private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: TroubleshootingInfo) {
     try {
-        val stringBuilder = StringBuilder()
-        var command: String
-        if (Shell.getShell().isRoot) {
-            command = String.format(
-                "logcat -e '%s' -t 1000",
-                BuildConfig.APPLICATION_ID
-            )
-            stringBuilder.append(
-                getCommandInLogFormatString(
-                    command,
-                    "Logcat"
-                )
-            )
-            command = "ls -lAhZ /config/usb_gadget"
-            stringBuilder.append(
-                getCommandInLogFormatString(
-                    command,
-                    "Gadgets Directory"
-                )
-            )
-            command =
-                "echo KERNEL_VERSION=$(uname -r |cut -d '-' -f1 ) && (gunzip -c /proc/config.gz | grep -i configfs | sed 's/# //; s/ is not set/=NOT_SET/')"
-            stringBuilder.append(
-                getCommandInLogFormatString(
-                    command,
-                    "Kernel Config"
-                )
-            )
-        } else {
-            stringBuilder.append("Could not create root shell. Was the app given root permissions?")
-                .append("\n")
+        val stringBuilder = buildString {
+            val rootPermissionInfo = troubleshootingInfo.rootPermissionInfo
+            val characterDevicesInfoList = troubleshootingInfo.characterDevicesInfoList
+            val kernelInfo = troubleshootingInfo.kernelInfo
+
+            appendLine("Do we have root permissions?: ${rootPermissionInfo.hasRootPermissions}")
+            appendLine("Root method: ${rootPermissionInfo.rootMethod.name}")
+
+            appendDivider()
+
+            if (characterDevicesInfoList != null) {
+                for (characterDevice in characterDevicesInfoList) {
+                    appendLine("character device info for: ${characterDevice.path}")
+                    appendLine("does it exist?: ${characterDevice.isPresent}")
+                    appendLine("is it visible without root?: ${characterDevice.isVisibleWithoutRoot}")
+                    appendLine("permissions: ")
+                    appendLine(characterDevice.permissions)
+
+                    appendLine()
+                }
+            } else {
+                appendLine("character device info list is null, that's bad.")
+            }
+
+            appendDivider()
+
+            if (kernelInfo != null) {
+                appendLine("relevant snippet of kernel config: ")
+                appendLine(kernelInfo.kernelConfigAnnotated.text)
+                appendLine("-")
+                appendLine("has ConfigFS support?: ${kernelInfo.hasConfigFsSupport}")
+                appendLine("has ConfigFS HID function support?: ${kernelInfo.hasConfigFsHidFunctionSupport}")
+
+            } else {
+                appendLine("kernel info is null, that's bad.")
+            }
+
+            appendDivider()
+
+            appendLine("Logs: ")
+
+            // Append all logs
+            for (entry in LogBuffer.getLogList()) {
+                appendLine(entry.toString())
+            }
         }
-        Timber.d(stringBuilder.toString())
+
+        Timber.d(stringBuilder)
 
         // Write out file
         context.contentResolver.openOutputStream(uri).use { outputStream ->
@@ -285,7 +302,7 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
                 Timber.e("Failed to open output stream for writing log file.")
                 return
             }
-            outputStream.write(stringBuilder.toString().toByteArray())
+            outputStream.write(stringBuilder.toByteArray())
         }
 
         Timber.d("Successfully exported logs")
@@ -293,17 +310,4 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
         Timber.e(e)
         Timber.e("IOException occurred while exporting logs")
     }
-}
-
-fun getCommandInLogFormatString(command: String, title: String): String {
-    val logStringBuilder = StringBuilder()
-    val halfDivider = "------------------------------"
-    val divider = halfDivider + halfDivider
-    val commandResult = Shell.cmd(command).exec()
-    val commandResultMultiline = java.lang.String.join("\n", commandResult.out)
-
-    logStringBuilder.append(String.format("%s %s %s", halfDivider, title, halfDivider)).append("\n")
-    logStringBuilder.append(commandResultMultiline).append("\n")
-    logStringBuilder.append(divider + "\n")
-    return logStringBuilder.toString()
 }

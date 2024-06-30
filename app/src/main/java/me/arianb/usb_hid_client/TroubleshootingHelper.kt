@@ -6,10 +6,12 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.topjohnwu.superuser.Shell
+import com.topjohnwu.superuser.ShellUtils
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.shell_utils.RootMethod
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
+import java.io.File
 
 data class TroubleshootingInfo(
     val rootPermissionInfo: RootPermissionInfo,
@@ -23,8 +25,10 @@ data class RootPermissionInfo(
 )
 
 data class CharacterDeviceInfo(
-    val isEveryCharDevPresent: Boolean,
-    val charDevicePermissions: String,
+    val path: String,
+    val isPresent: Boolean,
+    val isVisibleWithoutRoot: Boolean,
+    val permissions: String?,
 )
 
 data class KernelInfo(
@@ -73,15 +77,58 @@ fun detectIssues(): TroubleshootingInfo {
     )
 }
 
-// FIXME: finish implementation
+@RequiresRoot
 private fun getCharacterDeviceInfo(gadgetPath: String): CharacterDeviceInfo {
-    val isPresent = false // TODO:
+    val safeGadgetPathString = ShellUtils.escapedString(gadgetPath)
+
+    // Check if it exists
+    val shellResult = Shell.cmd("test -e $safeGadgetPathString").exec()
+    val isPresent = shellResult.code == 0
+
+    val isVisibleWithoutRoot: Boolean
+    val permissionsString: String?
 
     if (isPresent) {
-        // check if permissions seem good
-        // TODO: check char dev permissions. Theres a few ways I can do that:
-        //  - Check it theoretically (check for presence of proper selinux policy and unix permissions)
-        //  - Check it realistically (write to the devices and see what happens)
+        // Check if it's still visible if we check without root permissions
+        // this verifies that selinux policy was added correctly
+        isVisibleWithoutRoot = File(gadgetPath).exists()
+        if (!isVisibleWithoutRoot) {
+            // selinux policy is probably not right
+        }
+
+        // read permissions
+        val result = Shell.cmd("ls -lZ -- $safeGadgetPathString").exec()
+
+        permissionsString = buildString {
+            // Check if command ran successfully
+            //if (!result.isSuccess) {
+            // oh no, it wasn't successful :(
+            //}
+
+            // Check if output seems alright
+            val outputLinesList = result.out
+            if (outputLinesList.isNotEmpty()) {
+                append("stdout (with extra newlines): ")
+                appendLine()
+                for (line in outputLinesList) {
+                    val adjustedLine = line.replace(' ', '\n')
+                    append(adjustedLine)
+                    appendLine()
+                }
+            }
+
+            val errorLinesList = result.err
+            if (errorLinesList.isNotEmpty()) {
+                append("stderr: ")
+                for (line in errorLinesList) {
+                    append(line)
+                    appendLine()
+                }
+            }
+        }
+
+        // TODO: check if permissions seem correct
+//        Process.myUid()
         val arePermissionsGood = false
         if (arePermissionsGood) {
             // try to use the char device (write something safe like all zeroes)
@@ -92,14 +139,20 @@ private fun getCharacterDeviceInfo(gadgetPath: String): CharacterDeviceInfo {
                 // doesn't seem like there are any problems
             }
         }
+    } else {
+        isVisibleWithoutRoot = false
+        permissionsString = null
     }
 
     return CharacterDeviceInfo(
-        isPresent,
-        charDevicePermissions = "PLACEHOLDER"
+        path = gadgetPath,
+        isPresent = isPresent,
+        isVisibleWithoutRoot = isVisibleWithoutRoot,
+        permissions = permissionsString,
     )
 }
 
+@RequiresRoot
 private fun getKernelInfo(): KernelInfo {
     // constants
     val configFsKernelOption = "CONFIG_USB_CONFIGFS"
@@ -169,6 +222,7 @@ private fun getKernelInfo(): KernelInfo {
     )
 }
 
+@RequiresRoot
 private fun getKernelConfig(): List<String> {
     val commandResult = Shell.cmd("gunzip -c /proc/config.gz | grep -i configfs").exec()
 
@@ -203,3 +257,8 @@ private fun getKernelConfig(): List<String> {
 
     return kernelConfigLinesList
 }
+
+/**
+ * Should only be called if you know you have root permissions
+ */
+annotation class RequiresRoot

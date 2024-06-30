@@ -58,6 +58,7 @@ class TroubleshootingScreen : Screen {
 private fun TroubleshootingPage() {
     BasicPage(
         topBar = { TroubleshootingTopBar() },
+        scrollable = true
     ) {
 
         // TODO: add buttons for gadget "actions" like:
@@ -133,10 +134,10 @@ private fun GadgetActionButtons(mainViewModel: MainViewModel = viewModel()) {
 
 @Composable
 private fun DebuggingInfoList() {
-    val debugInfo = detectIssues()
-    Timber.d("debug info: %s", debugInfo.toString())
+    val troubleshootingInfo = detectIssues()
+    Timber.d("debug info: %s", troubleshootingInfo.toString())
 
-    with(debugInfo.rootPermissionInfo) {
+    with(troubleshootingInfo.rootPermissionInfo) {
         GadgetStatusItem(
             title = "Root Permission Info",
             summary = "Root Method: ${rootMethod.name}",
@@ -144,16 +145,18 @@ private fun DebuggingInfoList() {
         )
     }
 
-    debugInfo.characterDevicesInfoList?.let {
+    troubleshootingInfo.characterDevicesInfoList?.let {
         for (characterDevice in it) {
             GadgetStatusItem(
-                title = "Character Devices Info",
-                isGood = characterDevice.isEveryCharDevPresent
+                title = "Character Device Info",
+                summary = "path: ${characterDevice.path}",
+                extraInfo = AnnotatedString(characterDevice.permissions ?: "Failed to read permissions"),
+                isGood = characterDevice.isPresent && characterDevice.isVisibleWithoutRoot && characterDevice.permissions != null
             )
         }
     }
 
-    debugInfo.kernelInfo?.let {
+    troubleshootingInfo.kernelInfo?.let {
         GadgetStatusItem(
             title = "Kernel Support Info",
             summary = "ConfigFS support: ${it.hasConfigFsSupport ?: "Unknown"}" + "\n" +
@@ -172,62 +175,16 @@ private fun DebuggingInfoList() {
 private fun GadgetStatusItem(
     title: String,
     summary: String? = null,
-    isGood: Boolean?
-) {
-    GadgetStatusItemCommon(
-        title = title,
-        summary = summary,
-        isGood = isGood,
-        trailingContent = { color ->
-            // This is here so that these icons are aligned properly with the IconButtons, since those have larger
-            // minimum padding due to accessibility guidelines for touch targets. These aren't interactive components.
-            val sizeModifier = Modifier.minimumInteractiveComponentSize()
-            when (isGood) {
-                true -> {
-                    Icon(
-                        modifier = sizeModifier,
-                        imageVector = Icons.Default.Check,
-                        tint = color,
-                        contentDescription = "Good"
-                    )
-                }
-
-                false -> {
-                    Icon(
-                        modifier = sizeModifier,
-                        painter = painterResource(R.drawable.priority_high),
-                        tint = color,
-                        contentDescription = "Error"
-                    )
-                }
-
-                null -> {
-                    Icon(
-                        modifier = sizeModifier,
-                        painter = painterResource(R.drawable.question_mark_outline),
-                        tint = color,
-                        contentDescription = "Unknown"
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-private fun GadgetStatusItem(
-    title: String,
-    summary: String? = null,
     isGood: Boolean?,
     extraInfo: AnnotatedString,
 ) {
     var isShowingInfoAlert by remember { mutableStateOf(false) }
 
-    GadgetStatusItemCommon(
+    GadgetStatusItem(
         title = title,
         summary = summary,
         isGood = isGood,
-        trailingContent = { color ->
+        additionalTrailingContent = { color ->
             IconButton(onClick = { isShowingInfoAlert = !isShowingInfoAlert }) {
                 Icon(imageVector = Icons.Outlined.Info, tint = color, contentDescription = "Info")
             }
@@ -256,16 +213,61 @@ private fun GadgetStatusItem(
 }
 
 @Composable
-private fun GadgetStatusItemCommon(
+private fun GadgetStatusItem(
     title: String,
     summary: String?,
     isGood: Boolean?,
-    trailingContent: @Composable ((color: Color) -> Unit)
+    additionalTrailingContent: @Composable ((color: Color) -> Unit)? = null
 ) {
     val color = if (isGood == true) {
         LocalContentColor.current
     } else {
         MaterialTheme.colorScheme.error
+    }
+
+    val baseTrailingContent = @Composable {
+        // This is here so that these icons are aligned properly with the IconButtons, since those have larger
+        // minimum padding due to accessibility guidelines for touch targets. These aren't interactive components.
+        val sizeModifier = Modifier.minimumInteractiveComponentSize()
+        when (isGood) {
+            true -> {
+                Icon(
+                    modifier = sizeModifier,
+                    imageVector = Icons.Default.Check,
+                    tint = color,
+                    contentDescription = "Good"
+                )
+            }
+
+            false -> {
+                Icon(
+                    modifier = sizeModifier,
+                    painter = painterResource(R.drawable.priority_high),
+                    tint = color,
+                    contentDescription = "Error"
+                )
+            }
+
+            null -> {
+                Icon(
+                    modifier = sizeModifier,
+                    painter = painterResource(R.drawable.question_mark_outline),
+                    tint = color,
+                    contentDescription = "Unknown"
+                )
+            }
+        }
+    }
+
+    val trailingContent: @Composable (() -> Unit) = if (additionalTrailingContent == null) {
+        baseTrailingContent
+    } else {
+        {
+            Row {
+                additionalTrailingContent(color)
+                baseTrailingContent()
+            }
+        }
     }
 
     ListItem(
@@ -276,7 +278,7 @@ private fun GadgetStatusItemCommon(
                 Text(summary)
             }
         },
-        trailingContent = { trailingContent(color) }
+        trailingContent = trailingContent
     )
 }
 

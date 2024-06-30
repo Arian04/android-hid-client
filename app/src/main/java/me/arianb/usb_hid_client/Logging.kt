@@ -18,10 +18,17 @@ data class LogEntry(
     val tag: String,
     val message: String,
     val t: Throwable? = null
-)
+) {
+    override fun toString(): String {
+        return if (t != null) {
+            "${tag}\t\t${priority}\t\t${message}\t\t${t}"
+        } else {
+            "${tag}\t\t${priority}\t\t${message}"
+        }
+    }
+}
 
 enum class Level(val priority: Int) {
-    UNKNOWN(-1),
     VERBOSE(2),
     DEBUG(3),
     INFO(4),
@@ -63,7 +70,7 @@ sealed class LogBuffer {
                 Level.WARN.priority -> Level.WARN.name
                 Level.ERROR.priority -> Level.ERROR.name
                 Level.ASSERT.priority -> Level.ASSERT.name
-                else -> Level.UNKNOWN.name
+                else -> "UNKNOWN_(${priority})"
             }
         }
 
