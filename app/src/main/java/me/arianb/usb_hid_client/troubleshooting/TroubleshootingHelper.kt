@@ -306,7 +306,7 @@ fun ExportLogsPreferenceButton() {
     )
 }
 
-private inline fun StringBuilder.appendDivider(): StringBuilder =
+private fun StringBuilder.appendDivider(): StringBuilder =
     appendLine().appendLine("------------------------------")
 
 private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: TroubleshootingInfo) {
