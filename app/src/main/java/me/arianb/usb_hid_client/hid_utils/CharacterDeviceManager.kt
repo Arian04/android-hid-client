@@ -25,7 +25,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         withContext(dispatcher) {
             val commandResult = Shell.cmd(appResources.openRawResource(R.raw.create_char_devices)).exec()
-            Timber.d("create device script: \nstdout=%s\nstderr=%s", commandResult.out, commandResult.err)
+            logShellCommandResult("create devices script", commandResult)
 
             fixSelinuxPermissions()
 
@@ -96,7 +96,8 @@ class CharacterDeviceManager private constructor(private val application: Applic
     fun deleteCharacterDevices() {
         val appResources: Resources = application.resources
 
-        Shell.cmd(appResources.openRawResource(R.raw.delete_char_devices)).exec()
+        val commandResult = Shell.cmd(appResources.openRawResource(R.raw.delete_char_devices)).exec()
+        logShellCommandResult("delete gadget script", commandResult)
 
         return
     }
@@ -144,6 +145,12 @@ class CharacterDeviceManager private constructor(private val application: Applic
                 instance
             }
         }
+    }
+}
+
+private fun logShellCommandResult(label: String, commandResult: Shell.Result) {
+    with(commandResult) {
+        Timber.i("${label}: \nexit code=%d\nstdout=%s\nstderr=%s", code, out, err)
     }
 }
 
