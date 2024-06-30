@@ -66,9 +66,9 @@ fun TroubleshootingPage() {
         //  - [x] create gadget
         //  - [x] remove gadget
         //  - [ ] re-create gadget
-        LabeledCategory("Gadget Actions") {
-            GadgetActionButtons()
-        }
+//        LabeledCategory("Gadget Actions") {
+//            GadgetActionButtons()
+//        }
 
         LabeledCategory("Debugging Information") {
             DebuggingInfoList()
