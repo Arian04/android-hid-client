@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client
+package me.arianb.usb_hid_client.ui.standalone_screens
 
 import android.text.method.LinkMovementMethod
 import android.util.TypedValue
@@ -23,6 +23,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.widget.TextViewCompat
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
+import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.ui.theme.PaddingExtraLarge
 import me.arianb.usb_hid_client.ui.theme.PaddingNone
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal

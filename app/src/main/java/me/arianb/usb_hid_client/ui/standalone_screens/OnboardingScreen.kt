@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client
+package me.arianb.usb_hid_client.ui.standalone_screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Button
@@ -14,6 +14,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import me.arianb.usb_hid_client.MainScreen
+import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.settings.PreferenceKey
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingExtraExtraLarge

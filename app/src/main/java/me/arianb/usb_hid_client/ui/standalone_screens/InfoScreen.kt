@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client
+package me.arianb.usb_hid_client.ui.standalone_screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.padding
@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
+import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews

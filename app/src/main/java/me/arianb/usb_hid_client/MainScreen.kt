@@ -35,6 +35,8 @@ import me.arianb.usb_hid_client.input_views.Touchpad
 import me.arianb.usb_hid_client.settings.SettingsScreen
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import me.arianb.usb_hid_client.troubleshooting.TroubleshootingScreen
+import me.arianb.usb_hid_client.ui.standalone_screens.HelpScreen
+import me.arianb.usb_hid_client.ui.standalone_screens.InfoScreen
 import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.BasicTopBar
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
