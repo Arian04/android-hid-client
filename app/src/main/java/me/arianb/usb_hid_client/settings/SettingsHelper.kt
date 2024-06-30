@@ -1,10 +1,5 @@
 package me.arianb.usb_hid_client.settings
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,17 +21,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
-import me.arianb.usb_hid_client.BuildConfig
-import me.arianb.usb_hid_client.LogBuffer
-import me.arianb.usb_hid_client.R
-import me.arianb.usb_hid_client.TroubleshootingInfo
-import me.arianb.usb_hid_client.detectIssues
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 import timber.log.Timber
-import java.io.IOException
 
 
 // This is basically just an alias now
@@ -208,105 +196,4 @@ fun OnClickPreference(
         supportingContent = { Text(summary) },
         trailingContent = trailingContent
     )
-}
-
-@Composable
-fun ExportLogsPreferenceButton() {
-    val troubleshootingInfo = detectIssues()
-
-    val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // If the user doesn't choose a location to save the file, don't continue
-        val uri = result.data?.data ?: return@rememberLauncherForActivityResult
-
-        Timber.d("selected file URI: %s", uri)
-        saveLogFile(context, uri, troubleshootingInfo)
-    }
-
-    OnClickPreference(
-        title = stringResource(R.string.export_debug_logs_btn_title),
-        summary = stringResource(R.string.export_debug_logs_btn_summary),
-        onClick = {
-            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "text/plain"
-
-                val unixTime = System.currentTimeMillis() / 1000
-                val filename = "debug_log_${BuildConfig.APPLICATION_ID}_${unixTime}.txt"
-                putExtra(Intent.EXTRA_TITLE, filename)
-            }
-
-            launcher.launch(intent)
-        }
-    )
-}
-
-private inline fun StringBuilder.appendDivider(): StringBuilder =
-    appendLine().appendLine("------------------------------")
-
-private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: TroubleshootingInfo) {
-    try {
-        val stringBuilder = buildString {
-            val rootPermissionInfo = troubleshootingInfo.rootPermissionInfo
-            val characterDevicesInfoList = troubleshootingInfo.characterDevicesInfoList
-            val kernelInfo = troubleshootingInfo.kernelInfo
-
-            appendLine("Do we have root permissions?: ${rootPermissionInfo.hasRootPermissions}")
-            appendLine("Root method: ${rootPermissionInfo.rootMethod.name}")
-
-            appendDivider()
-
-            if (characterDevicesInfoList != null) {
-                for (characterDevice in characterDevicesInfoList) {
-                    appendLine("character device info for: ${characterDevice.path}")
-                    appendLine("does it exist?: ${characterDevice.isPresent}")
-                    appendLine("is it visible without root?: ${characterDevice.isVisibleWithoutRoot}")
-                    appendLine("permissions: ")
-                    appendLine(characterDevice.permissions)
-
-                    appendLine()
-                }
-            } else {
-                appendLine("character device info list is null, that's bad.")
-            }
-
-            appendDivider()
-
-            if (kernelInfo != null) {
-                appendLine("relevant snippet of kernel config: ")
-                appendLine(kernelInfo.kernelConfigAnnotated.text)
-                appendLine("-")
-                appendLine("has ConfigFS support?: ${kernelInfo.hasConfigFsSupport}")
-                appendLine("has ConfigFS HID function support?: ${kernelInfo.hasConfigFsHidFunctionSupport}")
-
-            } else {
-                appendLine("kernel info is null, that's bad.")
-            }
-
-            appendDivider()
-
-            appendLine("Logs: ")
-
-            // Append all logs
-            for (entry in LogBuffer.getLogList()) {
-                appendLine(entry.toString())
-            }
-        }
-
-        Timber.d(stringBuilder)
-
-        // Write out file
-        context.contentResolver.openOutputStream(uri).use { outputStream ->
-            if (outputStream == null) {
-                Timber.e("Failed to open output stream for writing log file.")
-                return
-            }
-            outputStream.write(stringBuilder.toByteArray())
-        }
-
-        Timber.d("Successfully exported logs")
-    } catch (e: IOException) {
-        Timber.e(e)
-        Timber.e("IOException occurred while exporting logs")
-    }
 }

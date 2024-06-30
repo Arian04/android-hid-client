@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client
+package me.arianb.usb_hid_client.troubleshooting
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -37,7 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
-import me.arianb.usb_hid_client.settings.ExportLogsPreferenceButton
+import me.arianb.usb_hid_client.MainViewModel
+import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.shell_utils.RootMethod
 import me.arianb.usb_hid_client.ui.theme.codeLineHeightScaleFactor
 import me.arianb.usb_hid_client.ui.theme.codeStyle

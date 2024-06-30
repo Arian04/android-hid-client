@@ -14,6 +14,7 @@ import cafe.adriel.voyager.navigator.NavigatorDisposeBehavior
 import cafe.adriel.voyager.transitions.SlideTransition
 import com.topjohnwu.superuser.Shell
 import me.arianb.usb_hid_client.settings.SettingsViewModel
+import me.arianb.usb_hid_client.troubleshooting.ProductionTree
 import timber.log.Timber
 
 // TODO: move all misc strings used in snackbars and alerts throughout the app into strings.xml for translation purposes.
