@@ -31,7 +31,7 @@ class InfoScreen : Screen {
 }
 
 @Composable
-private fun InfoPage() {
+fun InfoPage() {
     BasicPage(
         topBar = { InfoTopBar() },
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -31,7 +31,7 @@ class OnboardingScreen : Screen {
 }
 
 @Composable
-private fun OnboardingPage() {
+fun OnboardingPage() {
     BasicPage(
         topBar = { OnboardingTopBar() },
         horizontalAlignment = Alignment.CenterHorizontally,

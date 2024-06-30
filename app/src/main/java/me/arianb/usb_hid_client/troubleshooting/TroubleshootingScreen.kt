@@ -56,7 +56,7 @@ class TroubleshootingScreen : Screen {
 }
 
 @Composable
-private fun TroubleshootingPage() {
+fun TroubleshootingPage() {
     BasicPage(
         topBar = { TroubleshootingTopBar() },
         scrollable = true

@@ -24,7 +24,7 @@ class SettingsScreen : Screen {
 }
 
 @Composable
-private fun SettingsPage() {
+fun SettingsPage() {
     val padding = PaddingNormal
     val paddingModifier = Modifier.padding(horizontal = padding)
 

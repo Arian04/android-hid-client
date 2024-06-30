@@ -42,7 +42,7 @@ class HelpScreen : Screen {
 }
 
 @Composable
-private fun HelpPage() {
+fun HelpPage() {
     val questionAnswerPairs = remember {
         arrayOf(
             Pair(R.string.help_faq_q1, R.string.help_faq_a1),

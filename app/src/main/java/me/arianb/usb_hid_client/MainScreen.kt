@@ -50,7 +50,7 @@ class MainScreen : Screen {
 }
 
 @Composable
-private fun MainPage(mainViewModel: MainViewModel = viewModel()) {
+fun MainPage(mainViewModel: MainViewModel = viewModel()) {
     val rootStateHolder = RootStateHolder.getInstance()
     val rootState by rootStateHolder.uiState.collectAsState()
 

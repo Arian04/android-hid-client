@@ -157,50 +157,6 @@
 
     <issue
         id="SyntheticAccessor"
-        message="Access to `private` method `HelpPage` of class `HelpScreenKt` requires synthetic accessor"
-        errorLine1="        HelpPage()"
-        errorLine2="        ~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/HelpScreen.kt"
-            line="39"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="SyntheticAccessor"
-        message="Access to `private` method `InfoPage` of class `InfoScreenKt` requires synthetic accessor"
-        errorLine1="        InfoPage()"
-        errorLine2="        ~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/InfoScreen.kt"
-            line="28"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="SyntheticAccessor"
-        message="Access to `private` method `MainPage` of class `MainScreenKt` requires synthetic accessor"
-        errorLine1="        MainPage()"
-        errorLine2="        ~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/MainScreen.kt"
-            line="45"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="SyntheticAccessor"
-        message="Access to `private` method `OnboardingPage` of class `OnboardingScreenKt` requires synthetic accessor"
-        errorLine1="        OnboardingPage()"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/OnboardingScreen.kt"
-            line="27"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="SyntheticAccessor"
         message="Access to `private` method `writeHIDReport` of class `Companion` requires synthetic accessor"
         errorLine1="        writeHIDReport(report, characterDevicePath)"
         errorLine2="        ~~~~~~~~~~~~~~">
@@ -218,28 +174,6 @@
         <location
             file="src/main/java/me/arianb/usb_hid_client/report_senders/ReportSender.kt"
             line="56"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="SyntheticAccessor"
-        message="Access to `private` method `SettingsPage` of class `SettingsScreenKt` requires synthetic accessor"
-        errorLine1="        SettingsPage()"
-        errorLine2="        ~~~~~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/settings/SettingsScreen.kt"
-            line="28"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="SyntheticAccessor"
-        message="Access to `private` method `TroubleshootingPage` of class `TroubleshootingScreenKt` requires synthetic accessor"
-        errorLine1="        TroubleshootingPage()"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/TroubleshootingScreen.kt"
-            line="53"
             column="9"/>
     </issue>
 
