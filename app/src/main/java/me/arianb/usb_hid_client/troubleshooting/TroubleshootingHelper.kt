@@ -44,6 +44,7 @@ data class CharacterDeviceInfo(
 )
 
 data class KernelInfo(
+    val version: String,
     val kernelConfigAnnotated: AnnotatedString,
     val hasConfigFsSupport: Boolean?,
     val hasConfigFsHidFunctionSupport: Boolean?,
@@ -170,6 +171,7 @@ private fun getKernelInfo(): KernelInfo {
     val configFsKernelOption = "CONFIG_USB_CONFIGFS"
     val configFsHidKernelOption = "${configFsKernelOption}_F_HID"
 
+    val kernelVersion = System.getProperty("os.version")
     val kernelConfig = getKernelConfig()
     var hasConfigFsSupport: Boolean? = null
     var hasConfigFsHidFunctionSupport: Boolean? = null
@@ -228,6 +230,7 @@ private fun getKernelInfo(): KernelInfo {
     }
 
     return KernelInfo(
+        kernelVersion ?: "unknown",
         kernelConfigAnnotatedString,
         hasConfigFsSupport,
         hasConfigFsHidFunctionSupport,
@@ -338,12 +341,12 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
             appendDivider()
 
             if (kernelInfo != null) {
-                appendLine("relevant snippet of kernel config: ")
-                appendLine(kernelInfo.kernelConfigAnnotated.text)
-                appendLine("-")
+                appendLine("version: ${kernelInfo.version}")
                 appendLine("has ConfigFS support?: ${kernelInfo.hasConfigFsSupport}")
                 appendLine("has ConfigFS HID function support?: ${kernelInfo.hasConfigFsHidFunctionSupport}")
-
+                appendLine("-")
+                appendLine("relevant snippet of kernel config: ")
+                appendLine(kernelInfo.kernelConfigAnnotated.text)
             } else {
                 appendLine("kernel info is null, that's bad.")
             }

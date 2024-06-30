@@ -160,8 +160,11 @@ private fun DebuggingInfoList() {
     troubleshootingInfo.kernelInfo?.let {
         GadgetStatusItem(
             title = "Kernel Support Info",
-            summary = "ConfigFS support: ${it.hasConfigFsSupport ?: "Unknown"}" + "\n" +
-                    "ConfigFS HID support: ${it.hasConfigFsHidFunctionSupport ?: "Unknown"}",
+            summary = buildString {
+                appendLine("Version: ${it.version}")
+                appendLine("ConfigFS support: ${it.hasConfigFsSupport ?: "Unknown"}")
+                append("ConfigFS HID support: ${it.hasConfigFsHidFunctionSupport ?: "Unknown"}")
+            },
             extraInfo = it.kernelConfigAnnotated,
             isGood = if (it.hasConfigFsSupport == null || it.hasConfigFsHidFunctionSupport == null) {
                 null
