@@ -163,7 +163,7 @@ fun getScanTime(): UShort {
 /**
  * Helper function to convert between types.
  */
-private fun TouchpadSender.send(
+fun TouchpadSender.send(
     pointerID: Int,
     tipSwitch: Boolean,
     x: Int,

@@ -156,28 +156,6 @@
     </issue>
 
     <issue
-        id="SyntheticAccessor"
-        message="Access to `private` method `writeHIDReport` of class `Companion` requires synthetic accessor"
-        errorLine1="        writeHIDReport(report, characterDevicePath)"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/report_senders/ReportSender.kt"
-            line="49"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="SyntheticAccessor"
-        message="Access to `private` method `writeHIDReport` of class `Companion` requires synthetic accessor"
-        errorLine1="        writeHIDReport(releaseReport, characterDevicePath)"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/report_senders/ReportSender.kt"
-            line="56"
-            column="9"/>
-    </issue>
-
-    <issue
         id="TypographyQuotes"
         message="Replace apostrophe (&apos;) with typographic apostrophe (’, &amp;#8217;) ?"
         errorLine1="    &lt;string name=&quot;help_faq_a1&quot;>You can create an issue &lt;a href=&quot;https://github.com/Arian04/android-hid-client/issues&quot;>here&lt;/a>. Just make sure it hasn\&apos;t already been reported.&lt;/string>"
