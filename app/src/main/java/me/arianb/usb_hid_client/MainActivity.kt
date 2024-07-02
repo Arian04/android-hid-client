@@ -1,5 +1,6 @@
 package me.arianb.usb_hid_client
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +19,21 @@ import me.arianb.usb_hid_client.troubleshooting.ProductionTree
 import me.arianb.usb_hid_client.ui.standalone_screens.OnboardingScreen
 import timber.log.Timber
 
+// Overriding Application so that the loggers only get created once, regardless of Activity lifecycle
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+            Shell.enableVerboseLogging = true
+        }
+
+        Timber.plant(ProductionTree())
+    }
+}
+
+
 // TODO: move all misc strings used in snackbars and alerts throughout the app into strings.xml for translation purposes.
 
 // Notes on terminology:
@@ -27,13 +43,6 @@ import timber.log.Timber
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-            Shell.enableVerboseLogging = true
-        }
-
-        Timber.plant(ProductionTree())
 
         setContent {
             Entrypoint()
