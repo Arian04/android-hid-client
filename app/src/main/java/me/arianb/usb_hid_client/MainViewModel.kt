@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.ModifiesStateDirectly
 import me.arianb.usb_hid_client.report_senders.KeySender
-import me.arianb.usb_hid_client.report_senders.MouseSender
 import me.arianb.usb_hid_client.report_senders.ReportSender
+import me.arianb.usb_hid_client.report_senders.TouchpadSender
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.FileNotFoundException
@@ -37,10 +37,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
     private val rootStateHolder = RootStateHolder.getInstance()
     val keySender = KeySender()
-    val mouseSender = MouseSender()
+    val touchpadSender = TouchpadSender()
+    private val senderList = listOf(keySender, touchpadSender)
 
     init {
-        for (sender: ReportSender in listOf(keySender, mouseSender)) {
+        for (sender: ReportSender in senderList) {
             viewModelScope.launch(ReportSender.dispatcher) {
                 sender.start(
                     onSuccess = {
@@ -141,11 +142,4 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun addMediaKey(key: Byte) =
         keySender.addMediaKey(key)
-
-    // Mouse
-    fun click(button: Byte) =
-        mouseSender.click(button)
-
-    fun move(x: Byte, y: Byte) =
-        mouseSender.move(x, y)
 }

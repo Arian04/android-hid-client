@@ -18,12 +18,12 @@ echo "Removing functions from configurations"
 for func in "$USB_GADGET_PATH"/configs/*.*/hid.keyboard; do
 	[ -e "$func" ] && rm "$func"
 done
-for func in "$USB_GADGET_PATH"/configs/*.*/hid.mouse; do
+for func in "$USB_GADGET_PATH"/configs/*.*/hid.touchpad; do
 	[ -e "$func" ] && rm "$func"
 done
 
 echo "Removing functions"
-for func in hid.keyboard hid.mouse; do
+for func in hid.keyboard hid.touchpad; do
   func_path="$USB_GADGET_PATH"/functions/$func
   [ -d "$func_path" ] && rmdir "$func_path"
 done

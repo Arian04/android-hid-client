@@ -10,6 +10,7 @@ import java.io.IOException
 abstract class ReportSender(
     val characterDevicePath: String,
     val usesReportIDs: Boolean,
+    val autoRelease: Boolean = true,
 ) {
     private val reportsChannel = Channel<ByteArray>(Channel.UNLIMITED) {
         Timber.wtf("A channel with an unlimited buffer shouldn't be failing to receive elements")
@@ -18,7 +19,11 @@ abstract class ReportSender(
     suspend fun start(onSuccess: () -> Unit, onException: (e: IOException) -> Unit) {
         for (report in reportsChannel) {
             try {
-                sendReport(report, characterDevicePath, usesReportIDs)
+                if (autoRelease) {
+                    sendReport(report, characterDevicePath, usesReportIDs)
+                } else {
+                    writeHIDReport(report, characterDevicePath)
+                }
                 onSuccess()
             } catch (e: IOException) {
                 Timber.d(e)
@@ -56,15 +61,15 @@ abstract class ReportSender(
         writeHIDReport(releaseReport, characterDevicePath)
     }
 
+    // Writes HID report to character device
+    @Throws(IOException::class, FileNotFoundException::class)
+    private fun writeHIDReport(report: ByteArray, characterDevicePath: String) {
+        FileOutputStream(characterDevicePath).use { outputStream ->
+            outputStream.write(report)
+        }
+    }
+
     companion object {
         val dispatcher = Dispatchers.IO
-
-        // Writes HID report to character device
-        @Throws(IOException::class, FileNotFoundException::class)
-        private fun writeHIDReport(report: ByteArray, characterDevicePath: String) {
-            FileOutputStream(characterDevicePath).use { outputStream ->
-                outputStream.write(report)
-            }
-        }
     }
 }
