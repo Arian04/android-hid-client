@@ -41,6 +41,10 @@ class TouchpadView : AppCompatTextView {
 
     fun setTouchListeners(touchpadSender: TouchpadSender) {
         setOnTouchListener { _: View?, motionEvent: MotionEvent ->
+            // Fixes possible NPE due to platform type
+            if (motionEvent.device == null) {
+                return@setOnTouchListener false
+            }
             val (pointerID, pointerX, pointerY) = getPointerTriple(motionEvent, pointerIndex = motionEvent.actionIndex)
 
             // Scan time is reset when pointer 0 is sent
