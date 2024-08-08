@@ -4,16 +4,29 @@ import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import timber.log.Timber
 import java.util.BitSet
 
-// TODO: remove report ID if it ends up not being necessary
-class TouchpadSender : ReportSender(
-    characterDevicePath = CharacterDeviceManager.TOUCHPAD_DEVICE_PATH,
-    usesReportIDs = true,
-    autoRelease = false
+// TODO:
+//  - remove report ID if it ends up not being necessary
+//  - overall cleanup unnecessary parts of the report descriptor
+open class TouchpadSender(
+    characterDevicePath: String = CharacterDeviceManager.TOUCHPAD_DEVICE_PATH
+) : ReportSender(
+    characterDevicePath = characterDevicePath
 ) {
-    private val reportID: Byte = 4
-
-    // TODO: use a bitset for the entire thing
     fun send(contactID: Byte, tipSwitch: Boolean, x: Short, y: Short, scanTime: UShort, contactCount: Byte) {
+        super.addReportToChannel(
+            getTouchpadReport(contactID, tipSwitch, x, y, scanTime, contactCount)
+        )
+    }
+
+    // TODO: improve readability, maybe use a bitset for the entire thing?
+    private fun getTouchpadReport(
+        contactID: Byte,
+        tipSwitch: Boolean,
+        x: Short,
+        y: Short,
+        scanTime: UShort,
+        contactCount: Byte
+    ): ByteArray {
         // Only send send non-zero contact count in the report of contact ID 0 as per the spec
         val realContactCount: Byte = if (contactID.toInt() == 0) {
             contactCount
@@ -37,12 +50,12 @@ class TouchpadSender : ReportSender(
         }
 
         // Turn it into a byte
-        val bitSetByteArray = secondByteBitSet.toByteArray()
+        var bitSetByteArray = secondByteBitSet.toByteArray()
         if (bitSetByteArray.size > 1) {
             Timber.wtf("ok guys this is not cool. bitSetByteArray.size = %d", bitSetByteArray.size)
         } else if (bitSetByteArray.isEmpty()) {
             Timber.wtf("ok guys this is REALLY not cool. bitSetByteArray is EMPTY somehow!!")
-            return
+            bitSetByteArray = byteArrayOf(0)
         }
         val secondByte: Byte = bitSetByteArray.first()
 
@@ -50,22 +63,24 @@ class TouchpadSender : ReportSender(
         val vendorUsageLowByte: Byte = 0
         val vendorUsageHighByte: Byte = 0
 
-        super.addReportToChannel(
-            byteArrayOf(
-                reportID,
-                secondByte,
-                x.toLowByte(),
-                x.toHighByte(),
-                y.toLowByte(),
-                y.toHighByte(),
-                scanTime.toLowByte(),
-                scanTime.toHighByte(),
-                realContactCount,
-                buttonByte,
-                vendorUsageLowByte,
-                vendorUsageHighByte
-            )
+        return byteArrayOf(
+            TOUCHPAD_REPORT_ID,
+            secondByte,
+            x.toLowByte(),
+            x.toHighByte(),
+            y.toLowByte(),
+            y.toHighByte(),
+            scanTime.toLowByte(),
+            scanTime.toHighByte(),
+            realContactCount,
+            buttonByte,
+            vendorUsageLowByte,
+            vendorUsageHighByte
         )
+    }
+
+    companion object {
+        private const val TOUCHPAD_REPORT_ID: Byte = 4
     }
 }
 

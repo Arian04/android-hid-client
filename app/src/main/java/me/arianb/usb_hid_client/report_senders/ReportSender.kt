@@ -9,21 +9,17 @@ import java.io.IOException
 
 abstract class ReportSender(
     val characterDevicePath: String,
-    val usesReportIDs: Boolean,
-    val autoRelease: Boolean = true,
 ) {
     private val reportsChannel = Channel<ByteArray>(Channel.UNLIMITED) {
         Timber.wtf("A channel with an unlimited buffer shouldn't be failing to receive elements")
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     suspend fun start(onSuccess: () -> Unit, onException: (e: IOException) -> Unit) {
         for (report in reportsChannel) {
             try {
-                if (autoRelease) {
-                    sendReport(report, characterDevicePath, usesReportIDs)
-                } else {
-                    writeHIDReport(report, characterDevicePath)
-                }
+                Timber.d("REPORT HEX (len = %d): %s", report.size, report.toHexString())
+                sendReport(report)
                 onSuccess()
             } catch (e: IOException) {
                 Timber.d(e)
@@ -45,31 +41,19 @@ abstract class ReportSender(
         reportsChannel.trySend(report)
     }
 
-    private fun sendReport(
-        report: ByteArray,
-        characterDevicePath: String,
-        preserveReportID: Boolean = false
-    ) {
-        // Send report
-        writeHIDReport(report, characterDevicePath)
-
-        // Send report of all zeroes (preserving report ID if necessary) to release
-        val releaseReport = ByteArray(report.size)
-        if (preserveReportID) {
-            releaseReport[0] = report[0]
-        }
-        writeHIDReport(releaseReport, characterDevicePath)
-    }
-
-    // Writes HID report to character device
-    @Throws(IOException::class, FileNotFoundException::class)
-    private fun writeHIDReport(report: ByteArray, characterDevicePath: String) {
-        FileOutputStream(characterDevicePath).use { outputStream ->
-            outputStream.write(report)
-        }
+    open fun sendReport(report: ByteArray) {
+        writeBytes(report, characterDevicePath)
     }
 
     companion object {
         val dispatcher = Dispatchers.IO
+
+        // Writes HID report to character device
+        @Throws(IOException::class, FileNotFoundException::class)
+        fun writeBytes(report: ByteArray, path: String) {
+            FileOutputStream(path).use { outputStream ->
+                outputStream.write(report)
+            }
+        }
     }
 }
