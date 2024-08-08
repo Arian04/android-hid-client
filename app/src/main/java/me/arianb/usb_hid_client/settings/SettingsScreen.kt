@@ -38,9 +38,8 @@ fun SettingsPage() {
             title = stringResource(R.string.theme_header),
             modifier = paddingModifier
         ) {
-            ListPreference(
+            AppThemePreference(
                 title = stringResource(R.string.app_theme_title),
-                options = AppTheme.values
             )
             if (isDynamicColorAvailable()) {
                 SwitchPreference(
@@ -50,18 +49,23 @@ fun SettingsPage() {
             }
         }
         PreferenceCategory(
-            title = stringResource(R.string.misc_header),
+            title = stringResource(R.string.direct_input),
+            modifier = paddingModifier
+        ) {
+            SwitchPreference(
+                title = stringResource(R.string.volume_button_passthrough_title),
+                summary = stringResource(R.string.volume_button_passthrough_summary),
+                key = PreferenceKey.VolumeButtonPassthroughKey
+            )
+        }
+        PreferenceCategory(
+            title = stringResource(R.string.manual_input),
             modifier = paddingModifier,
             showDivider = false
         ) {
             SwitchPreference(
                 title = stringResource(R.string.clear_manual_input_title),
                 key = PreferenceKey.ClearManualInputKey
-            )
-            SwitchPreference(
-                title = stringResource(R.string.volume_button_passthrough_title),
-                summary = stringResource(R.string.volume_button_passthrough_summary),
-                key = PreferenceKey.VolumeButtonPassthroughKey
             )
         }
     }

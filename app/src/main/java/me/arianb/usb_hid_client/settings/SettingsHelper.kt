@@ -70,15 +70,16 @@ fun SwitchPreference(
 }
 
 @Composable
-fun ListPreference(
+fun AppThemePreference(
     title: String,
-    options: List<AppTheme>,
     enabled: Boolean = true,
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
     val preferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
 
     val selectedTheme = preferencesState.appTheme
+
+    val options = AppTheme.values
 
     BasicListPreference(
         title = title,
