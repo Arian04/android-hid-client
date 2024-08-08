@@ -1,5 +1,6 @@
 package me.arianb.usb_hid_client.hid_utils;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.HashMap;
@@ -12,11 +13,17 @@ import timber.log.Timber;
 // 		 current: keycode/char -> human-readable key -> hid code
 // 		 proposed: keycode/char -> hid code (comment: human-readable key)
 public abstract class KeyCodeTranslation {
+    @NonNull
     public static final Map<Integer, String> keyEventModifierKeys;
+    @NonNull
     public static final Map<Integer, String> keyEventKeys;
+    @NonNull
     public static final Map<String, String> shiftChars;
+    @NonNull
     public static final Map<String, Byte> hidModifierCodes;
+    @NonNull
     public static final Map<String, Byte> hidKeyCodes;
+    @NonNull
     public static final Map<String, Byte> hidMediaKeyCodes;
 
     // Converts key to two scan codes
