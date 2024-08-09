@@ -16,8 +16,6 @@
     <string name="misc_header">Misc</string>
 
     <!-- Preferences -->
-    <string name="clear_manual_input_title">Clear manual input text box on send</string>
-
     <string name="app_theme_title">App theme</string>
     <string name="app_theme_system">Follow system</string>
     <string name="app_theme_dark_mode">Dark theme</string>
@@ -25,8 +23,13 @@
 
     <string name="dynamic_colors_title">Dynamic colors</string>
 
+    <string name="clear_manual_input_title">Clear manual input text box on send</string>
+
     <string name="volume_button_passthrough_title">Volume button passthrough</string>
     <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
+
+    <string name="touchpad_loopback_mode_title">Loopback mode (Requires app restart after changing option)</string>
+    <string name="touchpad_loopback_mode_summary">Touchpad will control a cursor on an external display connected to this device, rather than controlling a connected device</string>
 
     <!-- Info ("About") Screen -->
     <string name="info">About</string>

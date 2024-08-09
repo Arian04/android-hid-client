@@ -10,9 +10,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.ModifiesStateDirectly
+import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.KeySender
+import me.arianb.usb_hid_client.report_senders.LoopbackTouchpadSender
 import me.arianb.usb_hid_client.report_senders.ReportSender
 import me.arianb.usb_hid_client.report_senders.TouchpadSender
+import me.arianb.usb_hid_client.settings.UserPreferences
+import me.arianb.usb_hid_client.settings.UserPreferencesRepository
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.FileNotFoundException
@@ -36,8 +40,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
     private val rootStateHolder = RootStateHolder.getInstance()
+    private val userPreferencesState: StateFlow<UserPreferences> =
+        UserPreferencesRepository.getInstance(application).userPreferencesFlow
     val keySender = KeySender()
-    val touchpadSender = TouchpadSender()
+
+    // TODO: write this code properly so the app doesn't need to be restarted for this to work
+    val touchpadSender = if (userPreferencesState.value.isLoopbackModeEnabled) {
+        fixCharacterDevicePermissions(UHID.PATH)
+        LoopbackTouchpadSender()
+    } else {
+        TouchpadSender()
+    }
     private val senderList = listOf(keySender, touchpadSender)
 
     init {

@@ -130,7 +130,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         // SeLinux stuff
         private const val SELINUX_DOMAIN = "appdomain"
-        private const val SELINUX_POLICY = "allow $SELINUX_DOMAIN device chr_file { getattr open write }"
+        private const val SELINUX_POLICY = "allow $SELINUX_DOMAIN device chr_file { getattr open read write }"
 
         @Volatile
         private var INSTANCE: CharacterDeviceManager? = null

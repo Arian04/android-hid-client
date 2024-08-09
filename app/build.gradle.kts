@@ -27,6 +27,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        externalNativeBuild {
+            cmake {
+                cppFlags += ""
+            }
+        }
     }
 
     // Build configuration
@@ -52,6 +57,12 @@ android {
     }
     composeCompiler {
         enableStrongSkippingMode = true
+    }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     // Disable Google-encrypted binary blobs

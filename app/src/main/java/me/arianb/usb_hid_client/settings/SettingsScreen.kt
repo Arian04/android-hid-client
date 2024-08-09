@@ -61,11 +61,21 @@ fun SettingsPage() {
         PreferenceCategory(
             title = stringResource(R.string.manual_input),
             modifier = paddingModifier,
-            showDivider = false
         ) {
             SwitchPreference(
                 title = stringResource(R.string.clear_manual_input_title),
                 key = PreferenceKey.ClearManualInputKey
+            )
+        }
+        PreferenceCategory(
+            title = stringResource(R.string.touchpad_label),
+            modifier = paddingModifier,
+            showDivider = false
+        ) {
+            SwitchPreference(
+                title = stringResource(R.string.touchpad_loopback_mode_title),
+                summary = stringResource(R.string.touchpad_loopback_mode_summary),
+                key = PreferenceKey.LoopbackMode
             )
         }
     }

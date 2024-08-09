@@ -10,8 +10,8 @@ local.properties
 app/release
 app/debug
 captures/
-#.externalNativeBuild/
-#.cxx/
+.externalNativeBuild/
+.cxx/
 
 # IntelliJ
 *.iml

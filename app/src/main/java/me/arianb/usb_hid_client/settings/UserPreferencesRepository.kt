@@ -17,6 +17,7 @@ sealed class PreferenceKey(val key: String) {
     data object VolumeButtonPassthroughKey : PreferenceKey("volume_button_passthrough")
     data object AppThemeKey : PreferenceKey("app_theme")
     data object DynamicColorKey : PreferenceKey("dynamic_color")
+    data object LoopbackMode : PreferenceKey("loopback_mode")
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -42,6 +43,7 @@ data class UserPreferences(
     val isVolumeButtonPassthroughEnabled: Boolean,
     val appTheme: AppTheme,
     val isDynamicColorEnabled: Boolean,
+    val isLoopbackModeEnabled: Boolean,
 )
 
 class UserPreferencesRepository private constructor(application: Application) {
@@ -58,6 +60,7 @@ class UserPreferencesRepository private constructor(application: Application) {
                 isVolumeButtonPassthroughEnabled = getBoolean(PreferenceKey.VolumeButtonPassthroughKey, false),
                 appTheme = getAppTheme(),
                 isDynamicColorEnabled = getBoolean(PreferenceKey.DynamicColorKey, false),
+                isLoopbackModeEnabled = getBoolean(PreferenceKey.LoopbackMode, false),
             )
         }
 
