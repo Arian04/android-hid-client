@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import androidx.appcompat.widget.AppCompatTextView
@@ -41,10 +42,6 @@ class TouchpadView : AppCompatTextView {
 
     fun setTouchListeners(touchpadSender: TouchpadSender) {
         setOnTouchListener { _: View?, motionEvent: MotionEvent ->
-            // Fixes possible NPE due to platform type
-            if (motionEvent.device == null) {
-                return@setOnTouchListener false
-            }
             val (pointerID, pointerX, pointerY) = getPointerTriple(motionEvent, pointerIndex = motionEvent.actionIndex)
 
             // Scan time is reset when pointer 0 is sent
@@ -106,10 +103,16 @@ private fun getPointerTriple(motionEvent: MotionEvent, pointerIndex: Int): Tripl
         Pair(motionEvent.getX(pointerIndex), motionEvent.getY(pointerIndex))
     }
 
-    val xRange = motionEvent.device.getMotionRange(MotionEvent.AXIS_X)
-    val xMax = xRange.max
-    val yRange = motionEvent.device.getMotionRange(MotionEvent.AXIS_Y)
-    val yMax = yRange.max
+    // NOTE: MotionEvent has a bunch of properties (and properties of those properties) which are platform types.
+    //       I'm writing this note to be explicit about the fact that the following code should be treated cautiously so
+    //       as to not cause NPEs.
+    // --- start of unsafe code ---
+    val device: InputDevice? = motionEvent.device
+
+    // If null, just use some hardcoded safe-ish values
+    val xMax: Float = device?.getMotionRange(MotionEvent.AXIS_X)?.max ?: 1500f
+    val yMax: Float = device?.getMotionRange(MotionEvent.AXIS_Y)?.max ?: 3000f
+    // --- end of unsafe code ---
 
     // Get device rotation because if the device is suddenly a wide rectangle instead of a tall rectangle, then the
     // math changes.
