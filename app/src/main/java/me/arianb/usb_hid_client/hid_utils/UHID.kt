@@ -47,7 +47,7 @@ object UHID {
         write(uhidEventBytes)
     }
 
-    // TODO: figure out when I ever actually need to close this?
+    // TODO: figure out when I ever actually need to destroy this?
     fun destroy() {
         val destroyEvent = getDestroyEvent()
 

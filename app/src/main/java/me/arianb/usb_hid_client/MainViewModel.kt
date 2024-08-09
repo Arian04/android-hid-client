@@ -44,7 +44,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         UserPreferencesRepository.getInstance(application).userPreferencesFlow
     val keySender = KeySender()
 
-    // TODO: write this code properly so the app doesn't need to be restarted for this to work
+    // TODO: write this code properly so the app doesn't need to be restarted for this to work, then remove that note
+    //       from the touchpad loopback preference title
     val touchpadSender = if (userPreferencesState.value.isLoopbackModeEnabled) {
         fixCharacterDevicePermissions(UHID.PATH)
         LoopbackTouchpadSender()
