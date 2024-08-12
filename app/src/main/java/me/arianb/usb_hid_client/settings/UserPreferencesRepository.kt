@@ -47,7 +47,7 @@ data class UserPreferences(
 )
 
 class UserPreferencesRepository private constructor(application: Application) {
-    private val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
+    private val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
 
     private val _userPreferencesFlow = MutableStateFlow(userPreferences)
     val userPreferencesFlow: StateFlow<UserPreferences> = _userPreferencesFlow
