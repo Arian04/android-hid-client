@@ -14,8 +14,6 @@ import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.File
 
-// TODO: should this be CharacterDeviceManager or GadgetManager or something else? I feel like the name isn't right.
-
 class CharacterDeviceManager private constructor(private val application: Application) {
     private val dispatcher = Dispatchers.IO
     private val rootStateHolder = RootStateHolder.getInstance()
