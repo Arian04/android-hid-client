@@ -27,7 +27,7 @@ import timber.log.Timber
 
 // LEGACY: migrate this to Compose
 
-// TODO: address the linting issue below
+// From my understanding of this lint warning, I don't think it applies here.
 @SuppressLint("ClickableViewAccessibility")
 class TouchpadView : AppCompatTextView {
     private var currentScanTime: UShort = getScanTime()
