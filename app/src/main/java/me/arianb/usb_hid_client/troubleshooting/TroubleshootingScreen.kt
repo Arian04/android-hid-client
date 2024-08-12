@@ -68,9 +68,9 @@ fun TroubleshootingPage() {
         //  - [ ] re-create gadget
         //
         // TODO: re-enable once this is ready for production
-        LabeledCategory("Gadget Actions") {
-            GadgetActionButtons()
-        }
+//        LabeledCategory("Gadget Actions") {
+//            GadgetActionButtons()
+//        }
 
         LabeledCategory("Debugging Information") {
             DebuggingInfoList()
