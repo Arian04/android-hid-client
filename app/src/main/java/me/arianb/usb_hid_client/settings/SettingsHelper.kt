@@ -24,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
-import timber.log.Timber
 
 
 // This is basically just an alias now
@@ -78,33 +77,25 @@ fun AppThemePreference(
     val preferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
 
     val selectedTheme = preferencesState.appTheme
-
     val options = AppTheme.values
-
     BasicListPreference(
         title = title,
         options = options,
         enabled = enabled,
         selected = selectedTheme,
-        onPreferenceClicked = { thisSealedString ->
-            // Not sure what situation would cause this cast to fail, but it's better to be safe
-            val thisTheme = thisSealedString as? AppTheme
-            if (thisTheme != null) {
-                settingsViewModel.putAppTheme(thisTheme)
-            } else {
-                Timber.wtf("cast from SealedString to AppTheme failed for: %s", thisSealedString.key)
-            }
+        onPreferenceClicked = { thisAppTheme ->
+            settingsViewModel.putAppTheme(thisAppTheme)
         }
     )
 }
 
 @Composable
-fun BasicListPreference(
+fun <T : SealedString> BasicListPreference(
     title: String,
-    options: List<SealedString>,
-    selected: SealedString,
+    options: List<T>,
+    selected: T,
     enabled: Boolean = true,
-    onPreferenceClicked: ((thisSealedString: SealedString) -> Unit),
+    onPreferenceClicked: ((thisSealedString: T) -> Unit),
 ) {
     var isShowingAlert by remember { mutableStateOf(false) }
 
