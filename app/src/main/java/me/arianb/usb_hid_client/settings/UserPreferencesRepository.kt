@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import me.arianb.usb_hid_client.R
 
-// keys
 sealed class PreferenceKey(val key: String) {
     data object OnboardingDoneKey : PreferenceKey("onboarding_done")
     data object ClearManualInputKey : PreferenceKey("clear_manual_input")
