@@ -77,15 +77,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun handleException(e: IOException, devicePath: String) {
-        val lowercaseStacktrace = Log.getStackTraceString(e).lowercase()
+        val exceptionString = e.message ?: Log.getStackTraceString(e)
+        val lowercaseExceptionString = exceptionString.lowercase()
 
-        if (lowercaseStacktrace.contains("errno 108")) {
+        if (lowercaseExceptionString.contains("errno 108")) {
             Timber.i("device might be unplugged")
             _uiState.update { uiState.value.copy(isDeviceUnplugged = true) }
-        } else if (lowercaseStacktrace.contains("permission denied")) {
+        } else if (lowercaseExceptionString.contains("permission denied")) {
             Timber.i("char dev perms are wrong")
             _uiState.update { uiState.value.copy(isCharacterDevicePermissionsBroken = devicePath) }
-        } else if (lowercaseStacktrace.contains("enxio")) {
+        } else if (lowercaseExceptionString.contains("enxio")) {
             Timber.i("somehow the HID gadget is disabled but the character devices are still present")
         } else {
             Timber.e(e)
