@@ -76,7 +76,6 @@ fun MainPage(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
-
     val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
     val isDeviceInLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
     val hideManualInput = preferences.isTouchpadFullscreenInLandscape && isDeviceInLandscape
