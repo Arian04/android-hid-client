@@ -142,12 +142,13 @@ dependencies {
     val androidXAppCompatVersion = "1.7.0"
     val androidXConstraintLayoutVersion = "2.1.4"
     val androidXCoreVersion = "1.13.1"
-    val androidXLifecycleVersion = "2.8.2"
+    val androidXLifecycleVersion = "2.8.4"
     val androidXPreferenceVersion = "1.2.1"
-    val androidXTestJunit = "1.2.0"
+    val androidXTestJunitVersion = "1.2.1"
+    val androidXTracingVersion = "1.2.0"
 
     // Compose
-    val composeActivityVersion = "1.9.0"
+    val composeActivityVersion = "1.9.1"
     val composeMaterial3Version = "1.2.1"
     val composeUIVersion = "1.6.8"
     val composeBomVersion = "2024.06.00"
@@ -202,5 +203,6 @@ dependencies {
     androidTestImplementation("junit:junit:$junitVersion")
     debugImplementation("androidx.compose.ui:ui-test-manifest:$composeUIVersion")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeUIVersion")
-    androidTestImplementation("androidx.test.ext:junit:$androidXTestJunit")
+    androidTestImplementation("androidx.test.ext:junit:$androidXTestJunitVersion")
+    androidTestImplementation("androidx.tracing:tracing-ktx:$androidXTracingVersion")
 }
