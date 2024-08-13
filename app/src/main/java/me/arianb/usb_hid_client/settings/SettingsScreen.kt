@@ -73,6 +73,11 @@ fun SettingsPage() {
             showDivider = false
         ) {
             SwitchPreference(
+                title = stringResource(R.string.touchpad_fullscreen_in_landscape_title),
+                summary = stringResource(R.string.touchpad_fullscreen_in_landscape_summary),
+                key = PreferenceKey.TouchpadFullscreenInLandscape
+            )
+            SwitchPreference(
                 title = stringResource(R.string.touchpad_loopback_mode_title),
                 summary = stringResource(R.string.touchpad_loopback_mode_summary),
                 key = PreferenceKey.LoopbackMode

@@ -1,5 +1,6 @@
 package me.arianb.usb_hid_client
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -38,6 +40,7 @@ import me.arianb.usb_hid_client.input_views.DirectInputIconButton
 import me.arianb.usb_hid_client.input_views.ManualInput
 import me.arianb.usb_hid_client.input_views.Touchpad
 import me.arianb.usb_hid_client.settings.SettingsScreen
+import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import me.arianb.usb_hid_client.troubleshooting.TroubleshootingScreen
 import me.arianb.usb_hid_client.ui.standalone_screens.HelpScreen
@@ -56,7 +59,10 @@ class MainScreen : Screen {
 }
 
 @Composable
-fun MainPage(mainViewModel: MainViewModel = viewModel()) {
+fun MainPage(
+    mainViewModel: MainViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel()
+) {
     val rootStateHolder = RootStateHolder.getInstance()
     val rootState by rootStateHolder.uiState.collectAsState()
 
@@ -69,6 +75,11 @@ fun MainPage(mainViewModel: MainViewModel = viewModel()) {
     Timber.d("in MainScreen, uiState is: %s", uiState.toString())
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+
+    val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
+    val isDeviceInLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val hideManualInput = preferences.isTouchpadFullscreenInLandscape && isDeviceInLandscape
 
     val padding = PaddingNormal
     BasicPage(
@@ -89,8 +100,10 @@ fun MainPage(mainViewModel: MainViewModel = viewModel()) {
             CreateCharDevicesAlertDialog(showMissingCharDeviceOnStartupAlert)
         }
 
-        ManualInput()
-        Spacer(Modifier.height(PaddingNormal))
+        if (!hideManualInput) {
+            ManualInput()
+            Spacer(Modifier.height(PaddingNormal))
+        }
 
         // This has to be here, if I move it below Touchpad(), it never gets focused. I think it's because it ends up
         // out of the user's view, so Android just doesn't allow it to gain focus.

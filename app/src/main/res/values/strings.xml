@@ -31,6 +31,9 @@
     <string name="touchpad_loopback_mode_title">Loopback mode (Requires app restart after changing option)</string>
     <string name="touchpad_loopback_mode_summary">Touchpad will control a cursor on an external display connected to this device, rather than controlling a connected device</string>
 
+    <string name="touchpad_fullscreen_in_landscape_title">Fullscreen touchpad in landscape</string>
+    <string name="touchpad_fullscreen_in_landscape_summary">Hide everything except the touchpad when in landscape mode to make more space.</string>
+
     <!-- Info ("About") Screen -->
     <string name="info">About</string>
 

@@ -18,6 +18,7 @@ sealed class PreferenceKey(val key: String) {
     data object AppThemeKey : PreferenceKey("app_theme")
     data object DynamicColorKey : PreferenceKey("dynamic_color")
     data object LoopbackMode : PreferenceKey("loopback_mode")
+    data object TouchpadFullscreenInLandscape : PreferenceKey("touchpad_fullscreen_in_landscape")
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -44,6 +45,7 @@ data class UserPreferences(
     val appTheme: AppTheme,
     val isDynamicColorEnabled: Boolean,
     val isLoopbackModeEnabled: Boolean,
+    val isTouchpadFullscreenInLandscape: Boolean,
 )
 
 class UserPreferencesRepository private constructor(application: Application) {
@@ -61,6 +63,7 @@ class UserPreferencesRepository private constructor(application: Application) {
                 appTheme = getAppTheme(),
                 isDynamicColorEnabled = getBoolean(PreferenceKey.DynamicColorKey, false),
                 isLoopbackModeEnabled = getBoolean(PreferenceKey.LoopbackMode, false),
+                isTouchpadFullscreenInLandscape = getBoolean(PreferenceKey.TouchpadFullscreenInLandscape, false),
             )
         }
 
