@@ -33,6 +33,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 fun isDynamicColorAvailable(): Boolean {
+    // Dynamic color is available on Android 12+
     return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 }
 
@@ -52,7 +53,6 @@ fun USBHIDClientTheme(
     val dynamicColor = preferencesState.isDynamicColorEnabled
 
     val colorScheme = when {
-        // Dynamic color is available on Android 12+
         dynamicColor && isDynamicColorAvailable() -> {
             val context = LocalContext.current
             if (darkTheme) {
