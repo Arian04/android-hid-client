@@ -5,6 +5,7 @@ import android.util.TypedValue
 import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,7 +54,7 @@ fun HelpPage() {
 
     BasicPage(
         topBar = { HelpTopBar() },
-        paddingAll = PaddingNormal,
+        padding = PaddingValues(all = PaddingNormal),
         verticalArrangement = Arrangement.spacedBy(PaddingNone, Alignment.Top),
     ) {
         for (pair in questionAnswerPairs) {

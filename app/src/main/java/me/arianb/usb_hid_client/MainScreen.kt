@@ -1,5 +1,9 @@
 package me.arianb.usb_hid_client
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.AlertDialog
@@ -22,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -37,6 +42,7 @@ import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import me.arianb.usb_hid_client.troubleshooting.TroubleshootingScreen
 import me.arianb.usb_hid_client.ui.standalone_screens.HelpScreen
 import me.arianb.usb_hid_client.ui.standalone_screens.InfoScreen
+import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.BasicTopBar
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
@@ -63,10 +69,20 @@ fun MainPage(mainViewModel: MainViewModel = viewModel()) {
     Timber.d("in MainScreen, uiState is: %s", uiState.toString())
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val padding = PaddingNormal
     BasicPage(
         snackbarHostState = snackbarHostState,
         topBar = { MainTopBar() },
+
+        // The padding below the top app bar is pretty big, so omit top padding
+        padding = PaddingValues(start = padding, end = padding, bottom = padding),
+
         horizontalAlignment = Alignment.CenterHorizontally,
+
+        // I have to manually manage the spacing of elements here, because of the special case of having an invisible
+        // View (Direct Input). Otherwise, there's gonna be an awkward spacing created by the invisible View.
+        verticalArrangement = Arrangement.Top
     ) {
         if (showMissingCharDeviceOnStartupAlert.value) {
             Timber.d("MISSING CHAR DEV ON START")
@@ -74,7 +90,12 @@ fun MainPage(mainViewModel: MainViewModel = viewModel()) {
         }
 
         ManualInput()
+        Spacer(Modifier.height(PaddingNormal))
+
+        // This has to be here, if I move it below Touchpad(), it never gets focused. I think it's because it ends up
+        // out of the user's view, so Android just doesn't allow it to gain focus.
         DirectInput()
+
         Touchpad()
 
         LaunchedEffect(uiState) {

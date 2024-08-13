@@ -37,6 +37,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import me.arianb.usb_hid_client.settings.AppTheme
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingLarge
+import me.arianb.usb_hid_client.ui.theme.PaddingNone
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.USBHIDClientTheme
 
@@ -44,7 +45,7 @@ import me.arianb.usb_hid_client.ui.theme.USBHIDClientTheme
 fun BasicPage(
     topBar: @Composable () -> Unit,
     snackbarHostState: SnackbarHostState? = null,
-    paddingAll: Dp = PaddingLarge,
+    padding: PaddingValues = PaddingValues(all = PaddingLarge),
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(PaddingNormal, Alignment.Top),
     scrollable: Boolean = false,
@@ -73,7 +74,7 @@ fun BasicPage(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding)
-                            .padding(all = paddingAll)
+                            .padding(padding)
                             .then(scrollableModifier),
                         horizontalAlignment = horizontalAlignment,
                         verticalArrangement = verticalArrangement,
