@@ -199,8 +199,8 @@ private fun MainTopBar() {
 
                                 val thisScreen = item.first
 
-                                // Ensure that the Screen we're about to push isn't already in the navigation stack
-                                // iterates in reverse because it's more likely for the duplicate item to be at the end
+                                // Ensure that the Screen we're about to push isn't already in the navigation stack.
+                                // Iterates in reverse because it's more likely for the duplicate item to be at the end.
                                 for (screen in navigator.items.reversed()) {
                                     if (screen::class == thisScreen::class) {
                                         return@DropdownMenuItem
