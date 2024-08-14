@@ -56,10 +56,11 @@ class MyInstrumentedTest {
         rule.setContent { Entrypoint() }
         rule.waitForIdle()
 
-        // Trigger Magisk root permissions prompt
-        Shell.getShell().isRoot
-
         // TODO: automate accepting magisk root prompt. Right now I just click it manually.
+        // Trigger Magisk root permissions prompt, returning if we don't have root permissions
+        if (!Shell.getShell().isRoot) {
+            return
+        }
 
         // Continue past onboarding screen
         val continueButton = rule.onAllClickableNodes().filterToOne(hasText("Continue"))
