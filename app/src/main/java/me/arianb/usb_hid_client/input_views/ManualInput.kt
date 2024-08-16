@@ -8,6 +8,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,7 +20,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation
-import me.arianb.usb_hid_client.settings.PreferenceKey
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingLarge
 import timber.log.Timber
@@ -30,6 +30,8 @@ fun ManualInput(
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
     var manualInputString by remember { mutableStateOf("") }
+    val preferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
+    val shouldClearManualInputOnSend = preferencesState.clearManualInput
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -52,33 +54,35 @@ fun ManualInput(
                     return@onClick
                 }
 
+                // Save string
                 val stringToSend = manualInputString
                 Timber.d("manual input sending string: %s", stringToSend)
 
                 // Clear EditText if the user's preference is to clear it
-                val clearManualInput = settingsViewModel.getBoolean(PreferenceKey.ClearManualInputKey, false)
-                if (clearManualInput) {
+                if (shouldClearManualInputOnSend) {
                     manualInputString = ""
                 }
 
-                // Sends all keys
-                for (char in stringToSend) {
-                    // Converts (String) key to (byte) key scan code and (byte) modifier scan code and add to queue
-                    val tempScanCodes = KeyCodeTranslation.convertKeyToScanCodes(char)
-                    if (tempScanCodes == null) {
-                        val error = "key: '$char' is not supported."
-                        Timber.e(error)
-                        // FIXME: snackbar
-//                        Snackbar.make(parentLayout, error, Snackbar.LENGTH_SHORT).show()
-                        return@onClick
-                    }
-                    val modifierScanCode = tempScanCodes[0]
-                    val keyScanCode = tempScanCodes[1]
-                    mainViewModel.addStandardKey(modifierScanCode, keyScanCode)
-                }
+                sendInput(stringToSend, mainViewModel)
             }
         ) {
             Text(stringResource(R.string.send))
         }
+    }
+}
+
+fun sendInput(stringToSend: String, mainViewModel: MainViewModel) {
+    // Sends all keys
+    for (char in stringToSend) {
+        val scanCodes = KeyCodeTranslation.keyCharToScanCodes(char)
+        if (scanCodes == null) {
+            val error = "key: '$char' is not supported."
+            Timber.e(error)
+            // FIXME: snackbar
+            // Snackbar.make(parentLayout, error, Snackbar.LENGTH_SHORT).show()
+            return
+        }
+
+        mainViewModel.addStandardKey(scanCodes.first, scanCodes.second)
     }
 }

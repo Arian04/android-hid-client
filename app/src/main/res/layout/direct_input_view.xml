@@ -9,12 +9,11 @@
 
     <me.arianb.usb_hid_client.input_views.DirectInputKeyboardView
         android:id="@+id/etDirectInput"
+        android:text=""
+        android:hint=""
+        android:importantForAutofill="no"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text=""
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        android:hint=""
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="parent"
         tools:ignore="VisualLintBounds" />
