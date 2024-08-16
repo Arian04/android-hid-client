@@ -53,6 +53,7 @@
 
 
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 [<img src="images/app-screenshot1.png"
@@ -75,13 +76,20 @@ connected device is in its BIOS/UEFI. Even multimedia keys are supported, meanin
 keys to the connected computer to control media.
 
 **Disclaimers**:
-- This app requires your device to be rooted.
-- I strongly recommend using a keyboard such as [Unexpected Keyboard](https://github.com/Julow/Unexpected-Keyboard) to use special keys such as modifier and function keys, but most functionality will work with any standard Android keyboard.
 
-Bonus description for nerds: This app adds (and provides a simple UI for you to communicate with) two character devices (`/dev/hidg0` and `/dev/hidg1` respectively) by
-adding HID functions to the default Android USB gadget. If you wanted to, you could just use this app to create the character devices, then
-communicate solely through some C program, shell script, or whatever else you wanted as long as it had the right permissions to access the
-character devices and knew how to send proper reports to them. Beware of SELinux policies if you do that though. If anyone is actually doing that, let
+- This app requires your device to be rooted.
+- I strongly recommend using a keyboard such as [Unexpected Keyboard](https://github.com/Julow/Unexpected-Keyboard) to
+  use special keys such as modifier and function keys, but most functionality will work with any standard Android
+  keyboard.
+
+Bonus description for nerds: This app adds (and provides a simple UI for you to communicate with) two character
+devices (`/dev/hidg0` and `/dev/hidg1` respectively) by
+adding HID functions to the default Android USB gadget. If you wanted to, you could just use this app to create the
+character devices, then
+communicate solely through some C program, shell script, or whatever else you wanted as long as it had the right
+permissions to access the
+character devices and knew how to send proper reports to them. Beware of SELinux policies if you do that though. If
+anyone is actually doing that, let
 me know, I'd be glad to help if necessary.
 
 Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
@@ -97,30 +105,27 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
 ### Prerequisites
 
 * Rooted device running Android
-	- Only specific root methods are supported, because I need to patch SELinux policy at runtime and am using provided tools to do so.
-      if your root method isn't on this list and provides a method for live-patching SELinux policy, feel free to create an issue.
-      - Magisk: `magiskpolicy`
-      - KernelSU: `ksud sepolicy patch`
-	- Android version that I currently test with: 14
+    - Only specific root methods are supported, because I need to patch SELinux policy at runtime and am using provided
+      tools to do so.
+      if your root method isn't on this list and provides a method for live-patching SELinux policy, feel free to create
+      an issue.
+        - Magisk: `magiskpolicy`
+        - KernelSU: `ksud sepolicy patch`
+    - Android version that I currently test with: 14
 * Soft Keyboard
-	- I test the app with Gboard, Unexpected Keyboard, and used to test Hacker's keyboard, but Unexpected Keyboard is the one with better
-	  support, more keys,
-	  and [less issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A%22soft+keyboard+issue%22+is%3Aclosed)
-	  .
-	- Important Hacker's Keyboard settings to change:
-		- `Key behavior settings > Ctrl key code = None (Ignored when not modifying other keys)`
-		- `Key behavior settings > Alt key code = None (Ignored when not modifying other keys)`
-		- `Key behavior settings > Meta key code = None (Ignored when not modifying other keys)`
+    - I test the app with Gboard and Unexpected Keyboard, but Unexpected Keyboard is the one with slightly better
+      support, more keys,
+      and [fewer issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A%22soft+keyboard+issue%22+is%3Aclosed).
 
 ### Installation (Binary)<a name="installation-binary"> </a>
 
 The recommended way to install the app is through the [IzzyOnDroid repo][izzyondroid-url] via an app
-that's compatible with F-Droid style repositories, since that'll make updates much easier. However, you can also download
+that's compatible with F-Droid style repositories, since that'll make updates much easier. However, you can also
+download
 the APK file from the [Github releases page](https://github.com/Arian04/android-hid-client/releases), then install it
 on your Android device.
 
 ### Installation (Source)<a name="installation-source"></a>
-
 
 Clone the repository.
 
@@ -137,7 +142,8 @@ on your Android device.
 
 ## Usage
 
-To relay keys in real-time as soon as you press them, click on the keyboard icon in the menu bar. It should pull up your keyboard. Now you can just start typing!
+To relay keys in real-time as soon as you press them, click on the keyboard icon in the menu bar. It should pull up your
+keyboard. Now you can just start typing!
 
 Typing in the "Manual Input" text box will send all the characters that you've typed into the box to
 the connected device once you hit the "send" button.
@@ -169,11 +175,14 @@ See the [open issues][issues-url] for a full list of proposed features (and know
 
 
 <!-- CONTRIBUTING -->
+
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any
+contributions you make are **greatly appreciated**.
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also
+simply open an issue with the tag "enhancement".
 Don't forget to give the project a star! Thanks again!
 
 1. Fork the Project
@@ -187,6 +196,7 @@ Don't forget to give the project a star! Thanks again!
 
 
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
@@ -196,9 +206,11 @@ Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
 
 
 <!-- ACKNOWLEDGMENTS -->
+
 ## Acknowledgments
 
-* [IzzyOnDroid](https://floss.social/@IzzyOnDroid) for adding this app to [his F-Droid repository](https://android.izzysoft.de/repo)
+* [IzzyOnDroid](https://floss.social/@IzzyOnDroid) for adding this app
+  to [his F-Droid repository](https://android.izzysoft.de/repo)
 * [Best-README-Template](https://github.com/othneildrew/Best-README-Template)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -207,15 +219,27 @@ Distributed under the GNU GPLv3 License. See `LICENSE.txt` for more information.
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/Arian04/android-hid-client.svg?style=for-the-badge
+
 [contributors-url]: https://github.com/Arian04/android-hid-client/graphs/contributors
+
 [forks-shield]: https://img.shields.io/github/forks/Arian04/android-hid-client.svg?style=for-the-badge
+
 [forks-url]: https://github.com/Arian04/android-hid-client/network/members
+
 [stars-shield]: https://img.shields.io/github/stars/Arian04/android-hid-client.svg?style=for-the-badge
+
 [stars-url]: https://github.com/Arian04/android-hid-client/stargazers
+
 [issues-shield]: https://img.shields.io/github/issues/Arian04/android-hid-client.svg?style=for-the-badge
+
 [issues-url]: https://github.com/Arian04/android-hid-client/issues
+
 [license-shield]: https://img.shields.io/github/license/Arian04/android-hid-client.svg?style=for-the-badge
+
 [license-url]: https://github.com/Arian04/android-hid-client/blob/master/LICENSE.txt
+
 [izzyondroid-shield]: https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/me.arianb.usb_hid_client&style=for-the-badge
+
 [izzyondroid-url]: https://apt.izzysoft.de/packages/me.arianb.usb_hid_client
