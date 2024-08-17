@@ -5,6 +5,7 @@ import timber.log.Timber
 import java.util.BitSet
 
 // TODO:
+//  Preferably finish messing with report descriptors before v3.0.0 to minimize the number of breaking releases
 //  - remove report ID if it ends up not being necessary
 //  - overall cleanup unnecessary parts of the report descriptor
 open class TouchpadSender(
@@ -18,7 +19,6 @@ open class TouchpadSender(
         )
     }
 
-    // TODO: improve readability, maybe use a bitset for the entire thing?
     private fun getTouchpadReport(
         contactID: Byte,
         tipSwitch: Boolean,
