@@ -17,11 +17,11 @@ data class LogEntry(
     val priority: String,
     val tag: String,
     val message: String,
-    val t: Throwable? = null
+    val throwableString: String? = null,
 ) {
     override fun toString(): String {
-        return if (t != null) {
-            "${tag}\t\t${priority}\t\t${message}\t\t${t}"
+        return if (throwableString != null) {
+            "${tag}\t\t${priority}\t\t${message}\t\t${throwableString}"
         } else {
             "${tag}\t\t${priority}\t\t${message}"
         }
@@ -40,7 +40,7 @@ enum class Level(val priority: Int) {
 sealed class LogBuffer {
     companion object {
         // NOTE: adjust limit if this uses too much memory
-        private const val LIMIT = 1000
+        private const val LIMIT = 50000
         private val buffer = ArrayDeque<LogEntry>(LIMIT)
 
         fun log(priority: Int, tag: String?, message: String, t: Throwable? = null) {
@@ -48,7 +48,7 @@ sealed class LogBuffer {
                 priority = priorityToLevel(priority),
                 tag = tag ?: "unknown_tag",
                 message = message,
-                t = t
+                throwableString = t?.toString()
             )
 
             add(entry)
@@ -57,9 +57,9 @@ sealed class LogBuffer {
         private fun add(entry: LogEntry) {
             if (buffer.size >= LIMIT) {
                 buffer.removeFirst()
-            } else {
-                buffer.add(entry)
             }
+
+            buffer.add(entry)
         }
 
         private fun priorityToLevel(priority: Int): String {
