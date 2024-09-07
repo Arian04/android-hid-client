@@ -115,7 +115,7 @@ Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
 * Soft Keyboard
     - I test the app with Gboard and Unexpected Keyboard, but Unexpected Keyboard is the one with slightly better
       support, more keys,
-      and [fewer issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A%22soft+keyboard+issue%22+is%3Aclosed).
+      and [fewer issues](https://github.com/Arian04/android-hid-client/issues?q=label%3A"soft+keyboard+issue").
 
 ### Installation (Binary)<a name="installation-binary"> </a>
 
