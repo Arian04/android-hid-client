@@ -169,7 +169,7 @@ dependencies {
     implementation("androidx.compose.animation:animation-core:$composeUIVersion")
     implementation("androidx.compose.foundation:foundation-layout:$composeUIVersion")
     implementation("androidx.compose.foundation:foundation:$composeUIVersion")
-    implementation("androidx.compose.material:material-icons-core:$composeUIVersion")
+    implementation("androidx.compose.material:material-icons-extended:$composeUIVersion")
     implementation("androidx.compose.runtime:runtime:$composeUIVersion")
     implementation("androidx.compose.ui:ui-text:$composeUIVersion")
     implementation("androidx.compose.ui:ui-unit:$composeUIVersion")
