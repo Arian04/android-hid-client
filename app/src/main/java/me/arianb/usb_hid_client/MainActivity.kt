@@ -35,11 +35,6 @@ class MyApplication : Application() {
 
 
 // TODO: move all misc strings used in snackbars and alerts throughout the app into strings.xml for translation purposes.
-
-// Notes on terminology:
-// 		A key that has been pressed in conjunction with the shift key (ex: @ = 2 + shift, $ = 4 + shift, } = ] + shift)
-// 		will be referred to as a "shifted" key. In the previous example, 2, 4, and ] would be considered
-// 		the "un-shifted" keys.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
