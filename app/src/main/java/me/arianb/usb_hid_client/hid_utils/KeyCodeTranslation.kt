@@ -14,7 +14,9 @@ object KeyCodeTranslation {
     private val keyEventModifierKeys: MutableMap<Int, String> = mutableMapOf()
     private val hidModifierCodes: MutableMap<String, Byte> = mutableMapOf()
 
-    private val shiftChars: MutableMap<String, String> = mutableMapOf()
+    private val shiftChars: Map<String, String>
+
+    val problematicKeyEventKeys: Map<Int, Pair<Byte, Byte>>
 
     // Converts key to two scan codes
     // First element in pair is the scan code for the modifier
@@ -185,27 +187,48 @@ object KeyCodeTranslation {
         putModifierKey(META_META_RIGHT_ON, "right-meta", 0x80.toByte())
 
         // Keys that are represented by another key + shift
-        shiftChars["<"] = ","
-        shiftChars[">"] = "."
-        shiftChars["?"] = "/"
-        shiftChars[":"] = ";"
-        shiftChars["\""] = "'"
-        shiftChars["{"] = "["
-        shiftChars["}"] = "]"
-        shiftChars["|"] = "\\"
-        shiftChars["~"] = "`"
-        shiftChars["!"] = "1"
-        shiftChars["@"] = "2"
-        shiftChars["#"] = "3"
-        shiftChars["$"] = "4"
-        shiftChars["%"] = "5"
-        shiftChars["^"] = "6"
-        shiftChars["&"] = "7"
-        shiftChars["*"] = "8"
-        shiftChars["("] = "9"
-        shiftChars[")"] = "0"
-        shiftChars["_"] = "-"
-        shiftChars["+"] = "="
+        shiftChars = mapOf(
+            "<" to ",",
+            ">" to ".",
+            "?" to "/",
+            ":" to ";",
+            "\"" to "'",
+            "{" to "[",
+            "}" to "]",
+            "|" to "\\",
+            "~" to "`",
+            "!" to "1",
+            "@" to "2",
+            "#" to "3",
+            "$" to "4",
+            "%" to "5",
+            "^" to "6",
+            "&" to "7",
+            "*" to "8",
+            "(" to "9",
+            ")" to "0",
+            "_" to "-",
+            "+" to "=",
+        )
+
+        // Problematic keys that don't have a nice equivalent scancode to send, and needs to be converted into
+        // a key + a modifier or something similar. Reuse logic by just turning them into their character version
+        // and processing them that way.
+        problematicKeyEventKeys = buildMap {
+            fun MutableMap<Int, Pair<Byte, Byte>>.putProblematicKey(keyCode: Int, char: Char) {
+                val scanCodes = keyCharToScanCodes(char)
+                if (scanCodes == null) {
+                    // Eventually I should restructure this such that it's actually caught by the compiler somehow
+                    Timber.wtf("ERROR DURING PROBLEMATIC KEY CODE INITIALIZATION. THIS IS A BUG AND SHOULD NEVER HAPPEN.")
+                    return
+                }
+
+                put(keyCode, scanCodes)
+            }
+
+            putProblematicKey(KEYCODE_AT, '@')
+            putProblematicKey(KEYCODE_POUND, '#')
+        }
     }
 
     private fun putKey(keyCode: Int, key: String, scanCode: Byte) {

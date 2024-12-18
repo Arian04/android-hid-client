@@ -37,12 +37,17 @@ class MyInputConnection(
 
         Timber.d("keyCode constant: %s", KeyEvent.keyCodeToString(keyCode))
 
-        // FIXME: handle problematic keycodes like KEYCODE_POUND and KEYCODE_AT
+        // If this is one of the problematic keys, handle it early in a special way
+        val problematicKeyScanCodePair = KeyCodeTranslation.problematicKeyEventKeys[keyCode]
+        if (problematicKeyScanCodePair != null) {
+            keySender.addStandardKey(problematicKeyScanCodePair.first, problematicKeyScanCodePair.second)
+            return true
+        }
 
         // Handle the key itself
         val keyScanCode = KeyCodeTranslation.keyCodeToScanCode(keyCode)
         if (keyScanCode == null) {
-            Timber.w("Unsupported keycode '$keyCode'. This is probably a bug.")
+            Timber.w("Unsupported keycode '${KeyEvent.keyCodeToString(keyCode)}' ($keyCode). This is probably a bug.")
             return false
         }
 
