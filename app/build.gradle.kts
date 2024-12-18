@@ -1,5 +1,3 @@
-import java.util.Locale
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -106,7 +104,7 @@ android {
                 for (thisDevice in testDevices) {
                     for (thisApiLevel in minSDK..targetSDK) {
                         // lowercase and remove spaces
-                        val adjustedDeviceName = thisDevice.lowercase(Locale.US).replace(" ", "")
+                        val adjustedDeviceName = thisDevice.lowercase().replace(" ", "")
                         val name = "${adjustedDeviceName}_${thisApiLevel}"
                         create(name) {
                             device = thisDevice
