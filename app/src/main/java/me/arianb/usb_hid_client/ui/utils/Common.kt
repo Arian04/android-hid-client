@@ -175,7 +175,7 @@ fun getColorByTheme(settingsViewModel: SettingsViewModel = viewModel()): Int? {
     uiMode = Configuration.UI_MODE_NIGHT_YES
 )
 @Preview(
-    name = "Dark Mode",
+    name = "Light Mode",
     uiMode = Configuration.UI_MODE_NIGHT_NO
 )
 annotation class DarkLightModePreviews
