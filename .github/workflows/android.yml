@@ -70,6 +70,9 @@ jobs:
           distribution: "temurin"
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          # Only write to the cache for builds on the 'main' and 'develop' branches. (Default is 'main' only.)
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop' }}
 
       - name: Enable KVM group perms
         run: |
