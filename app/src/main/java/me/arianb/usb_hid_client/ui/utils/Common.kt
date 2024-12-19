@@ -30,14 +30,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.arianb.usb_hid_client.settings.AppTheme
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingLarge
-import me.arianb.usb_hid_client.ui.theme.PaddingNone
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.USBHIDClientTheme
 
