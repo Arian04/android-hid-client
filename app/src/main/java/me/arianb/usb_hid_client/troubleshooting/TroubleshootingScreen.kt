@@ -44,6 +44,7 @@ import me.arianb.usb_hid_client.ui.theme.codeLineHeightScaleFactor
 import me.arianb.usb_hid_client.ui.theme.codeStyle
 import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.utils.Experimental
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 import me.arianb.usb_hid_client.ui.utils.SimpleNavTopBar
 import timber.log.Timber
@@ -66,11 +67,12 @@ fun TroubleshootingPage() {
         //  - [x] create gadget
         //  - [x] remove gadget
         //  - [ ] re-create gadget
-        //
-        // TODO: re-enable once this is ready for production
-//        LabeledCategory("Gadget Actions") {
-//            GadgetActionButtons()
-//        }
+        // TODO: remove Experimental{} once this is ready for production
+        Experimental {
+            LabeledCategory("Gadget Actions") {
+                GadgetActionButtons()
+            }
+        }
 
         LabeledCategory("Debugging Information") {
             DebuggingInfoList()
