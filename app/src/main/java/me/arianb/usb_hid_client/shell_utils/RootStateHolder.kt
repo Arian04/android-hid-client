@@ -48,7 +48,7 @@ class RootStateHolder private constructor() {
     fun hasRootPermissions(): Boolean {
         val hasRootPermissions = Shell.getShell().isRoot
 
-        _uiState.update { uiState.value.copy(missingRootPrivileges = !hasRootPermissions) }
+        _uiState.update { it.copy(missingRootPrivileges = !hasRootPermissions) }
 
         return hasRootPermissions
     }

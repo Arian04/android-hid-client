@@ -82,10 +82,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         if (lowercaseExceptionString.contains("errno 108")) {
             Timber.i("device might be unplugged")
-            _uiState.update { uiState.value.copy(isDeviceUnplugged = true) }
+            _uiState.update { it.copy(isDeviceUnplugged = true) }
         } else if (lowercaseExceptionString.contains("permission denied")) {
             Timber.i("char dev perms are wrong")
-            _uiState.update { uiState.value.copy(isCharacterDevicePermissionsBroken = devicePath) }
+            _uiState.update { it.copy(isCharacterDevicePermissionsBroken = devicePath) }
         } else if (lowercaseExceptionString.contains("enxio")) {
             Timber.i("somehow the HID gadget is disabled but the character devices are still present")
         } else {
@@ -137,7 +137,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun characterDeviceMissing(charDevicePath: String): Boolean {
         val result = characterDeviceManager.characterDeviceMissing(charDevicePath)
 
-        _uiState.update { uiState.value.copy(missingCharacterDevice = result) }
+        _uiState.update { it.copy(missingCharacterDevice = result) }
 
         return result
     }
@@ -146,7 +146,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun anyCharacterDeviceMissing(): Boolean {
         val result = characterDeviceManager.anyCharacterDeviceMissing()
 
-        _uiState.update { uiState.value.copy(missingCharacterDevice = result) }
+        _uiState.update { it.copy(missingCharacterDevice = result) }
 
         return result
     }
