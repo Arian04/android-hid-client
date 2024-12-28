@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
-import java.util.EnumMap
 
 enum class RootMethod {
     UNKNOWN,
@@ -22,19 +21,16 @@ class RootStateHolder private constructor() {
     private val _uiState = MutableStateFlow(RootState())
     val uiState = _uiState.asStateFlow()
 
-    private val sepolicyMap: MutableMap<RootMethod, String?> = EnumMap(RootMethod::class.java)
-    private val rootBinaryMap: MutableMap<String, RootMethod>
-
-    init {
-        sepolicyMap[RootMethod.UNKNOWN] = null
-        sepolicyMap[RootMethod.UNROOTED] = null
-        sepolicyMap[RootMethod.MAGISK] = "magiskpolicy --live"
-        sepolicyMap[RootMethod.KERNELSU] = "ksud sepolicy patch"
-
-        rootBinaryMap = HashMap()
-        rootBinaryMap["magisk"] = RootMethod.MAGISK
-        rootBinaryMap["magiskpolicy"] = RootMethod.MAGISK
-        rootBinaryMap["ksud"] = RootMethod.KERNELSU
+    private val sepolicyMap: Map<RootMethod, String?> = buildMap {
+        put(RootMethod.UNKNOWN, null)
+        put(RootMethod.UNROOTED, null)
+        put(RootMethod.MAGISK, "magiskpolicy --live")
+        put(RootMethod.KERNELSU, "ksud sepolicy patch")
+    }
+    private val rootBinaryMap: Map<String, RootMethod> = buildMap {
+        put("magisk", RootMethod.MAGISK)
+        put("magiskpolicy", RootMethod.MAGISK)
+        put("ksud", RootMethod.KERNELSU)
     }
 
     // TODO: should this be part of RootState?
