@@ -40,7 +40,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
                         }
                         fixCharacterDevicePermissions(devicePath)
                     } catch (e: TimeoutCancellationException) {
-                        Timber.e("Shell script ran, but we timed out while waiting for character devices to be created.")
+                        Timber.e("Shell script ran, but we timed out while waiting for character device '$devicePath' to be created.")
                         // FIXME: show this error to the user
                     }
                 }
