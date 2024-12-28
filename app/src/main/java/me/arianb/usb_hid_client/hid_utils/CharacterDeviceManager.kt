@@ -1,15 +1,15 @@
 package me.arianb.usb_hid_client.hid_utils
 
 import android.app.Application
-import android.content.res.Resources
+import android.content.Intent
 import com.topjohnwu.superuser.Shell
+import com.topjohnwu.superuser.ipc.RootService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.File
@@ -18,13 +18,28 @@ class CharacterDeviceManager private constructor(private val application: Applic
     private val dispatcher = Dispatchers.IO
     private val rootStateHolder = RootStateHolder.getInstance()
 
+    private val mConnection = UsbGadgetServiceConnection()
+
     suspend fun createCharacterDevices() {
-        val appResources: Resources = application.resources
+        if (!mConnection.isBound) {
+            Intent(application, UsbGadgetService::class.java).also { intent ->
+                RootService.bind(intent, mConnection)
+            }
+        }
+
+        // FIXME: un-hardcode this
+        withTimeout(5000) {
+            // wait until the device file exists before trying to fix its permissions
+            while (!mConnection.isBound) {
+                Timber.d("not bound yet, sleeping for a bit before trying again...")
+                delay(500)
+            }
+            Timber.d("service is bound now!!!")
+        }
+
+        mConnection.create()
 
         withContext(dispatcher) {
-            val commandResult = Shell.cmd(appResources.openRawResource(R.raw.create_char_devices)).exec()
-            logShellCommandResult("create devices script", commandResult)
-
             fixSelinuxPermissions()
 
             launch {
@@ -40,11 +55,15 @@ class CharacterDeviceManager private constructor(private val application: Applic
                         }
                         fixCharacterDevicePermissions(devicePath)
                     } catch (e: TimeoutCancellationException) {
-                        Timber.e("Shell script ran, but we timed out while waiting for character device '$devicePath' to be created.")
                         // FIXME: show this error to the user
+                        Timber.e("Timed out while waiting for character device '$devicePath' to be created.")
                     }
                 }
             }
+        }
+
+        if (mConnection.isBound) {
+            RootService.unbind(mConnection)
         }
     }
 
@@ -90,11 +109,28 @@ class CharacterDeviceManager private constructor(private val application: Applic
         return categories
     }
 
-    fun deleteCharacterDevices() {
-        val appResources: Resources = application.resources
+    suspend fun deleteCharacterDevices() {
+        if (!mConnection.isBound) {
+            Intent(application, UsbGadgetService::class.java).also { intent ->
+                RootService.bind(intent, mConnection)
+            }
+        }
 
-        val commandResult = Shell.cmd(appResources.openRawResource(R.raw.delete_char_devices)).exec()
-        logShellCommandResult("delete gadget script", commandResult)
+        // FIXME: un-hardcode this
+        withTimeout(5000) {
+            // wait until the device file exists before trying to fix its permissions
+            while (!mConnection.isBound) {
+                Timber.d("not bound yet, sleeping for a bit before trying again...")
+                delay(500)
+            }
+            Timber.d("service is bound now!!!")
+        }
+
+        mConnection.delete()
+
+        if (mConnection.isBound) {
+            RootService.unbind(mConnection)
+        }
 
         return
     }

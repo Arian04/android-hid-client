@@ -169,6 +169,7 @@ dependencies {
     // Misc 3rd party
     implementation("com.jakewharton.timber:timber:$timberVersion")
     implementation("com.github.topjohnwu.libsu:core:$libsuVersion")
+    implementation("com.github.topjohnwu.libsu:service:$libsuVersion")
 
     // Compose
     implementation("androidx.activity:activity-compose:$composeActivityVersion")

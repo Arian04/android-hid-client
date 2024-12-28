@@ -118,10 +118,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        characterDeviceManager.deleteCharacterDevices()
+        viewModelScope.launch {
+            characterDeviceManager.deleteCharacterDevices()
 
-        // Re-evaluate state
-        anyCharacterDeviceMissing()
+            // Re-evaluate state
+            anyCharacterDeviceMissing()
+        }
     }
 
     fun fixCharacterDevicePermissions(device: String) {

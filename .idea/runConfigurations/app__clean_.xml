@@ -7,11 +7,13 @@
     <option name="ARTIFACT_NAME" value="" />
     <option name="PM_INSTALL_OPTIONS" value="" />
     <option name="ALL_USERS" value="false" />
-    <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+    <option name="ALWAYS_INSTALL_WITH_PM" value="true" />
     <option name="CLEAR_APP_STORAGE" value="true" />
     <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
     <option name="ACTIVITY_EXTRA_FLAGS" value="" />
     <option name="MODE" value="default_activity" />
+    <option name="RESTORE_ENABLED" value="false" />
+    <option name="RESTORE_FILE" value="" />
     <option name="CLEAR_LOGCAT" value="true" />
     <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
     <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
