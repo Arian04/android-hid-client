@@ -37,45 +37,43 @@ enum class Level(val priority: Int) {
     ASSERT(7)
 }
 
-sealed class LogBuffer {
-    companion object {
-        // NOTE: adjust limit if this uses too much memory
-        private const val LIMIT = 50000
-        private val buffer = ArrayDeque<LogEntry>(LIMIT)
+object LogBuffer {
+    // NOTE: adjust limit if this uses too much memory
+    private const val LIMIT = 50000
+    private val buffer = ArrayDeque<LogEntry>(LIMIT)
 
-        fun log(priority: Int, tag: String?, message: String, t: Throwable? = null) {
-            val entry = LogEntry(
-                priority = priorityToLevel(priority),
-                tag = tag ?: "unknown_tag",
-                message = message,
-                throwableString = t?.toString()
-            )
+    fun log(priority: Int, tag: String?, message: String, t: Throwable? = null) {
+        val entry = LogEntry(
+            priority = priorityToLevel(priority),
+            tag = tag ?: "unknown_tag",
+            message = message,
+            throwableString = t?.toString()
+        )
 
-            add(entry)
+        add(entry)
+    }
+
+    private fun add(entry: LogEntry) {
+        if (buffer.size >= LIMIT) {
+            buffer.removeFirst()
         }
 
-        private fun add(entry: LogEntry) {
-            if (buffer.size >= LIMIT) {
-                buffer.removeFirst()
-            }
+        buffer.add(entry)
+    }
 
-            buffer.add(entry)
+    private fun priorityToLevel(priority: Int): String {
+        return when (priority) {
+            Level.VERBOSE.priority -> Level.VERBOSE.name
+            Level.DEBUG.priority -> Level.DEBUG.name
+            Level.INFO.priority -> Level.INFO.name
+            Level.WARN.priority -> Level.WARN.name
+            Level.ERROR.priority -> Level.ERROR.name
+            Level.ASSERT.priority -> Level.ASSERT.name
+            else -> "UNKNOWN_(${priority})"
         }
+    }
 
-        private fun priorityToLevel(priority: Int): String {
-            return when (priority) {
-                Level.VERBOSE.priority -> Level.VERBOSE.name
-                Level.DEBUG.priority -> Level.DEBUG.name
-                Level.INFO.priority -> Level.INFO.name
-                Level.WARN.priority -> Level.WARN.name
-                Level.ERROR.priority -> Level.ERROR.name
-                Level.ASSERT.priority -> Level.ASSERT.name
-                else -> "UNKNOWN_(${priority})"
-            }
-        }
-
-        fun getLogList(): List<LogEntry> {
-            return buffer.toList()
-        }
+    fun getLogList(): List<LogEntry> {
+        return buffer.toList()
     }
 }
