@@ -118,11 +118,11 @@ class UsbGadgetServiceConnection : ServiceConnection {
         }
     }
 
-    fun create() {
+    fun createGadget() {
         send(UsbGadgetService.MSG_CREATE)
     }
 
-    fun delete() {
+    fun deleteGadget() {
         send(UsbGadgetService.MSG_DELETE)
     }
 }

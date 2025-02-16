@@ -29,7 +29,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         // FIXME: un-hardcode this
         withTimeout(5000) {
-            // wait until the device file exists before trying to fix its permissions
+            // wait until the service is bound before trying to use it
             while (!mConnection.isBound) {
                 Timber.d("not bound yet, sleeping for a bit before trying again...")
                 delay(500)
@@ -37,7 +37,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
             Timber.d("service is bound now!!!")
         }
 
-        mConnection.create()
+        mConnection.createGadget()
 
         withContext(dispatcher) {
             fixSelinuxPermissions()
@@ -126,7 +126,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
             Timber.d("service is bound now!!!")
         }
 
-        mConnection.delete()
+        mConnection.deleteGadget()
 
         if (mConnection.isBound) {
             RootService.unbind(mConnection)
@@ -161,7 +161,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
         const val TOUCHPAD_DEVICE_PATH = "/dev/hidg1"
         val ALL_CHARACTER_DEVICE_PATHS = listOf(KEYBOARD_DEVICE_PATH, TOUCHPAD_DEVICE_PATH)
 
-        // SeLinux stuff
+        // SELinux stuff
         private const val SELINUX_DOMAIN = "appdomain"
         private const val SELINUX_POLICY = "allow $SELINUX_DOMAIN device chr_file { getattr open read write }"
 
