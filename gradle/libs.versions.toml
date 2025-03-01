@@ -1,16 +1,19 @@
 [versions]
+kotlin = "2.0.0"
+androidGradlePlugin = "8.7.3"
+
 # AndroidX
 androidxAppCompat = "1.7.0"
-androidxConstraintLayout = "2.1.4"
-androidxCore = "1.13.1"
-androidxLifecycle = "2.8.4"
+androidxConstraintLayout = "2.2.1"
+androidxCore = "1.15.0"
+androidxLifecycle = "2.8.7"
 androidxPreference = "1.2.1"
 androidxTestJunit = "1.2.1"
 androidxTracing = "1.2.0"
 
 # Compose
-androidxComposeBom = "2024.06.00"
-androidxComposeActivity = "1.9.1"
+androidxComposeBom = "2025.02.00"
+androidxComposeActivity = "1.10.1"
 
 # Other libraries
 androidMaterial = "1.12.0"
@@ -67,3 +70,9 @@ androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestJunit" }
 androidx-tracing-ktx = { group = "androidx.tracing", name = "tracing-ktx", version.ref = "androidxTracing" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
+android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

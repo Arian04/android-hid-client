@@ -1,10 +1,7 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Top-level build file where you can add configuration options common to all subprojects/modules.
 plugins {
-    val androidVersion = "8.3.1"
-    val kotlinVersion = "2.0.0"
-
-    id("com.android.application") version androidVersion apply false
-    id("com.android.library") version androidVersion apply false
-    id("org.jetbrains.kotlin.android") version kotlinVersion apply false
-    id("org.jetbrains.kotlin.plugin.compose") version kotlinVersion
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.compose.compiler) apply false
 }

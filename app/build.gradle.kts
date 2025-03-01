@@ -1,7 +1,7 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.compose")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -15,7 +15,7 @@ android {
         // SDK support
         minSdk = 26
         targetSdk = 33
-        compileSdk = 34
+        compileSdk = 35
 
         // App Versioning
         versionCode = 230
