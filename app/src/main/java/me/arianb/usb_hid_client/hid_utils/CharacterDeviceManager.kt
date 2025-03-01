@@ -13,6 +13,8 @@ import kotlinx.coroutines.withTimeout
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.File
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
 class CharacterDeviceManager private constructor(private val application: Application) {
     private val dispatcher = Dispatchers.IO
@@ -20,22 +22,28 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
     private val mConnection = UsbGadgetServiceConnection()
 
-    suspend fun createCharacterDevices() {
+    private suspend fun ensureServiceIsBound(
+        timeout: Duration = 5000.milliseconds,
+        pollInterval: Duration = 500.milliseconds
+    ) {
         if (!mConnection.isBound) {
             Intent(application, UsbGadgetService::class.java).also { intent ->
                 RootService.bind(intent, mConnection)
             }
         }
 
-        // FIXME: un-hardcode this
-        withTimeout(5000) {
+        withTimeout(timeout) {
             // wait until the service is bound before trying to use it
             while (!mConnection.isBound) {
                 Timber.d("not bound yet, sleeping for a bit before trying again...")
-                delay(500)
+                delay(pollInterval)
             }
             Timber.d("service is bound now!!!")
         }
+    }
+
+    suspend fun createCharacterDevices() {
+        ensureServiceIsBound()
 
         mConnection.createGadget()
 
@@ -110,21 +118,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     suspend fun deleteCharacterDevices() {
-        if (!mConnection.isBound) {
-            Intent(application, UsbGadgetService::class.java).also { intent ->
-                RootService.bind(intent, mConnection)
-            }
-        }
-
-        // FIXME: un-hardcode this
-        withTimeout(5000) {
-            // wait until the device file exists before trying to fix its permissions
-            while (!mConnection.isBound) {
-                Timber.d("not bound yet, sleeping for a bit before trying again...")
-                delay(500)
-            }
-            Timber.d("service is bound now!!!")
-        }
+        ensureServiceIsBound()
 
         mConnection.deleteGadget()
 
