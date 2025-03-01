@@ -136,72 +136,55 @@ android {
 }
 
 dependencies {
-    // AndroidX
-    val androidXAppCompatVersion = "1.7.0"
-    val androidXConstraintLayoutVersion = "2.1.4"
-    val androidXCoreVersion = "1.13.1"
-    val androidXLifecycleVersion = "2.8.4"
-    val androidXPreferenceVersion = "1.2.1"
-    val androidXTestJunitVersion = "1.2.1"
-    val androidXTracingVersion = "1.2.0"
+    val composeBom = platform(libs.androidx.compose.bom)
+
+    implementation(libs.android.material)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.preference.ktx)
 
     // Compose
-    val composeActivityVersion = "1.9.1"
-    val composeMaterial3Version = "1.2.1"
-    val composeUIVersion = "1.6.8"
-    val composeBomVersion = "2024.06.00"
+    implementation(composeBom)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.viewbinding)
+    implementation(libs.androidx.compose.animation.core)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.ui.text)
+    implementation(libs.androidx.compose.ui.unit)
 
-    // Other libraries
-    val androidMaterialVersion = "1.12.0"
-    val junitVersion = "4.13.2"
-    val libsuVersion = "5.3.0"
-    val timberVersion = "5.0.1"
-    val voyagerVersion = "1.1.0-beta02"
+    // Logging
+    implementation(libs.timber)
 
-    implementation("com.google.android.material:material:$androidMaterialVersion")
-    implementation("androidx.appcompat:appcompat:$androidXAppCompatVersion")
-    implementation("androidx.constraintlayout:constraintlayout:$androidXConstraintLayoutVersion")
-    implementation("androidx.core:core-ktx:$androidXCoreVersion")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$androidXLifecycleVersion")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$androidXLifecycleVersion")
-    implementation("androidx.preference:preference-ktx:$androidXPreferenceVersion")
-
-    // Misc 3rd party
-    implementation("com.jakewharton.timber:timber:$timberVersion")
-    implementation("com.github.topjohnwu.libsu:core:$libsuVersion")
-    implementation("com.github.topjohnwu.libsu:service:$libsuVersion")
-
-    // Compose
-    implementation("androidx.activity:activity-compose:$composeActivityVersion")
-    implementation("androidx.compose.material3:material3:$composeMaterial3Version")
-    implementation("androidx.compose.ui:ui:$composeUIVersion")
-    implementation("androidx.compose.ui:ui-graphics:$composeUIVersion")
-    implementation("androidx.compose.ui:ui-viewbinding:$composeUIVersion")
-    implementation("androidx.compose.animation:animation-core:$composeUIVersion")
-    implementation("androidx.compose.foundation:foundation-layout:$composeUIVersion")
-    implementation("androidx.compose.foundation:foundation:$composeUIVersion")
-    implementation("androidx.compose.material:material-icons-core:$composeUIVersion")
-    implementation("androidx.compose.runtime:runtime:$composeUIVersion")
-    implementation("androidx.compose.ui:ui-text:$composeUIVersion")
-    implementation("androidx.compose.ui:ui-unit:$composeUIVersion")
+    // Root helper library
+    implementation(libs.libsu.core)
+    implementation(libs.libsu.service)
 
     // Navigation
-    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
-    implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
-    implementation("cafe.adriel.voyager:voyager-core:$voyagerVersion")
+    implementation(libs.voyager.navigator)
+    implementation(libs.voyager.transitions)
+    implementation(libs.voyager.core)
 
     // Android Studio Preview support
-    implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Unit Testing
-    testImplementation("junit:junit:$junitVersion")
+    testImplementation(libs.junit)
 
     // Instrumented Testing
-    androidTestImplementation("junit:junit:$junitVersion")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeUIVersion")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeUIVersion")
-    androidTestImplementation("androidx.test.ext:junit:$androidXTestJunitVersion")
-    androidTestImplementation("androidx.tracing:tracing-ktx:$androidXTracingVersion")
+    androidTestImplementation(composeBom)
+    androidTestImplementation(libs.junit)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.tracing.ktx)
 }
