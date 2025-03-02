@@ -1,6 +1,6 @@
 package me.arianb.usb_hid_client.report_senders
 
-import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
+import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import timber.log.Timber
 import java.util.BitSet
 
@@ -9,9 +9,9 @@ import java.util.BitSet
 //  - remove report ID if it ends up not being necessary
 //  - overall cleanup unnecessary parts of the report descriptor
 open class TouchpadSender(
-    characterDevicePath: String = CharacterDeviceManager.TOUCHPAD_DEVICE_PATH
+    touchpadDevicePath: TouchpadDevicePath
 ) : ReportSender(
-    characterDevicePath = characterDevicePath
+    touchpadDevicePath
 ) {
     fun send(contactID: Byte, tipSwitch: Boolean, x: Short, y: Short, scanTime: UShort, contactCount: Byte) {
         super.addReportToChannel(
@@ -27,7 +27,7 @@ open class TouchpadSender(
         scanTime: UShort,
         contactCount: Byte
     ): ByteArray {
-        // Only send send non-zero contact count in the report of contact ID 0 as per the spec
+        // Only send non-zero contact count in the report of contact ID 0 as per the spec
         val realContactCount: Byte = if (contactID.toInt() == 0) {
             contactCount
         } else {

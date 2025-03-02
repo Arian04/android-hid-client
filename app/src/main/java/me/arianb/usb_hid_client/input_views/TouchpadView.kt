@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -189,7 +191,7 @@ fun TouchpadSender.send(
 @Composable
 fun Touchpad(mainViewModel: MainViewModel = viewModel()) {
     val touchpadText = stringResource(R.string.touchpad_label)
-    val touchpadSender = mainViewModel.touchpadSender
+    val touchpadSender by mainViewModel.touchpadSender.collectAsState()
 
     val textColor = getColorByTheme()
 

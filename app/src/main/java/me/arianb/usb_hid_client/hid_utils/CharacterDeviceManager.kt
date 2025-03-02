@@ -7,6 +7,8 @@ import com.topjohnwu.superuser.ipc.RootService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -150,10 +152,25 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     companion object {
-        // character device paths
-        const val KEYBOARD_DEVICE_PATH = "/dev/hidg0"
-        const val TOUCHPAD_DEVICE_PATH = "/dev/hidg1"
-        val ALL_CHARACTER_DEVICE_PATHS = listOf(KEYBOARD_DEVICE_PATH, TOUCHPAD_DEVICE_PATH)
+        object DevicePaths {
+            val DEFAULT_KEYBOARD_DEVICE_PATH = KeyboardDevicePath("/dev/hidg0")
+            val DEFAULT_TOUCHPAD_DEVICE_PATH = TouchpadDevicePath("/dev/hidg1")
+
+            private val _keyboard = MutableStateFlow(DEFAULT_KEYBOARD_DEVICE_PATH)
+            private val _touchpad = MutableStateFlow(DEFAULT_TOUCHPAD_DEVICE_PATH)
+
+            val keyboard: StateFlow<KeyboardDevicePath> = _keyboard
+            val touchpad: StateFlow<TouchpadDevicePath> = _touchpad
+
+            val all: List<DevicePath>
+                get() = listOf(keyboard.value, touchpad.value)
+
+            val allUnsafe: List<String>
+                get() = this.all.map { it.path }
+        }
+
+        @Deprecated("Use type-safe version utilizing value classes")
+        val ALL_CHARACTER_DEVICE_PATHS = DevicePaths.allUnsafe
 
         // SELinux stuff
         private const val SELINUX_DOMAIN = "appdomain"
@@ -190,3 +207,13 @@ private fun logShellCommandResult(label: String, commandResult: Shell.Result) {
     message = "Ensure to update state when calling this method. You will usually want to be calling the ViewModel wrappers instead"
 )
 annotation class ModifiesStateDirectly
+
+interface DevicePath {
+    val path: String
+}
+
+@JvmInline
+value class KeyboardDevicePath(override val path: String) : DevicePath
+
+@JvmInline
+value class TouchpadDevicePath(override val path: String) : DevicePath

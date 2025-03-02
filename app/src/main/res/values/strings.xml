@@ -26,43 +26,68 @@
     <string name="clear_manual_input_title">Clear manual input text box on send</string>
 
     <string name="volume_button_passthrough_title">Volume button passthrough</string>
-    <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed (Only applies while Direct Input is focused)</string>
+    <string name="volume_button_passthrough_summary">Change volume of connected device when volume buttons are pressed
+        (Only applies while Direct Input is focused)
+    </string>
 
-    <string name="touchpad_loopback_mode_title">Loopback mode (Requires app restart after changing option)</string>
-    <string name="touchpad_loopback_mode_summary">Touchpad will control a cursor on an external display connected to this device, rather than controlling a connected device</string>
+    <string name="touchpad_loopback_mode_title">Loopback mode</string>
+    <string name="touchpad_loopback_mode_summary">Touchpad will control a cursor on an external display connected to
+        this device, rather than controlling a connected device
+    </string>
 
     <string name="touchpad_fullscreen_in_landscape_title">Fullscreen touchpad in landscape</string>
-    <string name="touchpad_fullscreen_in_landscape_summary">Hide everything except the touchpad when in landscape mode to make more space.</string>
+    <string name="touchpad_fullscreen_in_landscape_summary">Hide everything except the touchpad when in landscape mode
+        to make more space.
+    </string>
 
     <!-- Info ("About") Screen -->
     <string name="info">About</string>
 
     <string name="info_icon_description">App icon (Keyboard)</string>
-    <string name="info_description">This app allows you to use your phone to act as a USB keyboard and mouse without requiring any software on the connected device, allowing it to even work in the BIOS/UEFI of the connected device!</string>
+    <string name="info_description">This app allows you to use your phone to act as a USB keyboard and mouse without
+        requiring any software on the connected device, allowing it to even work in the BIOS/UEFI of the connected
+        device!
+    </string>
     <string name="info_source_code_url" translatable="false">https://github.com/Arian04/android-hid-client</string>
 
     <!-- Help Screen -->
     <string name="help">Help</string>
 
     <string name="help_faq_q1">How do I report bugs or submit feature requests?</string>
-    <string name="help_faq_a1">You can create an issue <a href="https://github.com/Arian04/android-hid-client/issues">here</a>. Just make sure it hasn\'t already been reported.</string>
+    <string name="help_faq_a1">You can create an issue <a href="https://github.com/Arian04/android-hid-client/issues">
+        here</a>. Just make sure it hasn\'t already been reported.
+    </string>
 
     <string name="help_faq_q2">How do I use the app?</string>
-    <string name="help_faq_a2">Manual Input: Type into the textbox and click the \"send\" button when you\'re done, at which point the text will be typed into the connected device all at once.\n\nDirect Input: Click on the keyboard icon in the top menu bar. Your keyboard should be pulled up. Now just start typing and the keys will be relayed to the connected device in real-time.</string>
+    <string name="help_faq_a2">Manual Input: Type into the textbox and click the \"send\" button when you\'re done, at
+        which point the text will be typed into the connected device all at once.\n\nDirect Input: Click on the keyboard
+        icon in the top menu bar. Your keyboard should be pulled up. Now just start typing and the keys will be relayed
+        to the connected device in real-time.
+    </string>
 
     <string name="help_faq_q3">The app isn\'t working properly, how do I fix it?</string>
-    <string name="help_faq_a3">First, make sure your device satisfies all prerequisites listed <a href="https://github.com/Arian04/android-hid-client#prerequisites">here</a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report as explained above.</string>
+    <string name="help_faq_a3">First, make sure your device satisfies all prerequisites listed <a
+        href="https://github.com/Arian04/android-hid-client#prerequisites">here
+    </a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report
+        as explained above.
+    </string>
 
     <!-- Onboarding Screen -->
     <string name="onboarding_title">Initial Setup</string>
 
     <string name="onboarding_header">Before you start using the app…</string>
-    <string name="onboarding_notice">Any mention of \"Direct Input\" refers to the keyboard icon in the menu bar that can be selected to pull up your keyboard and relay your keystrokes in real-time.\n\nAny mention \"Manual Input\" refers to the textbox that you can put text into and have it send all at once when you click the button beside it.</string>
+    <string name="onboarding_notice">Any mention of \"Direct Input\" refers to the keyboard icon in the menu bar that
+        can be selected to pull up your keyboard and relay your keystrokes in real-time.\n\nAny mention \"Manual Input\"
+        refers to the textbox that you can put text into and have it send all at once when you click the button beside
+        it.
+    </string>
     <string name="onboarding_continue_btn">Continue</string>
 
     <!-- Troubleshooting Screen -->
     <string name="troubleshooting_title">Troubleshooting</string>
     <string name="export_debug_logs_btn_title">Export debug logs</string>
-    <string name="export_debug_logs_btn_summary">This should only be needed if a developer requests for you to provide logs.</string>
+    <string name="export_debug_logs_btn_summary">This should only be needed if a developer requests for you to provide
+        logs.
+    </string>
 
 </resources>

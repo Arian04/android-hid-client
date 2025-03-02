@@ -58,7 +58,7 @@ fun DirectInput(
     mainViewModel: MainViewModel = viewModel(),
     settingsViewModel: SettingsViewModel = viewModel(),
 ) {
-    val keySender = mainViewModel.keySender
+    val keySender by mainViewModel.keySender.collectAsState()
     val userPreferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
 
     AndroidViewBinding(

@@ -6,16 +6,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
+import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.hid_utils.ModifiesStateDirectly
+import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.KeySender
 import me.arianb.usb_hid_client.report_senders.LoopbackTouchpadSender
-import me.arianb.usb_hid_client.report_senders.ReportSender
 import me.arianb.usb_hid_client.report_senders.TouchpadSender
-import me.arianb.usb_hid_client.settings.UserPreferences
 import me.arianb.usb_hid_client.settings.UserPreferencesRepository
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
@@ -40,38 +41,51 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
     private val rootStateHolder = RootStateHolder.getInstance()
-    private val userPreferencesState: StateFlow<UserPreferences> =
-        UserPreferencesRepository.getInstance(application).userPreferencesFlow
-    val keySender = KeySender()
+    private val userPreferencesStateFlow = UserPreferencesRepository.getInstance(application).userPreferencesFlow
 
-    // TODO: write this code properly so the app doesn't need to be restarted for this to work, then remove that note
-    //       from the touchpad loopback preference title
-    val touchpadSender = if (userPreferencesState.value.isLoopbackModeEnabled) {
-        fixCharacterDevicePermissions(UHID.PATH)
-        LoopbackTouchpadSender()
-    } else {
-        TouchpadSender()
-    }
-    private val senderList = listOf(keySender, touchpadSender)
+    val keySender: StateFlow<KeySender> = userPreferencesStateFlow
+        .mapState {
+            KeySender(CharacterDeviceManager.Companion.DevicePaths.DEFAULT_KEYBOARD_DEVICE_PATH)
+
+            // TODO: allow setting path as user preference
+            //KeySender(it.keyboardCharacterDevicePath)
+        }
+
+    val touchpadSender: StateFlow<TouchpadSender> = userPreferencesStateFlow
+        .mapState {
+            if (it.isLoopbackModeEnabled) {
+                fixCharacterDevicePermissions(UHID.PATH)
+                LoopbackTouchpadSender(TouchpadDevicePath(UHID.PATH))
+            } else {
+                TouchpadSender(CharacterDeviceManager.Companion.DevicePaths.DEFAULT_TOUCHPAD_DEVICE_PATH)
+
+                // TODO: allow setting path as user preference
+                //TouchpadSender(it.touchpadCharacterDevicePath)
+            }
+        }
+
+    private val senderFlowList = listOf(keySender, touchpadSender)
 
     init {
-        for (sender: ReportSender in senderList) {
-            viewModelScope.launch(ReportSender.dispatcher) {
-                sender.start(
-                    onSuccess = {
-                        // This is called when no exception was thrown, meaning everything is good :)
-                        // so let's set the UI state back to default (no errors)
-                        _uiState.update { MyUiState() }
-                    },
-                    onException = { e ->
-                        val characterDevicePath = sender.characterDevicePath
-                        if (e is FileNotFoundException && characterDeviceMissing(characterDevicePath)) {
-                            Timber.i("Character device '$characterDevicePath' doesn't exist. The user probably skipped the character device creation prompt.")
-                        } else {
-                            handleException(e, sender.characterDevicePath)
+        senderFlowList.forEach { senderFlow ->
+            viewModelScope.launch {
+                senderFlow.collectLatest { sender ->
+                    sender.start(
+                        onSuccess = {
+                            // This is called when no exception was thrown, meaning everything is good :)
+                            // so let's set the UI state back to default (no errors)
+                            _uiState.update { MyUiState() }
+                        },
+                        onException = { e ->
+                            val characterDevicePath = sender.characterDevicePath
+                            if (e is FileNotFoundException && characterDeviceMissing(characterDevicePath)) {
+                                Timber.i("Character device '$characterDevicePath' doesn't exist. The user probably skipped the character device creation prompt.")
+                            } else {
+                                handleException(e, sender.characterDevicePath.path)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
@@ -136,8 +150,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     @OptIn(ModifiesStateDirectly::class)
-    fun characterDeviceMissing(charDevicePath: String): Boolean {
-        val result = characterDeviceManager.characterDeviceMissing(charDevicePath)
+    fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
+        val result = characterDeviceManager.characterDeviceMissing(charDevicePath.path)
 
         _uiState.update { it.copy(missingCharacterDevice = result) }
 
@@ -155,8 +169,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     // Keyboard
     fun addStandardKey(modifier: Byte, key: Byte) =
-        keySender.addStandardKey(modifier, key)
+        keySender.value.addStandardKey(modifier, key)
 
     fun addMediaKey(key: Byte) =
-        keySender.addMediaKey(key)
+        keySender.value.addMediaKey(key)
+
+    private inline fun <T, R> StateFlow<T>.mapState(
+        crossinline transform: (value: T) -> R
+    ) = mapState(viewModelScope, transform)
 }
