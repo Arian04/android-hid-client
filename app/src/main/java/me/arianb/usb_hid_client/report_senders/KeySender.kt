@@ -16,7 +16,7 @@ class KeySender(
     }
 
     // Every time we send a report, we only send the "key-down" event. This method will automatically send the "key-up"
-    // event right afterwards
+    // event right afterward
     override fun sendReport(report: ByteArray) {
         // Send "key-down" report
         writeBytes(report)
