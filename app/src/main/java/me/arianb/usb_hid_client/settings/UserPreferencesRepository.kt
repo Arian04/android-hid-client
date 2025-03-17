@@ -3,21 +3,51 @@ package me.arianb.usb_hid_client.settings
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.annotation.StringRes
-import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import me.arianb.usb_hid_client.R
 
-sealed class PreferenceKey(val key: String) {
-    data object OnboardingDoneKey : PreferenceKey("onboarding_done")
-    data object ClearManualInputKey : PreferenceKey("clear_manual_input")
-    data object VolumeButtonPassthroughKey : PreferenceKey("volume_button_passthrough")
-    data object AppThemeKey : PreferenceKey("app_theme")
-    data object DynamicColorKey : PreferenceKey("dynamic_color")
-    data object LoopbackMode : PreferenceKey("loopback_mode")
-    data object TouchpadFullscreenInLandscape : PreferenceKey("touchpad_fullscreen_in_landscape")
+sealed class AppPreference(val preference: PreferenceKey<*>) {
+    data object OnboardingDoneKey : BooleanPreferenceKey("onboarding_done", false)
+    data object ClearManualInputKey : BooleanPreferenceKey("clear_manual_input", false)
+    data object VolumeButtonPassthroughKey : BooleanPreferenceKey("volume_button_passthrough", false)
+    data object AppThemeKey : ObjectPreferenceKey<AppTheme>(
+        "app_theme", AppTheme.System,
+        fromStringPreference = {
+            val defaultValue = AppTheme.System
+
+            when (it) {
+                AppTheme.System.key -> AppTheme.System
+                AppTheme.DarkMode.key -> AppTheme.DarkMode
+                AppTheme.LightMode.key -> AppTheme.LightMode
+                else -> defaultValue
+            }
+        },
+        toStringPreference = { it.key }
+    )
+
+    data object DynamicColorKey : BooleanPreferenceKey("dynamic_color", false)
+    data object LoopbackMode : BooleanPreferenceKey("loopback_mode", false)
+    data object TouchpadFullscreenInLandscape : BooleanPreferenceKey("touchpad_fullscreen_in_landscape", false)
+//    data object UsbGadgetPathPref : ObjectPreferenceKey<UsbGadgetPath>(
+//        "usb_gadget_path", UsbGadgetPath("/config/g1"),
+//        fromStringPreference = { UsbGadgetPath(it) },
+//        toStringPreference = { it.path }
+//    )
+//
+//    data object KeyboardCharacterDevicePath : ObjectPreferenceKey<KeyboardDevicePath>(
+//        "keyboard_character_device_path", CharacterDeviceManager.Companion.DevicePaths.DEFAULT_KEYBOARD_DEVICE_PATH,
+//        fromStringPreference = { KeyboardDevicePath(it) },
+//        toStringPreference = { it.path }
+//    )
+//
+//    data object TouchpadCharacterDevicePath : ObjectPreferenceKey<TouchpadDevicePath>(
+//        "touchpad_character_device_path", CharacterDeviceManager.Companion.DevicePaths.DEFAULT_TOUCHPAD_DEVICE_PATH,
+//        fromStringPreference = { TouchpadDevicePath(it) },
+//        toStringPreference = { it.path }
+//    )
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -45,6 +75,9 @@ data class UserPreferences(
     val isDynamicColorEnabled: Boolean,
     val isLoopbackModeEnabled: Boolean,
     val isTouchpadFullscreenInLandscape: Boolean,
+//    val usbGadgetPath: UsbGadgetPath,
+//    val keyboardCharacterDevicePath: KeyboardDevicePath,
+//    val touchpadCharacterDevicePath: TouchpadDevicePath
 )
 
 class UserPreferencesRepository private constructor(application: Application) {
@@ -53,55 +86,30 @@ class UserPreferencesRepository private constructor(application: Application) {
     private val _userPreferencesFlow = MutableStateFlow(userPreferences)
     val userPreferencesFlow: StateFlow<UserPreferences> = _userPreferencesFlow
 
+    private fun <T> PreferenceKey<T>.getValue() = this.getValue(sharedPreferences)
+    private fun <T> PreferenceKey<T>.setValue(value: T) = this.setValue(sharedPreferences, value)
+
     private val userPreferences: UserPreferences
         get() {
             return UserPreferences(
-                isOnboardingDone = getBoolean(PreferenceKey.OnboardingDoneKey, false),
-                clearManualInput = getBoolean(PreferenceKey.ClearManualInputKey, false),
-                isVolumeButtonPassthroughEnabled = getBoolean(PreferenceKey.VolumeButtonPassthroughKey, false),
-                appTheme = getAppTheme(),
-                isDynamicColorEnabled = getBoolean(PreferenceKey.DynamicColorKey, false),
-                isLoopbackModeEnabled = getBoolean(PreferenceKey.LoopbackMode, false),
-                isTouchpadFullscreenInLandscape = getBoolean(PreferenceKey.TouchpadFullscreenInLandscape, false),
+                isOnboardingDone = AppPreference.OnboardingDoneKey.getValue(),
+                clearManualInput = AppPreference.ClearManualInputKey.getValue(),
+                isVolumeButtonPassthroughEnabled = AppPreference.VolumeButtonPassthroughKey.getValue(),
+                appTheme = AppPreference.AppThemeKey.getValue(),
+                isDynamicColorEnabled = AppPreference.DynamicColorKey.getValue(),
+                isLoopbackModeEnabled = AppPreference.LoopbackMode.getValue(),
+                isTouchpadFullscreenInLandscape = AppPreference.TouchpadFullscreenInLandscape.getValue(),
+//                usbGadgetPath = AppPreference.UsbGadgetPathPref.getValue(),
+//                keyboardCharacterDevicePath = AppPreference.KeyboardCharacterDevicePath.getValue(),
+//                touchpadCharacterDevicePath = AppPreference.TouchpadCharacterDevicePath.getValue()
             )
         }
 
-    // TODO: maybe generalize this code so I can use it for any SealedString subclasses I come up with later on?
-    private fun getAppTheme(): AppTheme {
-        val key = PreferenceKey.AppThemeKey.key
-        val defaultValue = AppTheme.System
+    fun <T> getPreference(key: PreferenceKey<T>): T =
+        key.getValue()
 
-        val stringPreference = sharedPreferences.getString(key, defaultValue.key)
-        return when (stringPreference) {
-            AppTheme.System.key -> AppTheme.System
-            AppTheme.DarkMode.key -> AppTheme.DarkMode
-            AppTheme.LightMode.key -> AppTheme.LightMode
-            else -> defaultValue
-        }
-    }
-
-    fun putAppTheme(value: AppTheme) {
-        val key = PreferenceKey.AppThemeKey.key
-
-        editAndUpdate {
-            this.putString(key, value.key)
-        }
-    }
-
-    fun getBoolean(key: PreferenceKey, defaultValue: Boolean): Boolean {
-        return sharedPreferences.getBoolean(key.key, defaultValue)
-    }
-
-    fun putBoolean(key: PreferenceKey, value: Boolean) {
-        editAndUpdate {
-            this.putBoolean(key.key, value)
-        }
-    }
-
-    private inline fun editAndUpdate(commit: Boolean = false, action: SharedPreferences.Editor.() -> Unit) {
-        sharedPreferences.edit(commit = commit) {
-            action()
-        }
+    fun <T> setPreference(key: PreferenceKey<T>, value: T) {
+        key.setValue(value)
         _userPreferencesFlow.update { userPreferences }
     }
 

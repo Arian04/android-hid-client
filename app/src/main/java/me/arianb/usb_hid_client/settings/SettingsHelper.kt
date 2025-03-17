@@ -3,18 +3,8 @@ package me.arianb.usb_hid_client.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemColors
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RadioButtonColors
-import androidx.compose.material3.RadioButtonDefaults
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 
-
 // This is basically just an alias now
 @Composable
 fun PreferenceCategory(
@@ -33,21 +22,18 @@ fun PreferenceCategory(
     modifier: Modifier = Modifier,
     showDivider: Boolean = true,
     preferences: @Composable () -> Unit
-) {
-    LabeledCategory(title, modifier, showDivider) {
-        preferences()
-    }
+) = LabeledCategory(title, modifier, showDivider) {
+    preferences()
 }
 
 @Composable
 fun SwitchPreference(
     title: String,
     summary: String? = null,
-    key: PreferenceKey,
-    defaultValue: Boolean = false,
+    preference: BooleanPreferenceKey,
     viewModel: SettingsViewModel = viewModel()
 ) {
-    var isChecked by remember { mutableStateOf(viewModel.getBoolean(key, defaultValue)) }
+    var isChecked by remember { mutableStateOf(viewModel.getPreference(preference)) }
 
     ListItem(
         headlineContent = { Text(title) },
@@ -61,30 +47,9 @@ fun SwitchPreference(
                 checked = isChecked,
                 onCheckedChange = {
                     isChecked = it
-                    viewModel.putBoolean(key, isChecked)
+                    viewModel.setPreference(preference, isChecked)
                 },
             )
-        }
-    )
-}
-
-@Composable
-fun AppThemePreference(
-    title: String,
-    enabled: Boolean = true,
-    settingsViewModel: SettingsViewModel = viewModel()
-) {
-    val preferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
-
-    val selectedTheme = preferencesState.appTheme
-    val options = AppTheme.values
-    BasicListPreference(
-        title = title,
-        options = options,
-        enabled = enabled,
-        selected = selectedTheme,
-        onPreferenceClicked = { thisAppTheme ->
-            settingsViewModel.putAppTheme(thisAppTheme)
         }
     )
 }

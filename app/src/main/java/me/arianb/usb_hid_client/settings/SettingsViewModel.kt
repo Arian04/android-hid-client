@@ -7,12 +7,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val userPreferencesRepository = UserPreferencesRepository.getInstance(application)
     val userPreferencesFlow = userPreferencesRepository.userPreferencesFlow
 
-    fun putAppTheme(value: AppTheme) =
-        userPreferencesRepository.putAppTheme(value)
+    fun <T> getPreference(key: PreferenceKey<T>): T =
+        userPreferencesRepository.getPreference(key)
 
-    fun getBoolean(key: PreferenceKey, defaultValue: Boolean): Boolean =
-        userPreferencesRepository.getBoolean(key, defaultValue)
-
-    fun putBoolean(key: PreferenceKey, value: Boolean) =
-        userPreferencesRepository.putBoolean(key, value)
+    fun <T> setPreference(key: PreferenceKey<T>, value: T) =
+        userPreferencesRepository.setPreference(key, value)
 }

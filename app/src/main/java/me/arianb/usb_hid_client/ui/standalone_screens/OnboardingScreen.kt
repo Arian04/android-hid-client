@@ -16,7 +16,7 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import me.arianb.usb_hid_client.MainScreen
 import me.arianb.usb_hid_client.R
-import me.arianb.usb_hid_client.settings.PreferenceKey
+import me.arianb.usb_hid_client.settings.AppPreference
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingExtraExtraLarge
 import me.arianb.usb_hid_client.ui.utils.BasicPage
@@ -72,7 +72,7 @@ fun ContinueButton(settingsViewModel: SettingsViewModel = viewModel()) {
 
     Button(
         onClick = {
-            settingsViewModel.putBoolean(PreferenceKey.OnboardingDoneKey, true)
+            settingsViewModel.setPreference(AppPreference.OnboardingDoneKey, true)
             navigator.replace(MainScreen())
         }
     ) {
