@@ -12,4 +12,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun <T> setPreference(key: PreferenceKey<T>, value: T) =
         userPreferencesRepository.setPreference(key, value)
+
+    fun <T> resetPreferenceToDefault(key: PreferenceKey<T>) =
+        userPreferencesRepository.resetPreferenceToDefault(key)
 }

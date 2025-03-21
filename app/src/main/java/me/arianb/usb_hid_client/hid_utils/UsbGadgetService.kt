@@ -19,19 +19,7 @@ import timber.log.Timber
 import java.io.IOException
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createSymbolicLinkPointingTo
-import kotlin.io.path.deleteIfExists
-import kotlin.io.path.deleteRecursively
-import kotlin.io.path.div
-import kotlin.io.path.isDirectory
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.writeBytes
-import kotlin.io.path.writeText
-import kotlin.io.path.writer
+import kotlin.io.path.*
 
 class UsbGadgetService : RootService() {
     init {
@@ -298,3 +286,6 @@ internal object UsbGadgetManager {
         }
     }
 }
+
+@JvmInline
+value class UsbGadgetPath(val path: String) {}

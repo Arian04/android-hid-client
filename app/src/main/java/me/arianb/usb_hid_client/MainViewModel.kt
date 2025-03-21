@@ -45,10 +45,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val keySender: StateFlow<KeySender> = userPreferencesStateFlow
         .mapState {
-            KeySender(CharacterDeviceManager.Companion.DevicePaths.DEFAULT_KEYBOARD_DEVICE_PATH)
-
-            // TODO: allow setting path as user preference
-            //KeySender(it.keyboardCharacterDevicePath)
+            KeySender(it.keyboardCharacterDevicePath)
         }
 
     val touchpadSender: StateFlow<TouchpadSender> = userPreferencesStateFlow
@@ -57,10 +54,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 fixCharacterDevicePermissions(UHID.PATH)
                 LoopbackTouchpadSender(TouchpadDevicePath(UHID.PATH))
             } else {
-                TouchpadSender(CharacterDeviceManager.Companion.DevicePaths.DEFAULT_TOUCHPAD_DEVICE_PATH)
-
-                // TODO: allow setting path as user preference
-                //TouchpadSender(it.touchpadCharacterDevicePath)
+                TouchpadSender(it.touchpadCharacterDevicePath)
             }
         }
 

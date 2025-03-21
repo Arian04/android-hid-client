@@ -3,9 +3,9 @@
 
     <!-- Main Screen -->
     <string name="app_name" translatable="false">USB HID Client</string>
-    <string name="direct_input">Direct Input</string>
-    <string name="manual_input">Manual Input</string>
-    <string name="touchpad_label">Touchpad</string>
+    <string name="direct_input">Direct Input</string> <!-- Reused as preference category header -->
+    <string name="manual_input">Manual Input</string> <!-- Reused as preference category header -->
+    <string name="touchpad_label">Touchpad</string> <!-- Reused as preference category header -->
     <string name="send">Send</string>
 
     <!-- Settings Screen -->
@@ -14,6 +14,7 @@
     <!-- Preference Titles -->
     <string name="theme_header">Theme</string>
     <string name="misc_header">Misc</string>
+    <string name="device_specific_quirks_header">Device-Specific Quirks</string>
 
     <!-- Preferences -->
     <string name="app_theme_title">App theme</string>
@@ -39,6 +40,17 @@
     <string name="touchpad_fullscreen_in_landscape_summary">Hide everything except the touchpad when in landscape mode
         to make more space.
     </string>
+
+    <string name="experimental_mode_title">Experimental Mode</string>
+    <string name="experimental_mode_summary">Enable various experimental settings and features. Use at your own risk.
+    </string>
+
+    <string name="usb_gadget_path_title">USB Gadget Path</string>
+
+    <string name="keyboard_character_device_path">Keyboard Character Device Path</string>
+
+    <string name="touchpad_character_device_path">Touchpad Character Device Path</string>
+
 
     <!-- Info ("About") Screen -->
     <string name="info">About</string>

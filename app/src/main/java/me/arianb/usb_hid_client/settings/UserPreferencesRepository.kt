@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import me.arianb.usb_hid_client.R
+import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
+import me.arianb.usb_hid_client.hid_utils.KeyboardDevicePath
+import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
+import me.arianb.usb_hid_client.hid_utils.UsbGadgetPath
 
 sealed class AppPreference(val preference: PreferenceKey<*>) {
     data object OnboardingDoneKey : BooleanPreferenceKey("onboarding_done", false)
@@ -31,23 +35,23 @@ sealed class AppPreference(val preference: PreferenceKey<*>) {
     data object DynamicColorKey : BooleanPreferenceKey("dynamic_color", false)
     data object LoopbackMode : BooleanPreferenceKey("loopback_mode", false)
     data object TouchpadFullscreenInLandscape : BooleanPreferenceKey("touchpad_fullscreen_in_landscape", false)
-//    data object UsbGadgetPathPref : ObjectPreferenceKey<UsbGadgetPath>(
-//        "usb_gadget_path", UsbGadgetPath("/config/g1"),
-//        fromStringPreference = { UsbGadgetPath(it) },
-//        toStringPreference = { it.path }
-//    )
-//
-//    data object KeyboardCharacterDevicePath : ObjectPreferenceKey<KeyboardDevicePath>(
-//        "keyboard_character_device_path", CharacterDeviceManager.Companion.DevicePaths.DEFAULT_KEYBOARD_DEVICE_PATH,
-//        fromStringPreference = { KeyboardDevicePath(it) },
-//        toStringPreference = { it.path }
-//    )
-//
-//    data object TouchpadCharacterDevicePath : ObjectPreferenceKey<TouchpadDevicePath>(
-//        "touchpad_character_device_path", CharacterDeviceManager.Companion.DevicePaths.DEFAULT_TOUCHPAD_DEVICE_PATH,
-//        fromStringPreference = { TouchpadDevicePath(it) },
-//        toStringPreference = { it.path }
-//    )
+    data object UsbGadgetPathPref : ObjectPreferenceKey<UsbGadgetPath>(
+        "usb_gadget_path", UsbGadgetPath("/config/usb_gadget/g1"),
+        fromStringPreference = { UsbGadgetPath(it) },
+        toStringPreference = { it.path }
+    )
+
+    data object KeyboardCharacterDevicePath : ObjectPreferenceKey<KeyboardDevicePath>(
+        "keyboard_character_device_path", CharacterDeviceManager.Companion.DevicePaths.DEFAULT_KEYBOARD_DEVICE_PATH,
+        fromStringPreference = { KeyboardDevicePath(it) },
+        toStringPreference = { it.path }
+    )
+
+    data object TouchpadCharacterDevicePath : ObjectPreferenceKey<TouchpadDevicePath>(
+        "touchpad_character_device_path", CharacterDeviceManager.Companion.DevicePaths.DEFAULT_TOUCHPAD_DEVICE_PATH,
+        fromStringPreference = { TouchpadDevicePath(it) },
+        toStringPreference = { it.path }
+    )
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -75,9 +79,9 @@ data class UserPreferences(
     val isDynamicColorEnabled: Boolean,
     val isLoopbackModeEnabled: Boolean,
     val isTouchpadFullscreenInLandscape: Boolean,
-//    val usbGadgetPath: UsbGadgetPath,
-//    val keyboardCharacterDevicePath: KeyboardDevicePath,
-//    val touchpadCharacterDevicePath: TouchpadDevicePath
+    val usbGadgetPath: UsbGadgetPath,
+    val keyboardCharacterDevicePath: KeyboardDevicePath,
+    val touchpadCharacterDevicePath: TouchpadDevicePath
 )
 
 class UserPreferencesRepository private constructor(application: Application) {
@@ -88,6 +92,7 @@ class UserPreferencesRepository private constructor(application: Application) {
 
     private fun <T> PreferenceKey<T>.getValue() = this.getValue(sharedPreferences)
     private fun <T> PreferenceKey<T>.setValue(value: T) = this.setValue(sharedPreferences, value)
+    private fun <T> PreferenceKey<T>.resetToDefault() = this.resetToDefault(sharedPreferences)
 
     private val userPreferences: UserPreferences
         get() {
@@ -99,9 +104,9 @@ class UserPreferencesRepository private constructor(application: Application) {
                 isDynamicColorEnabled = AppPreference.DynamicColorKey.getValue(),
                 isLoopbackModeEnabled = AppPreference.LoopbackMode.getValue(),
                 isTouchpadFullscreenInLandscape = AppPreference.TouchpadFullscreenInLandscape.getValue(),
-//                usbGadgetPath = AppPreference.UsbGadgetPathPref.getValue(),
-//                keyboardCharacterDevicePath = AppPreference.KeyboardCharacterDevicePath.getValue(),
-//                touchpadCharacterDevicePath = AppPreference.TouchpadCharacterDevicePath.getValue()
+                usbGadgetPath = AppPreference.UsbGadgetPathPref.getValue(),
+                keyboardCharacterDevicePath = AppPreference.KeyboardCharacterDevicePath.getValue(),
+                touchpadCharacterDevicePath = AppPreference.TouchpadCharacterDevicePath.getValue()
             )
         }
 
@@ -110,6 +115,11 @@ class UserPreferencesRepository private constructor(application: Application) {
 
     fun <T> setPreference(key: PreferenceKey<T>, value: T) {
         key.setValue(value)
+        _userPreferencesFlow.update { userPreferences }
+    }
+
+    fun <T> resetPreferenceToDefault(key: PreferenceKey<T>) {
+        key.resetToDefault()
         _userPreferencesFlow.update { userPreferences }
     }
 

@@ -16,9 +16,15 @@ sealed class PreferenceKey<T>(val key: String, val defaultValue: T) {
             action()
         }
     }
+
+    fun resetToDefault(sharedPreferences: SharedPreferences) {
+        edit(sharedPreferences) {
+            remove(key)
+        }
+    }
 }
 
-open class BooleanPreferenceKey : PreferenceKey<Boolean> {
+sealed class BooleanPreferenceKey : PreferenceKey<Boolean> {
     constructor(key: String, defaultValue: Boolean) : super(key, defaultValue)
 
     override fun getValue(sharedPreferences: SharedPreferences): Boolean {
@@ -32,7 +38,7 @@ open class BooleanPreferenceKey : PreferenceKey<Boolean> {
     }
 }
 
-open class StringPreferenceKey : PreferenceKey<String> {
+sealed class StringPreferenceKey : PreferenceKey<String> {
     constructor(key: String, defaultValue: String) : super(key, defaultValue)
 
     override fun getValue(sharedPreferences: SharedPreferences): String {
@@ -46,13 +52,12 @@ open class StringPreferenceKey : PreferenceKey<String> {
     }
 }
 
-open class ObjectPreferenceKey<T>(
+sealed class ObjectPreferenceKey<T>(
     key: String,
     defaultValue: T,
     val fromStringPreference: (value: String) -> T,
     val toStringPreference: (value: T) -> String
 ) : PreferenceKey<T>(key, defaultValue) {
-
     override fun getValue(sharedPreferences: SharedPreferences): T {
         val stringValue = sharedPreferences.getString(key, null)
 

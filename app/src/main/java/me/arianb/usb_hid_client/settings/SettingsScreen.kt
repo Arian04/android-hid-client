@@ -17,6 +17,7 @@ import me.arianb.usb_hid_client.settings.AppSettings.AppThemePreference
 import me.arianb.usb_hid_client.settings.AppSettings.ClearManualInputOnSend
 import me.arianb.usb_hid_client.settings.AppSettings.DynamicColors
 import me.arianb.usb_hid_client.settings.AppSettings.MediaKeyPassthrough
+import me.arianb.usb_hid_client.settings.AppSettings.PreferenceCategory
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadFullscreenInLandscape
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadLoopbackMode
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
@@ -42,7 +43,7 @@ fun SettingsPage() {
         verticalArrangement = Arrangement.spacedBy(padding, Alignment.Top),
         scrollable = true
     ) {
-        AppSettings.PreferenceCategory(
+        PreferenceCategory(
             title = stringResource(R.string.theme_header),
         ) {
             AppThemePreference()
@@ -51,23 +52,35 @@ fun SettingsPage() {
                 DynamicColors()
             }
         }
-        AppSettings.PreferenceCategory(
+        PreferenceCategory(
             title = stringResource(R.string.direct_input),
         ) {
             MediaKeyPassthrough()
         }
-        AppSettings.PreferenceCategory(
+        PreferenceCategory(
             title = stringResource(R.string.manual_input),
         ) {
             ClearManualInputOnSend()
         }
-        AppSettings.PreferenceCategory(
+        PreferenceCategory(
             title = stringResource(R.string.touchpad_label),
-            showDivider = false
         ) {
             TouchpadFullscreenInLandscape()
             TouchpadLoopbackMode()
         }
+//        PreferenceCategory(
+//            title = stringResource(R.string.misc_header),
+//        ) {
+//            ExperimentalMode()
+//        }
+//        PreferenceCategory(
+//            title = stringResource(R.string.device_specific_quirks_header),
+//            showDivider = false
+//        ) {
+//            UsbGadgetPath()
+//            KeyboardCharacterDevicePath()
+//            TouchpadCharacterDevicePath()
+//        }
     }
 }
 
@@ -157,6 +170,42 @@ private object AppSettings {
             title = stringResource(R.string.touchpad_fullscreen_in_landscape_title),
             summary = stringResource(R.string.touchpad_fullscreen_in_landscape_summary),
             preference = AppPreference.TouchpadFullscreenInLandscape
+        )
+    }
+
+//    @Composable
+//    fun ExperimentalMode() {
+//        SwitchPreference(
+//            title = stringResource(R.string.experimental_mode_title),
+//            summary = stringResource(R.string.experimental_mode_summary),
+//            preference = AppPreference.LoopbackMode
+//        )
+//    }
+
+    @Composable
+    fun UsbGadgetPath() {
+        TextDialogPreference(
+            title = stringResource(R.string.usb_gadget_path_title),
+            preference = AppPreference.UsbGadgetPathPref,
+            property = UserPreferences::usbGadgetPath
+        )
+    }
+
+    @Composable
+    fun KeyboardCharacterDevicePath() {
+        TextDialogPreference(
+            title = stringResource(R.string.keyboard_character_device_path),
+            preference = AppPreference.KeyboardCharacterDevicePath,
+            property = UserPreferences::keyboardCharacterDevicePath
+        )
+    }
+
+    @Composable
+    fun TouchpadCharacterDevicePath() {
+        TextDialogPreference(
+            title = stringResource(R.string.touchpad_character_device_path),
+            preference = AppPreference.TouchpadCharacterDevicePath,
+            property = UserPreferences::touchpadCharacterDevicePath
         )
     }
 }

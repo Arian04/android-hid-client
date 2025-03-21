@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
+import kotlin.reflect.KProperty1
 
 // This is basically just an alias now
 @Composable
@@ -152,5 +154,70 @@ fun OnClickPreference(
         headlineContent = { Text(title) },
         supportingContent = { Text(summary) },
         trailingContent = trailingContent
+    )
+}
+
+@Composable
+fun <T> TextDialogPreference(
+    title: String,
+    summary: String? = null, // If null (default), display the current preference value
+    placeholder: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true,
+    preference: ObjectPreferenceKey<T>,
+    property: KProperty1<UserPreferences, T>,
+    settingsViewModel: SettingsViewModel = viewModel()
+) {
+    val currentUserPreferences by settingsViewModel.userPreferencesFlow.collectAsState()
+
+    val initialValue = property.get(currentUserPreferences)
+    val initialValueString = if (initialValue == preference.defaultValue) {
+        // If preference is default, string is empty
+        ""
+    } else {
+        preference.toStringPreference(initialValue)
+    }
+
+    // UI stuff
+    var isShowingDialog by remember { mutableStateOf(false) }
+    var editableValue by remember { mutableStateOf(initialValueString) }
+    OnClickPreference(
+        title = title,
+        summary = summary ?: if (editableValue.isBlank()) {
+            "Default"
+        } else {
+            editableValue
+        },
+        enabled = enabled,
+        onClick = { isShowingDialog = true },
+        trailingContent = {
+            if (isShowingDialog) {
+                AlertDialog(
+                    title = { Text(title) },
+                    onDismissRequest = { isShowingDialog = false },
+                    confirmButton = {
+                        TextButton(onClick = { isShowingDialog = false }) {
+                            Text("OK")
+                        }
+                    },
+                    text = {
+                        TextField(
+                            value = editableValue,
+                            placeholder = placeholder,
+                            onValueChange = {
+                                // Update UI
+                                editableValue = it
+
+                                // Update preference
+                                if (it.isBlank()) {
+                                    settingsViewModel.resetPreferenceToDefault(preference)
+                                } else {
+                                    settingsViewModel.setPreference(preference, preference.fromStringPreference(it))
+                                }
+                            },
+                        )
+                    }
+                )
+            }
+        }
     )
 }
