@@ -16,15 +16,21 @@ import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.settings.AppSettings.AppThemePreference
 import me.arianb.usb_hid_client.settings.AppSettings.ClearManualInputOnSend
 import me.arianb.usb_hid_client.settings.AppSettings.DynamicColors
+import me.arianb.usb_hid_client.settings.AppSettings.ExperimentalMode
+import me.arianb.usb_hid_client.settings.AppSettings.KeyboardCharacterDevicePath
 import me.arianb.usb_hid_client.settings.AppSettings.MediaKeyPassthrough
 import me.arianb.usb_hid_client.settings.AppSettings.PreferenceCategory
+import me.arianb.usb_hid_client.settings.AppSettings.TouchpadCharacterDevicePath
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadFullscreenInLandscape
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadLoopbackMode
+import me.arianb.usb_hid_client.settings.AppSettings.UsbGadgetPath
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.isDynamicColorAvailable
 import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.utils.Experimental
 import me.arianb.usb_hid_client.ui.utils.SimpleNavTopBar
+import me.arianb.usb_hid_client.ui.utils.isExperimentalModeEnabled
 
 class SettingsScreen : Screen {
     @Composable
@@ -68,19 +74,26 @@ fun SettingsPage() {
             TouchpadFullscreenInLandscape()
             TouchpadLoopbackMode()
         }
-//        PreferenceCategory(
-//            title = stringResource(R.string.misc_header),
-//        ) {
-//            ExperimentalMode()
-//        }
-//        PreferenceCategory(
-//            title = stringResource(R.string.device_specific_quirks_header),
-//            showDivider = false
-//        ) {
-//            UsbGadgetPath()
-//            KeyboardCharacterDevicePath()
-//            TouchpadCharacterDevicePath()
-//        }
+
+        // only set `showDivider = false` for the last category.
+        // haven't found a nice way to do that implicitly yet.
+
+        PreferenceCategory(
+            title = stringResource(R.string.misc_header),
+            showDivider = isExperimentalModeEnabled()
+        ) {
+            ExperimentalMode()
+        }
+        Experimental {
+            PreferenceCategory(
+                title = stringResource(R.string.device_specific_quirks_header),
+                showDivider = false
+            ) {
+                UsbGadgetPath()
+                KeyboardCharacterDevicePath()
+                TouchpadCharacterDevicePath()
+            }
+        }
     }
 }
 
@@ -173,14 +186,14 @@ private object AppSettings {
         )
     }
 
-//    @Composable
-//    fun ExperimentalMode() {
-//        SwitchPreference(
-//            title = stringResource(R.string.experimental_mode_title),
-//            summary = stringResource(R.string.experimental_mode_summary),
-//            preference = AppPreference.LoopbackMode
-//        )
-//    }
+    @Composable
+    fun ExperimentalMode() {
+        SwitchPreference(
+            title = stringResource(R.string.experimental_mode_title),
+            summary = stringResource(R.string.experimental_mode_summary),
+            preference = AppPreference.ExperimentalMode
+        )
+    }
 
     @Composable
     fun UsbGadgetPath() {

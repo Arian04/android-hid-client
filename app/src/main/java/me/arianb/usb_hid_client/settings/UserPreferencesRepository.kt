@@ -34,6 +34,7 @@ sealed class AppPreference(val preference: PreferenceKey<*>) {
 
     data object DynamicColorKey : BooleanPreferenceKey("dynamic_color", false)
     data object LoopbackMode : BooleanPreferenceKey("loopback_mode", false)
+    data object ExperimentalMode : BooleanPreferenceKey("experimental_mode", false)
     data object TouchpadFullscreenInLandscape : BooleanPreferenceKey("touchpad_fullscreen_in_landscape", false)
     data object UsbGadgetPathPref : ObjectPreferenceKey<UsbGadgetPath>(
         "usb_gadget_path", UsbGadgetPath("/config/usb_gadget/g1"),
@@ -79,6 +80,7 @@ data class UserPreferences(
     val isDynamicColorEnabled: Boolean,
     val isLoopbackModeEnabled: Boolean,
     val isTouchpadFullscreenInLandscape: Boolean,
+    val isExperimentalModeEnabled: Boolean,
     val usbGadgetPath: UsbGadgetPath,
     val keyboardCharacterDevicePath: KeyboardDevicePath,
     val touchpadCharacterDevicePath: TouchpadDevicePath
@@ -104,6 +106,7 @@ class UserPreferencesRepository private constructor(application: Application) {
                 isDynamicColorEnabled = AppPreference.DynamicColorKey.getValue(),
                 isLoopbackModeEnabled = AppPreference.LoopbackMode.getValue(),
                 isTouchpadFullscreenInLandscape = AppPreference.TouchpadFullscreenInLandscape.getValue(),
+                isExperimentalModeEnabled = AppPreference.ExperimentalMode.getValue(),
                 usbGadgetPath = AppPreference.UsbGadgetPathPref.getValue(),
                 keyboardCharacterDevicePath = AppPreference.KeyboardCharacterDevicePath.getValue(),
                 touchpadCharacterDevicePath = AppPreference.TouchpadCharacterDevicePath.getValue()

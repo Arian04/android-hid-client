@@ -1,14 +1,24 @@
 package me.arianb.usb_hid_client.ui.utils
 
 import androidx.compose.runtime.Composable
-import me.arianb.usb_hid_client.BuildConfig
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.arianb.usb_hid_client.settings.SettingsViewModel
 
 @Composable
 fun Experimental(
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
-    // TODO: add/implement user setting, maybe add red tint or something to differentiate experimental stuff
-    if (BuildConfig.DEBUG) {
+    // TODO: maybe add red tint or something to differentiate experimental stuff?
+    if (isExperimentalModeEnabled()) {
         content()
     }
+}
+
+@Composable
+fun isExperimentalModeEnabled(settingsViewModel: SettingsViewModel = viewModel()): Boolean {
+    val userPreferences by settingsViewModel.userPreferencesFlow.collectAsState()
+
+    return userPreferences.isExperimentalModeEnabled
 }
