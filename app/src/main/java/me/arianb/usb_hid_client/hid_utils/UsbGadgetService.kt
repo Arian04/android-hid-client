@@ -19,7 +19,19 @@ import timber.log.Timber
 import java.io.IOException
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
-import kotlin.io.path.*
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createSymbolicLinkPointingTo
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.div
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.writeBytes
+import kotlin.io.path.writeText
+import kotlin.io.path.writer
 
 class UsbGadgetService : RootService() {
     init {
@@ -168,19 +180,23 @@ internal object UsbGadgetManager {
             return currentGadgetPath
         }
 
-        val gadgetPaths = CONFIG_FS_PATH.listDirectoryEntries()
+        val gadgetPaths = runCatching { CONFIG_FS_PATH.listDirectoryEntries() }.getOrNull() ?: run {
+            Timber.e("Failed to list directory entries at path: $CONFIG_FS_PATH")
+            emptyList()
+        }
+
         if (gadgetPaths.isEmpty()) {
             // FIXME: replace this
             throw RuntimeException("no udc :(")
-        }
-
-        for (path in gadgetPaths) {
-            if ((path / "UDC").isRegularFile()) {
-                return path
+        } else {
+            for (path in gadgetPaths) {
+                if ((path / "UDC").isRegularFile()) {
+                    return path
+                }
             }
-        }
 
-        return gadgetPaths.first()
+            return gadgetPaths.first()
+        }
     }
 
     fun createCharacterDevices() {
@@ -199,7 +215,12 @@ internal object UsbGadgetManager {
 
         linkFunctionsToConfig(allHidFunctions)
 
-        resetGadget()
+        try {
+            resetGadget()
+        } catch (e: IOException) {
+            Timber.e("Failed to reset usb gadget")
+            Timber.e(e)
+        }
     }
 
     private fun Path.writeAsString(uByte: UByte) = writeAsString(uByte.toUInt())
@@ -233,7 +254,12 @@ internal object UsbGadgetManager {
         }
 
         // Ensure this directory (and all its parents) exist
-        CONFIGS_PATH.createDirectories()
+        try {
+            CONFIGS_PATH.createDirectories()
+        } catch (e: IOException) {
+            Timber.e("IOException occurred while trying to create all directories in path: $CONFIGS_PATH")
+            Timber.e(e)
+        }
 
         functions.forEach {
             try {
@@ -246,6 +272,7 @@ internal object UsbGadgetManager {
         }
     }
 
+    @Throws(IOException::class)
     private fun resetGadget() {
         val udcPath: Path = USB_GADGET_PATH / "UDC"
 
@@ -277,7 +304,12 @@ internal object UsbGadgetManager {
             }
 
             // Apply changes
-            resetGadget()
+            try {
+                resetGadget()
+            } catch (e: IOException) {
+                Timber.e("Failed to reset usb gadget")
+                Timber.e(e)
+            }
 
             // Delete character devices
             CharacterDeviceManager.ALL_CHARACTER_DEVICE_PATHS.map { Path(it) }.forEach {
