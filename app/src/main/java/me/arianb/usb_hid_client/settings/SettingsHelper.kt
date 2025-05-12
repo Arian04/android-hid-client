@@ -3,7 +3,17 @@ package me.arianb.usb_hid_client.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonColors
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -161,7 +171,6 @@ fun OnClickPreference(
 fun <T> TextDialogPreference(
     title: String,
     summary: String? = null, // If null (default), display the current preference value
-    placeholder: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
     preference: ObjectPreferenceKey<T>,
     property: KProperty1<UserPreferences, T>,
@@ -182,10 +191,8 @@ fun <T> TextDialogPreference(
     var editableValue by remember { mutableStateOf(initialValueString) }
     OnClickPreference(
         title = title,
-        summary = summary ?: if (editableValue.isBlank()) {
+        summary = summary ?: editableValue.ifBlank {
             "Default"
-        } else {
-            editableValue
         },
         enabled = enabled,
         onClick = { isShowingDialog = true },
@@ -202,7 +209,9 @@ fun <T> TextDialogPreference(
                     text = {
                         TextField(
                             value = editableValue,
-                            placeholder = placeholder,
+                            placeholder = {
+                                Text(text = preference.toStringPreference(preference.defaultValue))
+                            },
                             onValueChange = {
                                 // Update UI
                                 editableValue = it
