@@ -53,6 +53,8 @@ sealed class AppPreference(val preference: PreferenceKey<*>) {
         fromStringPreference = { TouchpadDevicePath(it) },
         toStringPreference = { it.path }
     )
+
+    data object CreateNewGadgetForFunctions : BooleanPreferenceKey("create_new_gadget_for_functions", false)
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -83,7 +85,8 @@ data class UserPreferences(
     val isExperimentalModeEnabled: Boolean,
     val usbGadgetPath: UsbGadgetPath,
     val keyboardCharacterDevicePath: KeyboardDevicePath,
-    val touchpadCharacterDevicePath: TouchpadDevicePath
+    val touchpadCharacterDevicePath: TouchpadDevicePath,
+    val createNewGadgetForFunctions: Boolean,
 )
 
 class UserPreferencesRepository private constructor(application: Application) {
@@ -109,7 +112,8 @@ class UserPreferencesRepository private constructor(application: Application) {
                 isExperimentalModeEnabled = AppPreference.ExperimentalMode.getValue(),
                 usbGadgetPath = AppPreference.UsbGadgetPathPref.getValue(),
                 keyboardCharacterDevicePath = AppPreference.KeyboardCharacterDevicePath.getValue(),
-                touchpadCharacterDevicePath = AppPreference.TouchpadCharacterDevicePath.getValue()
+                touchpadCharacterDevicePath = AppPreference.TouchpadCharacterDevicePath.getValue(),
+                createNewGadgetForFunctions = AppPreference.CreateNewGadgetForFunctions.getValue()
             )
         }
 
