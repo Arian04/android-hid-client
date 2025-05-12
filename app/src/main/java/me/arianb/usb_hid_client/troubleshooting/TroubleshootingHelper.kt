@@ -18,11 +18,11 @@ import com.topjohnwu.superuser.ShellUtils
 import me.arianb.usb_hid_client.BuildConfig
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
+import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.settings.OnClickPreference
 import me.arianb.usb_hid_client.shell_utils.RootMethod
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
-import java.io.File
 import java.io.IOException
 
 data class TroubleshootingInfo(
@@ -71,7 +71,7 @@ fun detectIssues(): TroubleshootingInfo {
     if (hasRootPermissions) {
         // Check character device stuff
         characterDevicesInfoList = buildList {
-            for (path in CharacterDeviceManager.ALL_CHARACTER_DEVICE_PATHS) {
+            for (path in CharacterDeviceManager.Companion.DevicePaths.all) {
                 add(getCharacterDeviceInfo(path))
             }
         }
@@ -91,8 +91,8 @@ fun detectIssues(): TroubleshootingInfo {
 }
 
 @RequiresRoot
-private fun getCharacterDeviceInfo(gadgetPath: String): CharacterDeviceInfo {
-    val safeGadgetPathString = ShellUtils.escapedString(gadgetPath)
+private fun getCharacterDeviceInfo(gadgetPath: DevicePath): CharacterDeviceInfo {
+    val safeGadgetPathString = ShellUtils.escapedString(gadgetPath.path)
 
     // Check if it exists
     val shellResult = Shell.cmd("test -e $safeGadgetPathString").exec()
@@ -104,7 +104,7 @@ private fun getCharacterDeviceInfo(gadgetPath: String): CharacterDeviceInfo {
     if (isPresent) {
         // Check if it's still visible if we check without root permissions
         // this verifies that selinux policy was added correctly
-        isVisibleWithoutRoot = File(gadgetPath).exists()
+        isVisibleWithoutRoot = gadgetPath.exists()
         if (!isVisibleWithoutRoot) {
             // selinux policy is probably not right
         }
@@ -158,7 +158,7 @@ private fun getCharacterDeviceInfo(gadgetPath: String): CharacterDeviceInfo {
     }
 
     return CharacterDeviceInfo(
-        path = gadgetPath,
+        path = gadgetPath.path,
         isPresent = isPresent,
         isVisibleWithoutRoot = isVisibleWithoutRoot,
         permissions = permissionsString,

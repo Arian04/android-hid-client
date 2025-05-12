@@ -53,11 +53,11 @@ class CharacterDeviceManager private constructor(private val application: Applic
             fixSelinuxPermissions()
 
             launch {
-                for (devicePath in ALL_CHARACTER_DEVICE_PATHS) {
+                for (devicePath in DevicePaths.all) {
                     try {
                         withTimeout(3000) {
                             // wait until the device file exists before trying to fix its permissions
-                            while (!File(devicePath).exists()) {
+                            while (devicePath.exists()) {
                                 Timber.d("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
                                 delay(200)
                             }
@@ -81,6 +81,8 @@ class CharacterDeviceManager private constructor(private val application: Applic
         val selinuxPolicyCommand = "${rootStateHolder.sepolicyCommand} '$SELINUX_POLICY'"
         Shell.cmd(selinuxPolicyCommand).exec()
     }
+
+    fun fixCharacterDevicePermissions(device: DevicePath) = fixCharacterDevicePermissions(device.path)
 
     fun fixCharacterDevicePermissions(device: String) {
         val appUID: Int = application.applicationInfo.uid
@@ -132,18 +134,18 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     @ModifiesStateDirectly
-    fun characterDeviceMissing(charDevicePath: String): Boolean {
-        val isCharDevMissing = if (!ALL_CHARACTER_DEVICE_PATHS.contains(charDevicePath)) {
+    fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
+        val isCharDevMissing = if (!DevicePaths.all.contains(charDevicePath)) {
             true
-        } else !File(charDevicePath).exists()
+        } else !charDevicePath.exists()
 
         return isCharDevMissing
     }
 
     @ModifiesStateDirectly
     fun anyCharacterDeviceMissing(): Boolean {
-        for (charDevicePath in ALL_CHARACTER_DEVICE_PATHS) {
-            if (!File(charDevicePath).exists()) {
+        for (charDevicePath in DevicePaths.all) {
+            if (!charDevicePath.exists()) {
                 return true
             }
         }
@@ -164,13 +166,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
             val all: List<DevicePath>
                 get() = listOf(keyboard.value, touchpad.value)
-
-            val allUnsafe: List<String>
-                get() = this.all.map { it.path }
         }
-
-        @Deprecated("Use type-safe version utilizing value classes")
-        val ALL_CHARACTER_DEVICE_PATHS = DevicePaths.allUnsafe
 
         // SELinux stuff
         private const val SELINUX_DOMAIN = "appdomain"
@@ -210,6 +206,8 @@ annotation class ModifiesStateDirectly
 
 interface DevicePath {
     val path: String
+
+    fun exists(): Boolean = File(path).exists()
 }
 
 @JvmInline

@@ -312,7 +312,7 @@ internal object UsbGadgetManager {
             }
 
             // Delete character devices
-            CharacterDeviceManager.ALL_CHARACTER_DEVICE_PATHS.map { Path(it) }.forEach {
+            CharacterDeviceManager.Companion.DevicePaths.all.map { Path(it.path) }.forEach {
                 it.deleteIfExists()
             }
         }

@@ -75,7 +75,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             if (e is FileNotFoundException && characterDeviceMissing(characterDevicePath)) {
                                 Timber.i("Character device '$characterDevicePath' doesn't exist. The user probably skipped the character device creation prompt.")
                             } else {
-                                handleException(e, sender.characterDevicePath.path)
+                                handleException(e, sender.characterDevicePath)
                             }
                         }
                     )
@@ -84,7 +84,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun handleException(e: IOException, devicePath: String) {
+    private fun handleException(e: IOException, devicePath: DevicePath) {
         val exceptionString = e.message ?: Log.getStackTraceString(e)
         val lowercaseExceptionString = exceptionString.lowercase()
 
@@ -93,7 +93,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isDeviceUnplugged = true) }
         } else if (lowercaseExceptionString.contains("permission denied")) {
             Timber.i("char dev perms are wrong")
-            _uiState.update { it.copy(isCharacterDevicePermissionsBroken = devicePath) }
+            _uiState.update { it.copy(isCharacterDevicePermissionsBroken = devicePath.path) }
         } else if (lowercaseExceptionString.contains("enxio")) {
             Timber.i("somehow the HID gadget is disabled but the character devices are still present")
         } else {
@@ -145,7 +145,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @OptIn(ModifiesStateDirectly::class)
     fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
-        val result = characterDeviceManager.characterDeviceMissing(charDevicePath.path)
+        val result = characterDeviceManager.characterDeviceMissing(charDevicePath)
 
         _uiState.update { it.copy(missingCharacterDevice = result) }
 
