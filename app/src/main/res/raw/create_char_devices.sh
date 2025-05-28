@@ -33,6 +33,9 @@ fi
 
 echo "USB_GADGET_PATH = ${USB_GADGET_PATH}"
 
+# Disable gadget (temporarily)
+echo "" > "${USB_GADGET_PATH}/UDC"
+
 # Other paths
 CONFIGS_PATH="${USB_GADGET_PATH}/configs/b.1/"
 KB_FUNCTION_PATH="${USB_GADGET_PATH}/functions/hid.keyboard"
