@@ -174,8 +174,8 @@ internal object UsbGadgetManager {
         }
 
         if (gadgetPaths.isEmpty()) {
-            // FIXME: replace this
-            throw RuntimeException("no udc :(")
+            // TODO: This is WRONG, but it's better than a RuntimeException and I don't have better handling yet
+            return CONFIG_FS_PATH / "g1"
         } else {
             for (path in gadgetPaths) {
                 if ((path / "UDC").isRegularFile()) {
