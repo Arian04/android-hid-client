@@ -13,8 +13,6 @@ import android.os.RemoteException
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ipc.RootService
 import me.arianb.usb_hid_client.BuildConfig
-import me.arianb.usb_hid_client.hid_utils.UsbGadgetManager.createCharacterDevices
-import me.arianb.usb_hid_client.hid_utils.UsbGadgetManager.deleteCharacterDevices
 import timber.log.Timber
 import java.io.IOException
 import java.nio.file.Path
@@ -42,8 +40,8 @@ class UsbGadgetService : RootService() {
             Timber.d("Message received in service, running with UID = ${Process.myUid()}")
             try {
                 when (msg.what) {
-                    MSG_CREATE -> createCharacterDevices()
-                    MSG_DELETE -> deleteCharacterDevices()
+                    MSG_CREATE -> UsbGadgetManager.createCharacterDevices()
+                    MSG_DELETE -> UsbGadgetManager.deleteCharacterDevices()
                     else -> {
                         Timber.w("Unhandled message: $msg")
                         return false
@@ -115,10 +113,11 @@ class UsbGadgetServiceConnection : ServiceConnection {
     }
 }
 
+// FIXME: implement CreateNewGadgetForFunctions preference
 @OptIn(ExperimentalUnsignedTypes::class)
 internal object UsbGadgetManager {
     private val CONFIG_FS_PATH: Path = Path("/config/usb_gadget")
-    private val USB_GADGET_PATH: Path = determineGadgetPath()
+    private val USB_GADGET_PATH: Path = determineGadgetPath() // FIXME: use preference value
 
     private val CONFIGS_PATH: Path = USB_GADGET_PATH / "configs/b.1/"
     private val FUNCTIONS_PATH: Path = USB_GADGET_PATH / "functions/"
