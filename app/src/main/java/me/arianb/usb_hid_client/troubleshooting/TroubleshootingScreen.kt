@@ -92,6 +92,12 @@ private fun TroubleshootingTopBar() {
 
 @Composable
 private fun GadgetActionButtons(mainViewModel: MainViewModel = viewModel()) {
+    // FIXME:
+    //  unsure what the root cause of the issue is yet, but the button always presents
+    //  in the "delete char dev" state (regardless of what the seemingly "real" state of
+    //  things is) when navigating away from and back to the screen. If not transitioning
+    //  between screens, it seems to toggle correctly.
+
     var isShowingConfirmationAlert by remember { mutableStateOf(false) }
 
     val state by mainViewModel.uiState.collectAsState()
