@@ -8,11 +8,16 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.os.Parcelable
 import android.os.Process
 import android.os.RemoteException
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ipc.RootService
+import kotlinx.parcelize.Parcelize
 import me.arianb.usb_hid_client.BuildConfig
+import me.arianb.usb_hid_client.getParcelableCompat
+import me.arianb.usb_hid_client.hid_utils.UsbGadgetService.Companion.GADGET_PREF_BUNDLE_KEY
+import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import timber.log.Timber
 import java.io.IOException
 import java.nio.file.Path
@@ -38,10 +43,23 @@ class UsbGadgetService : RootService() {
     internal class MessageHandler : Handler.Callback {
         override fun handleMessage(msg: Message): Boolean {
             Timber.d("Message received in service, running with UID = ${Process.myUid()}")
+
+            val gadgetUserPreferences: GadgetUserPreferences? = run {
+                val bundle = msg.data.apply {
+                    classLoader = GadgetUserPreferences::class.java.classLoader
+                }
+                bundle.getParcelableCompat(GADGET_PREF_BUNDLE_KEY)
+            }
+            if (gadgetUserPreferences == null) {
+                Timber.e("Failed to unmarshal GadgetUserPreferences")
+                return false
+            }
+            Timber.d("GadgetUserPreferences = $gadgetUserPreferences")
             try {
+                val usbGadgetManager = UsbGadgetManager(gadgetUserPreferences)
                 when (msg.what) {
-                    MSG_CREATE -> UsbGadgetManager.createCharacterDevices()
-                    MSG_DELETE -> UsbGadgetManager.deleteCharacterDevices()
+                    MSG_CREATE -> usbGadgetManager.createCharacterDevices()
+                    MSG_DELETE -> usbGadgetManager.deleteCharacterDevices()
                     else -> {
                         Timber.w("Unhandled message: $msg")
                         return false
@@ -69,6 +87,8 @@ class UsbGadgetService : RootService() {
     }
 
     companion object {
+        const val GADGET_PREF_BUNDLE_KEY = "data"
+
         const val MSG_CREATE = 0
         const val MSG_DELETE = 1
     }
@@ -90,13 +110,15 @@ class UsbGadgetServiceConnection : ServiceConnection {
         mService = null
     }
 
-    private fun send(messageType: Int) {
+    private fun send(messageType: Int, preferences: GadgetUserPreferences) {
         if (!isBound) {
             Timber.w("Attempted to communicate with service using unbound connection")
             return
         }
 
-        val msg = Message.obtain(null, messageType)
+        val msg = Message.obtain(null, messageType).apply {
+            data.putParcelable(GADGET_PREF_BUNDLE_KEY, preferences)
+        }
         try {
             mService!!.send(msg)
         } catch (e: RemoteException) {
@@ -104,25 +126,25 @@ class UsbGadgetServiceConnection : ServiceConnection {
         }
     }
 
-    fun createGadget() {
-        send(UsbGadgetService.MSG_CREATE)
+    fun createGadget(preferences: GadgetUserPreferences) {
+        send(UsbGadgetService.MSG_CREATE, preferences)
     }
 
-    fun deleteGadget() {
-        send(UsbGadgetService.MSG_DELETE)
+    fun deleteGadget(preferences: GadgetUserPreferences) {
+        send(UsbGadgetService.MSG_DELETE, preferences)
     }
 }
 
 // FIXME: implement CreateNewGadgetForFunctions preference
 @OptIn(ExperimentalUnsignedTypes::class)
-internal object UsbGadgetManager {
+internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences) {
     private val CONFIG_FS_PATH: Path = Path("/config/usb_gadget")
-    private val USB_GADGET_PATH: Path = determineGadgetPath() // FIXME: use preference value
+    private val USB_GADGET_PATH: Path = determineGadgetPath()
 
     private val CONFIGS_PATH: Path = USB_GADGET_PATH / "configs/b.1/"
     private val FUNCTIONS_PATH: Path = USB_GADGET_PATH / "functions/"
 
-    private data class HidFunction(
+    private inner class HidFunction(
         val name: String,
         val protocol: UByte,
         val subclass: UByte,
@@ -157,24 +179,29 @@ internal object UsbGadgetManager {
     )
 
     private fun determineGadgetPath(): Path {
-        var currentGadgetPath: Path = CONFIG_FS_PATH / "g1"
-        if (currentGadgetPath.isDirectory()) {
-            return currentGadgetPath
+        val pathsToTry: List<Path> = buildList {
+            val prefPath = gadgetUserPreferences.usbGadgetPath
+            if (prefPath.path.isNotBlank()) {
+                this.add(Path(prefPath.path))
+            }
+
+            this.add(CONFIG_FS_PATH / "g1")
+            this.add(CONFIG_FS_PATH / "g2")
         }
 
-        currentGadgetPath = CONFIG_FS_PATH / "g2"
-        if (currentGadgetPath.isDirectory()) {
-            return currentGadgetPath
+        for (path in pathsToTry) {
+            if (path.isDirectory()) {
+                return path
+            }
         }
 
         val gadgetPaths = runCatching { CONFIG_FS_PATH.listDirectoryEntries() }.getOrNull() ?: run {
             Timber.e("Failed to list directory entries at path: $CONFIG_FS_PATH")
             emptyList()
         }
-
         if (gadgetPaths.isEmpty()) {
             // TODO: This is WRONG, but it's better than a RuntimeException and I don't have better handling yet
-            return CONFIG_FS_PATH / "g1"
+            return pathsToTry.first()
         } else {
             for (path in gadgetPaths) {
                 if ((path / "UDC").isRegularFile()) {
@@ -307,4 +334,5 @@ internal object UsbGadgetManager {
 }
 
 @JvmInline
-value class UsbGadgetPath(val path: String)
+@Parcelize
+value class UsbGadgetPath(val path: String) : Parcelable

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.File
@@ -44,10 +45,10 @@ class CharacterDeviceManager private constructor(private val application: Applic
         }
     }
 
-    suspend fun createCharacterDevices() {
+    suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
         ensureServiceIsBound()
 
-        mConnection.createGadget()
+        mConnection.createGadget(gadgetUserPreferences)
 
         withContext(dispatcher) {
             fixSelinuxPermissions()
@@ -121,10 +122,10 @@ class CharacterDeviceManager private constructor(private val application: Applic
         return categories
     }
 
-    suspend fun deleteCharacterDevices() {
+    suspend fun deleteCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
         ensureServiceIsBound()
 
-        mConnection.deleteGadget()
+        mConnection.deleteGadget(gadgetUserPreferences)
 
         if (mConnection.isBound) {
             RootService.unbind(mConnection)

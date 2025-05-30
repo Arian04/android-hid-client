@@ -2,11 +2,13 @@ package me.arianb.usb_hid_client.settings
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.os.Parcelable
 import androidx.annotation.StringRes
 import androidx.preference.PreferenceManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.parcelize.Parcelize
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.KeyboardDevicePath
@@ -88,6 +90,21 @@ data class UserPreferences(
     val touchpadCharacterDevicePath: TouchpadDevicePath,
     val createNewGadgetForFunctions: Boolean,
 )
+
+@Parcelize
+data class GadgetUserPreferences(
+    val usbGadgetPath: UsbGadgetPath,
+    val createNewGadgetForFunctions: Boolean,
+) : Parcelable {
+    companion object {
+        fun fromUserPreferences(userPreferences: UserPreferences): GadgetUserPreferences {
+            return GadgetUserPreferences(
+                usbGadgetPath = userPreferences.usbGadgetPath,
+                createNewGadgetForFunctions = userPreferences.createNewGadgetForFunctions
+            )
+        }
+    }
+}
 
 class UserPreferencesRepository private constructor(application: Application) {
     private val sharedPreferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)

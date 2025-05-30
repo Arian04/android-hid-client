@@ -17,6 +17,7 @@ import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.KeySender
 import me.arianb.usb_hid_client.report_senders.LoopbackTouchpadSender
 import me.arianb.usb_hid_client.report_senders.TouchpadSender
+import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.settings.UserPreferencesRepository
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
@@ -113,7 +114,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            characterDeviceManager.createCharacterDevices()
+            val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+            characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
 
             // Re-evaluate state
             anyCharacterDeviceMissing()
@@ -127,7 +129,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            characterDeviceManager.deleteCharacterDevices()
+            val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+            characterDeviceManager.deleteCharacterDevices(gadgetUserPreferences)
 
             // Re-evaluate state
             anyCharacterDeviceMissing()
