@@ -25,6 +25,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
     private val mConnection = UsbGadgetServiceConnection()
 
+    @Throws(TimeoutCancellationException::class)
     private suspend fun ensureServiceIsBound(
         timeout: Duration = 5000.milliseconds,
         pollInterval: Duration = 500.milliseconds
@@ -46,7 +47,12 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     private suspend fun useService(block: suspend (UsbGadgetServiceConnection) -> Unit) {
-        ensureServiceIsBound()
+        try {
+            ensureServiceIsBound()
+        } catch (e: TimeoutCancellationException) {
+            Timber.e("Failed to bind service within timeout duration: $e")
+            return
+        }
 
         block(mConnection)
 
