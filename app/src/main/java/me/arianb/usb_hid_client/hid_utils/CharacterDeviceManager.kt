@@ -45,36 +45,42 @@ class CharacterDeviceManager private constructor(private val application: Applic
         }
     }
 
-    suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
+    private suspend fun useService(block: suspend (UsbGadgetServiceConnection) -> Unit) {
         ensureServiceIsBound()
 
-        mConnection.createGadget(gadgetUserPreferences)
-
-        withContext(dispatcher) {
-            fixSelinuxPermissions()
-
-            launch {
-                for (devicePath in DevicePaths.all) {
-                    try {
-                        withTimeout(3000) {
-                            // wait until the device file exists before trying to fix its permissions
-                            while (devicePath.exists()) {
-                                Timber.d("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
-                                delay(200)
-                            }
-                            Timber.d("$devicePath exists now!!!")
-                        }
-                        fixCharacterDevicePermissions(devicePath)
-                    } catch (e: TimeoutCancellationException) {
-                        // FIXME: show this error to the user
-                        Timber.e("Timed out while waiting for character device '$devicePath' to be created.")
-                    }
-                }
-            }
-        }
+        block(mConnection)
 
         if (mConnection.isBound) {
             RootService.unbind(mConnection)
+        }
+    }
+
+    suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
+        useService {
+            it.createGadget(gadgetUserPreferences)
+
+            withContext(dispatcher) {
+                fixSelinuxPermissions()
+
+                launch {
+                    for (devicePath in DevicePaths.all) {
+                        try {
+                            withTimeout(3000) {
+                                // wait until the device file exists before trying to fix its permissions
+                                while (devicePath.exists()) {
+                                    Timber.d("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
+                                    delay(200)
+                                }
+                                Timber.d("$devicePath exists now!!!")
+                            }
+                            fixCharacterDevicePermissions(devicePath)
+                        } catch (e: TimeoutCancellationException) {
+                            // FIXME: show this error to the user
+                            Timber.e("Timed out while waiting for character device '$devicePath' to be created.")
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -123,15 +129,9 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     suspend fun deleteCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
-        ensureServiceIsBound()
-
-        mConnection.deleteGadget(gadgetUserPreferences)
-
-        if (mConnection.isBound) {
-            RootService.unbind(mConnection)
+        useService {
+            it.deleteGadget(gadgetUserPreferences)
         }
-
-        return
     }
 
     @ModifiesStateDirectly
