@@ -49,15 +49,19 @@ open class TouchpadSender(
             secondByteBitSet.set(i, contactID.isBitSet(i - 4))
         }
 
-        // Turn it into a byte
-        var bitSetByteArray = secondByteBitSet.toByteArray()
-        if (bitSetByteArray.size > 1) {
-            Timber.wtf("ok guys this is not cool. bitSetByteArray.size = %d", bitSetByteArray.size)
-        } else if (bitSetByteArray.isEmpty()) {
-            Timber.wtf("ok guys this is REALLY not cool. bitSetByteArray is EMPTY somehow!!")
-            bitSetByteArray = byteArrayOf(0)
+        val secondByte: Byte = run {
+            // Turn it into a byte
+            val bitSetByteArray = secondByteBitSet.toByteArray()
+            if (bitSetByteArray.size < 1) {
+                Timber.wtf("ok guys this is REALLY not cool. bitSetByteArray is EMPTY somehow!!")
+                0
+            } else {
+                if (bitSetByteArray.isEmpty()) {
+                    Timber.wtf("ok guys this is not cool. bitSetByteArray.size = %d", bitSetByteArray.size)
+                }
+                bitSetByteArray.first()
+            }
         }
-        val secondByte: Byte = bitSetByteArray.first()
 
         val buttonByte: Byte = 0
         val vendorUsageLowByte: Byte = 0
