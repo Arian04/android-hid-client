@@ -196,10 +196,11 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             }
         }
 
-        val gadgetPaths = runCatching { CONFIG_FS_PATH.listDirectoryEntries() }.getOrNull() ?: run {
-            Timber.e("Failed to list directory entries at path: $CONFIG_FS_PATH")
+        val gadgetPaths = (runCatching { CONFIG_FS_PATH.listDirectoryEntries() }.getOrNull() ?: run {
+            Timber.e("Failed to list entries at path: $CONFIG_FS_PATH")
             emptyList()
-        }
+        }).filter { it.isDirectory() }
+        
         if (gadgetPaths.isEmpty()) {
             // TODO: This is WRONG, but it's better than a RuntimeException and I don't have better handling yet
             return pathsToTry.first()
