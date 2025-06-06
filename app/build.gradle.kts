@@ -10,9 +10,6 @@ android {
     defaultConfig {
         applicationId = "me.arianb.usb_hid_client"
 
-        // Android SDK Build Tools version
-        buildToolsVersion = "34.0.0"
-
         // SDK support
         minSdk = 26
         targetSdk = 33
@@ -53,9 +50,6 @@ android {
         buildConfig = true
         compose = true
         viewBinding = true
-    }
-    composeCompiler {
-        enableStrongSkippingMode = true
     }
     externalNativeBuild {
         cmake {
