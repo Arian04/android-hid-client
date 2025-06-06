@@ -17,6 +17,7 @@ import me.arianb.usb_hid_client.settings.AppSettings.AppThemePreference
 import me.arianb.usb_hid_client.settings.AppSettings.ClearManualInputOnSend
 import me.arianb.usb_hid_client.settings.AppSettings.DynamicColors
 import me.arianb.usb_hid_client.settings.AppSettings.ExperimentalMode
+import me.arianb.usb_hid_client.settings.AppSettings.FullyDisableGadgetDuringConfiguration
 import me.arianb.usb_hid_client.settings.AppSettings.KeyboardCharacterDevicePath
 import me.arianb.usb_hid_client.settings.AppSettings.MediaKeyPassthrough
 import me.arianb.usb_hid_client.settings.AppSettings.PreferenceCategory
@@ -89,6 +90,7 @@ fun SettingsPage() {
                 title = stringResource(R.string.device_specific_quirks_header),
                 showDivider = false
             ) {
+                FullyDisableGadgetDuringConfiguration()
                 UsbGadgetPath()
                 KeyboardCharacterDevicePath()
                 TouchpadCharacterDevicePath()
@@ -219,6 +221,15 @@ private object AppSettings {
             title = stringResource(R.string.touchpad_character_device_path),
             preference = AppPreference.TouchpadCharacterDevicePath,
             property = UserPreferences::touchpadCharacterDevicePath
+        )
+    }
+
+    @Composable
+    fun FullyDisableGadgetDuringConfiguration() {
+        SwitchPreference(
+            title = stringResource(R.string.disable_gadget_functions_during_config),
+            summary = stringResource(R.string.disable_gadget_functions_during_config_summary),
+            preference = AppPreference.DisableGadgetFunctionsDuringConfiguration
         )
     }
 }

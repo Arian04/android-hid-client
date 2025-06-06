@@ -140,6 +140,7 @@ class UsbGadgetServiceConnection : ServiceConnection {
 internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences) {
     private val CONFIG_FS_PATH: Path = Path("/config/usb_gadget")
     private val USB_GADGET_PATH: Path = determineGadgetPath()
+    private val UDC_PATH: Path = USB_GADGET_PATH / "UDC"
 
     private val CONFIGS_PATH: Path = USB_GADGET_PATH / "configs/b.1/"
     private val FUNCTIONS_PATH: Path = USB_GADGET_PATH / "functions/"
@@ -218,6 +219,34 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         //  check if symlinks already exist in configs dir bc if they do, writes will fail due to "device or resource busy",
         //  which is reasonable, since the function would be active.
 
+        val gadgetFunctionLinksToRestore: List<Pair<Path, Path>> =
+            if (gadgetUserPreferences.disableGadgetFunctionsDuringConfiguration) {
+                getGadgetFunctionLinksToRestore().apply {
+                    // Delete links
+                    forEach { (linkPath, _) ->
+                        runCatching {
+                            linkPath.deleteIfExists()
+                        }
+                    }
+                }
+            } else {
+                emptyList()
+            }
+
+        // Disable gadget before configuring it to work around possible device-specific issue
+        //
+        // Credit to @szescxz on GitHub for finding this workaround
+        //   - https://github.com/Arian04/android-hid-client/issues/50#issuecomment-2915345677
+        // Credit to @alryaz on GitHub for submitting a PR that I unfortunately couldn't accept, since it was based
+        // on outdated code from the main branch
+        //  - https://github.com/Arian04/android-hid-client/pull/64
+        try {
+            disableGadget()
+        } catch (e: IOException) {
+            Timber.e("Failed to disable usb gadget")
+            Timber.e(e)
+        }
+
         for (hidFunction in allHidFunctions) {
             try {
                 addHidFunction(hidFunction)
@@ -229,12 +258,46 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
         linkFunctionsToConfig(allHidFunctions)
 
+        gadgetFunctionLinksToRestore.forEach { (linkPath, targetPath) ->
+            runCatching {
+                linkPath.createSymbolicLinkPointingTo(targetPath)
+            }.onFailure {
+                Timber.e("ugh it didn't work, here's some info: link=$linkPath target=$targetPath")
+                Timber.e(it)
+            }
+        }
+
         try {
-            resetGadget()
+            enableGadget()
         } catch (e: IOException) {
             Timber.e("Failed to reset usb gadget")
             Timber.e(e)
         }
+    }
+
+    private fun getGadgetFunctionLinksToRestore(): List<Pair<Path, Path>> {
+        val entries: List<Path> = runCatching { CONFIGS_PATH.listDirectoryEntries() }.getOrNull() ?: run {
+            Timber.e("Failed to list directory entries at path: $CONFIGS_PATH")
+            emptyList()
+        }
+
+        Timber.i(entries.toString())
+
+        val links = entries.filter { it.isSymbolicLink() }
+        Timber.i(links.toString())
+
+        val linkPairs: List<Pair<Path, Path>> = links.mapNotNull {
+            runCatching {
+                // It is extremely important to get the real path, and not just use the link's target, because using
+                // and restoring that relative path target will fail later. I think it's due to some file system
+                // weirdness in the way ConfigFS handles symlinks (play around with `ln -s` and you'll see what I mean)
+                Pair(it, it.toRealPath())
+            }.getOrNull()
+        }
+
+        Timber.i(linkPairs.toString())
+
+        return linkPairs
     }
 
     private fun Path.writeAsString(uByte: UByte) = writeAsString(uByte.toUInt())
@@ -288,16 +351,25 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
     @Throws(IOException::class)
     private fun resetGadget() {
-        val udcPath: Path = USB_GADGET_PATH / "UDC"
+        disableGadget()
+        enableGadget()
+    }
 
-        val udc: String? = System.getProperty("sys.usb.controller")
-
-        udcPath.writer(options = arrayOf(StandardOpenOption.SYNC)).use {
+    @Throws(IOException::class)
+    private fun disableGadget() {
+        UDC_PATH.writer(options = arrayOf(StandardOpenOption.SYNC)).use {
             // For some reason, it was refusing to clear without writing a newline, other whitespace didn't seem to work.
             it.write("\n")
+        }
+    }
 
-            // This part seems to happen implicitly
-            if (udc != null) {
+    @Throws(IOException::class)
+    private fun enableGadget() {
+        val udc: String? = System.getProperty("sys.usb.controller")
+
+        if (udc != null) {
+            UDC_PATH.writer(options = arrayOf(StandardOpenOption.SYNC)).use {
+                // This part seems to happen implicitly
                 it.write(udc)
             }
         }

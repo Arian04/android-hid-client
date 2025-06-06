@@ -51,6 +51,10 @@
 
     <string name="touchpad_character_device_path">Touchpad Character Device Path</string>
 
+    <string name="disable_gadget_functions_during_config">Disable gadget functions during configuration</string>
+    <string name="disable_gadget_functions_during_config_summary">Fixes symlink creation failing with
+        \'Invalid argument\' on some devices
+    </string>
 
     <!-- Info ("About") Screen -->
     <string name="info">About</string>

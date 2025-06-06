@@ -57,6 +57,9 @@ sealed class AppPreference(val preference: PreferenceKey<*>) {
     )
 
     data object CreateNewGadgetForFunctions : BooleanPreferenceKey("create_new_gadget_for_functions", false)
+
+    data object DisableGadgetFunctionsDuringConfiguration :
+        BooleanPreferenceKey("disable_gadget_functions_during_config", false)
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -89,18 +92,21 @@ data class UserPreferences(
     val keyboardCharacterDevicePath: KeyboardDevicePath,
     val touchpadCharacterDevicePath: TouchpadDevicePath,
     val createNewGadgetForFunctions: Boolean,
+    val disableGadgetFunctionsDuringConfiguration: Boolean,
 )
 
 @Parcelize
 data class GadgetUserPreferences(
     val usbGadgetPath: UsbGadgetPath,
     val createNewGadgetForFunctions: Boolean,
+    val disableGadgetFunctionsDuringConfiguration: Boolean,
 ) : Parcelable {
     companion object {
         fun fromUserPreferences(userPreferences: UserPreferences): GadgetUserPreferences {
             return GadgetUserPreferences(
                 usbGadgetPath = userPreferences.usbGadgetPath,
-                createNewGadgetForFunctions = userPreferences.createNewGadgetForFunctions
+                createNewGadgetForFunctions = userPreferences.createNewGadgetForFunctions,
+                disableGadgetFunctionsDuringConfiguration = userPreferences.disableGadgetFunctionsDuringConfiguration,
             )
         }
     }
@@ -130,7 +136,8 @@ class UserPreferencesRepository private constructor(application: Application) {
                 usbGadgetPath = AppPreference.UsbGadgetPathPref.getValue(),
                 keyboardCharacterDevicePath = AppPreference.KeyboardCharacterDevicePath.getValue(),
                 touchpadCharacterDevicePath = AppPreference.TouchpadCharacterDevicePath.getValue(),
-                createNewGadgetForFunctions = AppPreference.CreateNewGadgetForFunctions.getValue()
+                createNewGadgetForFunctions = AppPreference.CreateNewGadgetForFunctions.getValue(),
+                disableGadgetFunctionsDuringConfiguration = AppPreference.DisableGadgetFunctionsDuringConfiguration.getValue(),
             )
         }
 
