@@ -73,7 +73,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
                     try {
                         withTimeout(3000) {
                             // wait until the device file exists before trying to fix its permissions
-                            while (devicePath.exists()) {
+                            while (!devicePath.exists()) {
                                 Timber.d("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
                                 delay(200)
                             }
