@@ -200,7 +200,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             Timber.e("Failed to list entries at path: $CONFIG_FS_PATH")
             emptyList()
         }).filter { it.isDirectory() }
-        
+
         if (gadgetPaths.isEmpty()) {
             // TODO: This is WRONG, but it's better than a RuntimeException and I don't have better handling yet
             return pathsToTry.first()
@@ -350,10 +350,18 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         }
     }
 
-    @Throws(IOException::class)
     private fun resetGadget() {
-        disableGadget()
-        enableGadget()
+        try {
+            disableGadget()
+        } catch (e: IOException) {
+            Timber.w(e, "Failed to disable USB gadget during reset procedure")
+        }
+
+        try {
+            enableGadget()
+        } catch (e: IOException) {
+            Timber.w(e, "Failed to enable USB gadget during reset procedure")
+        }
     }
 
     @Throws(IOException::class)
@@ -368,11 +376,9 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
     private fun enableGadget() {
         val udc: String? = System.getProperty("sys.usb.controller")
 
-        if (udc != null) {
-            UDC_PATH.writer(options = arrayOf(StandardOpenOption.SYNC)).use {
-                // This part seems to happen implicitly
-                it.write(udc)
-            }
+        UDC_PATH.writer(options = arrayOf(StandardOpenOption.SYNC)).use {
+            // This part seems to happen implicitly
+            it.write(udc)
         }
     }
 
@@ -391,12 +397,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             }
 
             // Apply changes
-            try {
-                resetGadget()
-            } catch (e: IOException) {
-                Timber.e("Failed to reset usb gadget")
-                Timber.e(e)
-            }
+            resetGadget()
 
             // Delete character devices
             CharacterDeviceManager.Companion.DevicePaths.all.map { Path(it.path) }.forEach {
