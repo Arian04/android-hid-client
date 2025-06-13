@@ -374,7 +374,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
     @Throws(IOException::class)
     private fun enableGadget() {
-        val udc: String? = System.getProperty("sys.usb.controller")
+        val udc = getUDC()
 
         UDC_PATH.writer(options = arrayOf(StandardOpenOption.SYNC)).use {
             // This part seems to happen implicitly
@@ -404,6 +404,46 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
                 it.deleteIfExists()
             }
         }
+    }
+
+    @Throws(IOException::class)
+    fun getUDC(): String {
+        // NOTE:
+        //  Reading the "sys.usb.controller" property will return null when (I think) the gadget is disabled.
+        //  My guess is it returns the *active* UDC, so I can't read the UDC when it's inactive. So we're doing
+        //  it this way instead.
+
+        val udcList: List<Path> = run {
+            val udcDirectoryPath = Path("/sys/class/udc")
+
+            udcDirectoryPath.listDirectoryEntries()
+        }
+        Timber.d("UDC value from file listing is: $udcList")
+
+        val udcPath: Path = if (udcList.isEmpty()) {
+            // TODO: What do we even do at this point
+            Path("")
+        } else if (udcList.size == 1) {
+            udcList.first()
+        } else {
+            // There's more than one, attempt to filter it down I guess
+            val filteredList = udcList.filter { it.isSymbolicLink() }
+
+            if (filteredList.isEmpty()) {
+                // Just use the unfiltered list I guess
+                udcList.first()
+            } else if (filteredList.size == 1) {
+                filteredList.first()
+            } else {
+                Timber.w("filtered list of UDCs has more than one, using first one: $udcList")
+
+                filteredList.first()
+            }
+        }
+
+        val udc = udcPath.name
+
+        return udc
     }
 }
 
