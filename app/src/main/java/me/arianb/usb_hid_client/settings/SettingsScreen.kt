@@ -74,6 +74,7 @@ fun SettingsPage() {
         ) {
             TouchpadFullscreenInLandscape()
             TouchpadLoopbackMode()
+            //EnablePrecisionTouchpad() // FIXME: uncomment this once it's implemented
         }
 
         // only set `showDivider = false` for the last category.
@@ -185,6 +186,15 @@ private object AppSettings {
             title = stringResource(R.string.touchpad_fullscreen_in_landscape_title),
             summary = stringResource(R.string.touchpad_fullscreen_in_landscape_summary),
             preference = AppPreference.TouchpadFullscreenInLandscape
+        )
+    }
+
+    @Composable
+    fun EnablePrecisionTouchpad() {
+        SwitchPreference(
+            title = stringResource(R.string.enable_precision_touchpad_title),
+            summary = stringResource(R.string.enable_precision_touchpad_summary),
+            preference = AppPreference.EnablePrecisionTouchpad
         )
     }
 

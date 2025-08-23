@@ -60,6 +60,8 @@ sealed class AppPreference(val preference: PreferenceKey<*>) {
 
     data object DisableGadgetFunctionsDuringConfiguration :
         BooleanPreferenceKey("disable_gadget_functions_during_config", false)
+
+    data object EnablePrecisionTouchpad : BooleanPreferenceKey("enable_precision_touchpad", false)
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -93,6 +95,7 @@ data class UserPreferences(
     val touchpadCharacterDevicePath: TouchpadDevicePath,
     val createNewGadgetForFunctions: Boolean,
     val disableGadgetFunctionsDuringConfiguration: Boolean,
+    val enablePrecisionTouchpad: Boolean,
 )
 
 @Parcelize
@@ -100,6 +103,7 @@ data class GadgetUserPreferences(
     val usbGadgetPath: UsbGadgetPath,
     val createNewGadgetForFunctions: Boolean,
     val disableGadgetFunctionsDuringConfiguration: Boolean,
+    val enablePrecisionTouchpad: Boolean,
 ) : Parcelable {
     companion object {
         fun fromUserPreferences(userPreferences: UserPreferences): GadgetUserPreferences {
@@ -107,6 +111,7 @@ data class GadgetUserPreferences(
                 usbGadgetPath = userPreferences.usbGadgetPath,
                 createNewGadgetForFunctions = userPreferences.createNewGadgetForFunctions,
                 disableGadgetFunctionsDuringConfiguration = userPreferences.disableGadgetFunctionsDuringConfiguration,
+                enablePrecisionTouchpad = userPreferences.enablePrecisionTouchpad,
             )
         }
     }
@@ -138,6 +143,7 @@ class UserPreferencesRepository private constructor(application: Application) {
                 touchpadCharacterDevicePath = AppPreference.TouchpadCharacterDevicePath.getValue(),
                 createNewGadgetForFunctions = AppPreference.CreateNewGadgetForFunctions.getValue(),
                 disableGadgetFunctionsDuringConfiguration = AppPreference.DisableGadgetFunctionsDuringConfiguration.getValue(),
+                enablePrecisionTouchpad = AppPreference.EnablePrecisionTouchpad.getValue(),
             )
         }
 
