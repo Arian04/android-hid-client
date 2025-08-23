@@ -13,7 +13,7 @@ open class TouchpadSender(
 ) : ReportSender(
     touchpadDevicePath
 ) {
-    fun send(contactID: Byte, tipSwitch: Boolean, x: Short, y: Short, scanTime: UShort, contactCount: Byte) {
+    open fun send(contactID: Byte, tipSwitch: Boolean, x: Short, y: Short, scanTime: UShort, contactCount: Byte) {
         super.addReportToChannel(
             getTouchpadReport(contactID, tipSwitch, x, y, scanTime, contactCount)
         )
@@ -34,34 +34,23 @@ open class TouchpadSender(
             0
         }
 
-        val secondByteBitSet = BitSet(8)
-        val isConfident = true
-        secondByteBitSet.set(0, isConfident)
-        secondByteBitSet.set(1, tipSwitch)
+        val secondByteBitSet = BitSet(8).apply {
+            val isConfident = true
+            set(0, isConfident)
+            set(1, tipSwitch)
 
-        // Padding
-        secondByteBitSet.clear(2)
-        secondByteBitSet.clear(3)
+            // Padding
+            clear(2)
+            clear(3)
 
-        // Contact ID
-        // Copy lower 4 bits of contactID into high 4 bits of the BitSet
-        for (i in 4..7) {
-            secondByteBitSet.set(i, contactID.isBitSet(i - 4))
-        }
-
-        val secondByte: Byte = run {
-            // Turn it into a byte
-            val bitSetByteArray = secondByteBitSet.toByteArray()
-            if (bitSetByteArray.size < 1) {
-                Timber.wtf("ok guys this is REALLY not cool. bitSetByteArray is EMPTY somehow!!")
-                0
-            } else {
-                if (bitSetByteArray.isEmpty()) {
-                    Timber.wtf("ok guys this is not cool. bitSetByteArray.size = %d", bitSetByteArray.size)
-                }
-                bitSetByteArray.first()
+            // Contact ID
+            // Copy lower 4 bits of contactID into high 4 bits of the BitSet
+            for (i in 4..7) {
+                set(i, contactID.isBitSet(i - 4))
             }
         }
+
+        val secondByte: Byte = safeBitSetToByte(secondByteBitSet)
 
         val buttonByte: Byte = 0
         val vendorUsageLowByte: Byte = 0
