@@ -4,10 +4,6 @@ import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.report_senders.safeBitSetToByte
 import java.util.BitSet
 
-// TODO:
-//  Preferably finish messing with report descriptors before v3.0.0 to minimize the number of breaking releases
-//  - remove report ID if it ends up not being necessary
-//  - overall cleanup unnecessary parts of the report descriptor
 open class TouchpadSender(
     touchpadDevicePath: TouchpadDevicePath
 ) : PointerDeviceSender(
