@@ -16,6 +16,7 @@ import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.settings.AppSettings.AppThemePreference
 import me.arianb.usb_hid_client.settings.AppSettings.ClearManualInputOnSend
 import me.arianb.usb_hid_client.settings.AppSettings.DynamicColors
+import me.arianb.usb_hid_client.settings.AppSettings.EnablePrecisionTouchpad
 import me.arianb.usb_hid_client.settings.AppSettings.ExperimentalMode
 import me.arianb.usb_hid_client.settings.AppSettings.FullyDisableGadgetDuringConfiguration
 import me.arianb.usb_hid_client.settings.AppSettings.KeyboardCharacterDevicePath
@@ -74,7 +75,7 @@ fun SettingsPage() {
         ) {
             TouchpadFullscreenInLandscape()
             TouchpadLoopbackMode()
-            //EnablePrecisionTouchpad() // FIXME: uncomment this once it's implemented
+            EnablePrecisionTouchpad()
         }
 
         // only set `showDivider = false` for the last category.

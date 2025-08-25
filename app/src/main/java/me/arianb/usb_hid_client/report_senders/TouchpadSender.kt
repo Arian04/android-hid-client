@@ -1,7 +1,6 @@
 package me.arianb.usb_hid_client.report_senders
 
 import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
-import timber.log.Timber
 import java.util.BitSet
 
 // TODO:
@@ -10,10 +9,10 @@ import java.util.BitSet
 //  - overall cleanup unnecessary parts of the report descriptor
 open class TouchpadSender(
     touchpadDevicePath: TouchpadDevicePath
-) : ReportSender(
+) : PointerDeviceSender(
     touchpadDevicePath
 ) {
-    open fun send(contactID: Byte, tipSwitch: Boolean, x: Short, y: Short, scanTime: UShort, contactCount: Byte) {
+    override fun send(contactID: Byte, tipSwitch: Boolean, x: Short, y: Short, scanTime: UShort, contactCount: Byte) {
         super.addReportToChannel(
             getTouchpadReport(contactID, tipSwitch, x, y, scanTime, contactCount)
         )

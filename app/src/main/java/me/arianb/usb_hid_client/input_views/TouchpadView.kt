@@ -23,7 +23,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
-import me.arianb.usb_hid_client.report_senders.TouchpadSender
+import me.arianb.usb_hid_client.report_senders.PointerDeviceSender
 import me.arianb.usb_hid_client.ui.utils.getColorByTheme
 import timber.log.Timber
 
@@ -42,7 +42,7 @@ class TouchpadView : AppCompatTextView {
         defStyleAttr
     )
 
-    fun setTouchListeners(touchpadSender: TouchpadSender) {
+    fun setTouchListeners(touchpadSender: PointerDeviceSender) {
         setOnTouchListener { _: View?, motionEvent: MotionEvent ->
             val (pointerID, pointerX, pointerY) = getPointerTriple(motionEvent, pointerIndex = motionEvent.actionIndex)
 
@@ -172,7 +172,7 @@ fun getScanTime(): UShort {
 /**
  * Helper function to convert between types.
  */
-fun TouchpadSender.send(
+fun PointerDeviceSender.send(
     pointerID: Int,
     tipSwitch: Boolean,
     x: Int,

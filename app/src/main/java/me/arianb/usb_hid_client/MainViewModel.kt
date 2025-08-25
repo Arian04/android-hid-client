@@ -16,6 +16,8 @@ import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.KeySender
 import me.arianb.usb_hid_client.report_senders.LoopbackTouchpadSender
+import me.arianb.usb_hid_client.report_senders.MouseSender
+import me.arianb.usb_hid_client.report_senders.PointerDeviceSender
 import me.arianb.usb_hid_client.report_senders.TouchpadSender
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.settings.UserPreferencesRepository
@@ -49,13 +51,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             KeySender(it.keyboardCharacterDevicePath)
         }
 
-    val touchpadSender: StateFlow<TouchpadSender> = userPreferencesStateFlow
+    val touchpadSender: StateFlow<PointerDeviceSender> = userPreferencesStateFlow
         .mapState {
+            // TODO:
+            //  maybe make it clear to the user that the Loopback Mode always uses precision touchpad, and that these
+            //  settings are therefore mutually exclusive.
             if (it.isLoopbackModeEnabled) {
                 fixCharacterDevicePermissions(UHID.PATH)
                 LoopbackTouchpadSender(TouchpadDevicePath(UHID.PATH))
-            } else {
+            } else if (it.enablePrecisionTouchpad) {
                 TouchpadSender(it.touchpadCharacterDevicePath)
+            } else {
+                MouseSender(it.touchpadCharacterDevicePath)
             }
         }
 
