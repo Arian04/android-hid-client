@@ -15,10 +15,10 @@ import me.arianb.usb_hid_client.hid_utils.ModifiesStateDirectly
 import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.KeySender
-import me.arianb.usb_hid_client.report_senders.LoopbackTouchpadSender
-import me.arianb.usb_hid_client.report_senders.MouseSender
-import me.arianb.usb_hid_client.report_senders.PointerDeviceSender
-import me.arianb.usb_hid_client.report_senders.TouchpadSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.LoopbackTouchpadSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.settings.UserPreferencesRepository
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder

@@ -23,7 +23,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
-import me.arianb.usb_hid_client.report_senders.PointerDeviceSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
 import me.arianb.usb_hid_client.ui.utils.getColorByTheme
 import timber.log.Timber
 
