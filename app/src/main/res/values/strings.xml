@@ -44,8 +44,7 @@
     <string name="enable_precision_touchpad_title">Enable Precision Touchpad</string>
     <string name="enable_precision_touchpad_summary">Pointer device will present itself as a touchpad, rather than a
         mouse. In other words, things like gestures will work.
-        \n\nNOTE: This currently DOES NOT work on Windows. However, it does work on Linux and Android. MacOS support is
-        unknown.
+        \n\nNOTE: This currently DOES NOT work on Windows or macOS. However, it does work on Linux and Android.
     </string>
 
     <string name="experimental_mode_title">Experimental Mode</string>
