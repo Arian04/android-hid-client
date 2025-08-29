@@ -1,0 +1,12 @@
+Features
+- USB gadget and character device logic improvements
+- Add support for "Experimental Mode", which makes several experimental options available
+- Precision Touchpad Mode (Only working when phone is connected to a Linux or Android device)
+- Experimental "Loopback Mode" for Touchpad
+
+Other Changes
+- Misc visual changes
+- Bump versions of many dependencies
+- Many, many bug fixes
+
+See the GitHub release for more details
