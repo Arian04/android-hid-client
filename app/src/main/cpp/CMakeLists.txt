@@ -12,6 +12,11 @@ cmake_minimum_required(VERSION 3.22.1)
 # build script scope).
 project("usb_hid_client")
 
+# Disable build-time-generated IDs for the purpose of Reproducible Builds
+#
+# Source: https://gitlab.com/IzzyOnDroid/repo/-/wikis/Reproducible-Builds/RB-Hints-for-Developers#no-funny-build-time-generated-ids
+add_link_options("-Wl,--build-id=none")
+
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
