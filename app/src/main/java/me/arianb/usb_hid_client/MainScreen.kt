@@ -78,7 +78,7 @@ fun MainPage(
 
     val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
     val isDeviceInLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val hideManualInput = preferences.isTouchpadFullscreenInLandscape && isDeviceInLandscape
+    val fullScreenTouchPadEnabled = preferences.isTouchpadFullscreenInLandscape && isDeviceInLandscape
 
     val padding = PaddingNormal
     BasicPage(
@@ -99,7 +99,7 @@ fun MainPage(
             CreateCharDevicesAlertDialog(showMissingCharDeviceOnStartupAlert)
         }
 
-        if (!hideManualInput) {
+        if (!fullScreenTouchPadEnabled) {
             ManualInput()
             Spacer(Modifier.height(PaddingNormal))
         }
