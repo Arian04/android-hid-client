@@ -110,7 +110,7 @@ fun ManualInput(
     }
 }
 
-fun sendInput(stringToSend: String, mainViewModel: MainViewModel) {
+private fun sendInput(stringToSend: String, mainViewModel: MainViewModel) {
     // Sends all keys
     for (char in stringToSend) {
         val scanCodes = KeyCodeTranslation.keyCharToScanCodes(char)
