@@ -7,6 +7,12 @@
     <string name="manual_input">Manual Input</string> <!-- Reused as preference category header -->
     <string name="touchpad_label">Touchpad</string> <!-- Reused as preference category header -->
     <string name="send">Send</string>
+    <string name="execute_manual_input">Execute</string>
+    <string name="save">Save</string>
+
+    <string name="select">Select</string>
+    <string name="edit">Edit</string>
+    <string name="execute_script">Execute</string>
 
     <!-- Settings Screen -->
     <string name="settings">Settings</string>
