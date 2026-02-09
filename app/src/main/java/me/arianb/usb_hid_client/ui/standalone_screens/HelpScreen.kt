@@ -71,9 +71,12 @@ private data class FaqItem(
 fun HelpPage() {
     val faqItems = remember {
         arrayOf(
-            FaqItem(R.string.help_faq_q1, R.string.help_faq_a1, hasHyperLink = true),
+            FaqItem(R.string.help_faq_q1, R.string.help_faq_a1),
             FaqItem(R.string.help_faq_q2, R.string.help_faq_a2),
-            FaqItem(R.string.help_faq_q3, R.string.help_faq_a3)
+            FaqItem(R.string.help_faq_q3, R.string.help_faq_a3),
+            FaqItem(R.string.help_faq_q4, R.string.help_faq_a4),
+            FaqItem(R.string.help_faq_q5, R.string.help_faq_a5, hasHyperLink = true),
+            FaqItem(R.string.help_faq_q6, R.string.help_faq_a6),
         )
     }
 

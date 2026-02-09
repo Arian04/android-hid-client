@@ -81,20 +81,174 @@
     <!-- Help Screen -->
     <string name="help">Help</string>
 
-    <string name="help_faq_q1">How do I report bugs or submit feature requests?</string>
-    <string name="help_faq_a1">You can create an issue <a href="https://github.com/Arian04/android-hid-client/issues">
-        here</a>. Just make sure it hasn\'t already been reported.
+    <string name="help_faq_q1">How do I use the app?</string>
+    <string name="help_faq_a1">
+        NOTE: Any information below mentioning features related to running or loading scripts will only be relevant
+        if scripting support is enabled in the settings.
+
+        \n\n> Directly use your phone as a touchpad by interacting with the \"Touchpad\".
+        \n\n> Directly use your phone as a keyboard using \"Direct Input\"
+        \n\n> Send text (inject keystroke) using \"Manual Input\" with \"Send\" button.
+        \n\n> Directly execute scripts using \"Manual Input\"  with \"Execute\" button below \"Manual Input\".
+        \n\n> Save script in \"Manual Input\" to script file with \"Save\" button
+        \n\n> Select and execute plain text script file of (.ahc, .duck, .txt) extensions using buttons below \"Script File Path\".
+        \n\n> Load the script within a selected script file onto \"Manual Input\" with the \"Edit\" button.
     </string>
 
-    <string name="help_faq_q2">How do I use the app?</string>
-    <string name="help_faq_a2">Manual Input: Type into the textbox and click the \"send\" button when you\'re done, at
-        which point the text will be typed into the connected device all at once.\n\nDirect Input: Click on the keyboard
+    <string name="help_faq_q2">Direct Input</string>
+    <string name="help_faq_a2">
+        Click on the keyboard
         icon in the top menu bar. Your keyboard should be pulled up. Now just start typing and the keys will be relayed
         to the connected device in real-time.
     </string>
 
-    <string name="help_faq_q3">The app isn\'t working properly, how do I fix it?</string>
-    <string name="help_faq_a3">First, make sure your device satisfies all prerequisites listed <a
+    <string name="help_faq_q3">Manual Input</string>
+    <string name="help_faq_a3">
+        Type into the \"Manual Input\" textbox and click the \"send\" button when you\'re done, at
+        which point the text will be typed into the connected device all at once.
+        \n\nTo allow input of special characters, and
+        modifier keys via this method \' {[X]} \' tag format can be used as follows:
+
+        \n\n   ----------------------------------------
+        \n MODIFIER KEYS
+        \n   ----------------------------------------
+        \n {[C]} for Ctrl
+        \n {[A]} for Alt
+        \n {[S]} for Shift
+        \n {[M]} for Meta/Windows key
+
+        \n\n   ----------------------------------------
+        \n SPECIAL KEYS
+        \n   ----------------------------------------
+        \n {[E]} for Escape
+        \n {[T]} for Tab
+        \n {[B]} for Backspace
+        \n {[N]} for Enter
+        \n {[U]} for Up
+        \n {[D]} for Down
+        \n {[R]} for Right
+        \n {[L]} for Left
+        \n {[1]} for F1
+        \n {[2]} for F2
+        \n {[3]} for F3
+        \n {[4]} for F4
+        \n {[5]} for F5
+        \n {[6]} for F6
+        \n {[7]} for F7
+        \n {[8]} for F8
+        \n {[9]} for F9
+        \n {[!]} for F10
+        \n {[@]} for F11
+        \n {[#]} for F12
+
+        \n\n   ----------------------------------------
+        \n COMMANDS
+        \n   ----------------------------------------
+        \n {[ ]} to sleep for 500ms (space)
+
+        \n\n   ----------------------------------------
+        \n Examples:
+        \n   ----------------------------------------
+        \n to send \"hello\":
+        \n hello
+        \n open notepad in windows:
+        \n {[M]}r{[ ]}{[ ]}notepad{[N]}
+
+        \n\nDo note that a new line in the manual input is also processed as ENTER in addition to {[N]}.
+        For a more readable solution use scripting format with the \"Execute\" button below Manual Input.
+    </string>
+
+    <string name="help_faq_q4">Scripting</string>
+    <string name="help_faq_a4">
+        The following commands and keys can be used for scripting. Some commands and keys will have multiple variations for same function
+        or key and are separated by \' , \' (comma).
+        \nDo note that only COMMANDS will take a parameter. MODIFIER KEYS and SPECIAL KEYS will not take any parameter.
+
+        \n\n   ----------------------------------------
+        \n COMMANDS:
+        \n   ----------------------------------------
+
+        \n\n //, REM                          -> comments
+        \n\n NAME                             -> name of script - treated as comment
+        \n\n DESC                             -> description of script - treated as comment
+        \n\n AUTHOR                           -> author of script - treated as comment
+        \n\n SEND, STRING                     -> sends the string passed, (Manual input \"Send\")
+        \n\n SENDLN, STRINGLN                 -> sends the string passed followed by ENTER, (Manual input \"Send\")
+        \n\n SLEEP, DELAY                     -> temporarily cease execution of script for the specified number of milliseconds
+
+
+        \n\n ----------------------------------------
+        \n MODIFIER KEYS:
+        \n   ----------------------------------------
+        \n L_CTRL, L_CONTROL, CTRL
+        \n L_ALT, ALT
+        \n L_SHIFT, SHIFT
+        \n L_META, L_WIN, META, WIN
+        \n R_CTRL, R_CONTROL
+        \n R_ALT
+        \n R_SHIFT
+        \n R_META, R_WIN
+
+        \n\n  ----------------------------------------
+        \n SPECIAL KEYS:
+        \n   ----------------------------------------
+        \n UP
+        \n DOWN
+        \n LEFT
+        \n RIGHT
+        \n ESCAPE, ESC
+        \n TAB
+        \n BACKSPACE, BACK
+        \n DELETE, DEL
+        \n PRINT
+        \n SPACE
+        \n ENTER
+        \n SCROLL_LOCK
+        \n NUM_LOCK
+        \n PAUSE
+        \n INSERT
+        \n HOME
+        \n END
+        \n PAGE_UP, PG_UP
+        \n PAGE_DOWN, PG_DOWN
+        \n NEXT
+        \n PREVIOUS, PREV
+        \n PLAY_PAUSE, PLAY, PP
+        \n VOLUME_UP, VOL_UP
+        \n VOLUME_DOWN, VOL_DOWN
+        \n F1
+        \n F2
+        \n F3
+        \n F4
+        \n F5
+        \n F6
+        \n F7
+        \n F8
+        \n F9
+        \n F10
+        \n F11
+        \n F12
+
+
+        \n\n   ----------------------------------------
+        \n Example Script:
+        \n   ----------------------------------------
+        \n // Script To open notepad in windows:
+        \n WIN
+        \n SEND r
+        \n DELAY 1000
+        \n SEND notepad
+        \n ENTER
+        \n   ----------------------------------------
+    </string>
+
+    <string name="help_faq_q5">How do I report bugs or submit feature requests?</string>
+    <string name="help_faq_a5">You can create an issue <a href="https://github.com/Arian04/android-hid-client/issues">
+        here</a>. Just make sure it hasn\'t already been reported.
+    </string>
+
+    <string name="help_faq_q6">The app isn\'t working properly, how do I fix it?</string>
+    <string name="help_faq_a6">First, make sure your device satisfies all prerequisites listed <a
         href="https://github.com/Arian04/android-hid-client#prerequisites">here
     </a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report
         as explained above.
