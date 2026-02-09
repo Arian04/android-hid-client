@@ -27,17 +27,17 @@ class UsbGadgetServiceConnection : ServiceConnection {
 
     private fun send(messageType: Int, preferences: GadgetUserPreferences) {
         if (!isBound) {
-            Timber.Forest.w("Attempted to communicate with service using unbound connection")
+            Timber.w("Attempted to communicate with service using unbound connection")
             return
         }
 
         val msg = Message.obtain(null, messageType).apply {
-            data.putParcelable(UsbGadgetService.Companion.GADGET_PREF_BUNDLE_KEY, preferences)
+            data.putParcelable(UsbGadgetService.GADGET_PREF_BUNDLE_KEY, preferences)
         }
         try {
             mService!!.send(msg)
         } catch (e: RemoteException) {
-            Timber.Forest.e(e)
+            Timber.e(e)
         }
     }
 

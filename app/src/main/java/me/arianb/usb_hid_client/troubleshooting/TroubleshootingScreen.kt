@@ -6,7 +6,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,7 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -195,7 +206,8 @@ private fun GadgetStatusItem(
     )
 
     if (isShowingInfoAlert) {
-        val clipboardManager = LocalClipboardManager.current
+        val clipboardManager = LocalClipboard.current.nativeClipboard
+
         AlertDialog(
             title = { Text(title) },
             text = { CodeText(extraInfo) },
@@ -203,7 +215,7 @@ private fun GadgetStatusItem(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        clipboardManager.setText(extraInfo)
+                        clipboardManager.text = extraInfo
                         //isShowingInfoAlert = false // TODO: should I close the dialog when text is copied or not?
                     }
                 ) {
