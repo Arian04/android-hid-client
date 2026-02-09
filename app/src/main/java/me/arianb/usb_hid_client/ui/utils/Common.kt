@@ -29,6 +29,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -147,25 +149,15 @@ fun LabeledCategory(
 }
 
 /**
- * Get text color as Int based on current app theme. This is meant to be used for
+ * Get text color as an ARGB Int based on current app theme. This is meant to be used for
  * legacy TextViews still present in the app, since they seem to only set their text color
  * based on the system theme.
  */
 @Composable
-fun getColorByTheme(settingsViewModel: SettingsViewModel = viewModel()): Int? {
-    val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
+fun getColorByTheme(): Int {
+    val textColor: Color = MaterialTheme.colorScheme.onSurface
 
-    // These hex values are the colors that Android would set the text to by default during my testing
-    val textColor: Int? = when (preferences.appTheme) {
-        AppTheme.DarkMode -> 0xB3FFFFFF.toInt()
-        AppTheme.LightMode -> 0x8A000000.toInt()
-        else -> {
-            // Just let the system sort it out
-            null
-        }
-    }
-
-    return textColor
+    return textColor.toArgb()
 }
 
 @Preview(
