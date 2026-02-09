@@ -17,6 +17,7 @@ import me.arianb.usb_hid_client.settings.AppSettings.AppThemePreference
 import me.arianb.usb_hid_client.settings.AppSettings.ClearManualInputOnSend
 import me.arianb.usb_hid_client.settings.AppSettings.DynamicColors
 import me.arianb.usb_hid_client.settings.AppSettings.EnablePrecisionTouchpad
+import me.arianb.usb_hid_client.settings.AppSettings.EnableScriptingSupport
 import me.arianb.usb_hid_client.settings.AppSettings.ExperimentalMode
 import me.arianb.usb_hid_client.settings.AppSettings.FullyDisableGadgetDuringConfiguration
 import me.arianb.usb_hid_client.settings.AppSettings.KeyboardCharacterDevicePath
@@ -69,6 +70,7 @@ fun SettingsPage() {
             title = stringResource(R.string.manual_input),
         ) {
             ClearManualInputOnSend()
+            EnableScriptingSupport()
         }
         PreferenceCategory(
             title = stringResource(R.string.touchpad_label),
@@ -241,6 +243,15 @@ private object AppSettings {
             title = stringResource(R.string.disable_gadget_functions_during_config),
             summary = stringResource(R.string.disable_gadget_functions_during_config_summary),
             preference = AppPreference.DisableGadgetFunctionsDuringConfiguration
+        )
+    }
+
+    @Composable
+    fun EnableScriptingSupport() {
+        SwitchPreference(
+            title = stringResource(R.string.enable_scripting_support_title),
+            summary = stringResource(R.string.enable_scripting_support_summary),
+            preference = AppPreference.EnableScriptingSupport
         )
     }
 }

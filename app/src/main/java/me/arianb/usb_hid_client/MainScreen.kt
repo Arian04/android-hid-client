@@ -38,7 +38,9 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import me.arianb.usb_hid_client.input_views.DirectInput
 import me.arianb.usb_hid_client.input_views.DirectInputIconButton
 import me.arianb.usb_hid_client.input_views.ManualInput
+import me.arianb.usb_hid_client.input_views.scripting.ScriptsDisplayView
 import me.arianb.usb_hid_client.input_views.Touchpad
+import me.arianb.usb_hid_client.input_views.scripting.ManualInputForScripting
 import me.arianb.usb_hid_client.settings.SettingsScreen
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
@@ -100,8 +102,14 @@ fun MainPage(
         }
 
         if (!fullScreenTouchPadEnabled) {
-            ManualInput()
-            Spacer(Modifier.height(PaddingNormal))
+
+            if(preferences.enableScriptingSupport) {
+                ManualInputForScripting()
+                ScriptsDisplayView()
+            } else {
+                ManualInput()
+                Spacer(Modifier.height(PaddingNormal))
+            }
         }
 
         // This has to be here, if I move it below Touchpad(), it never gets focused. I think it's because it ends up

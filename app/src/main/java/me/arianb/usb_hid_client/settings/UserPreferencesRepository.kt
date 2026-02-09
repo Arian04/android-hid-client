@@ -62,6 +62,8 @@ sealed class AppPreference(val preference: PreferenceKey<*>) {
         BooleanPreferenceKey("disable_gadget_functions_during_config", false)
 
     data object EnablePrecisionTouchpad : BooleanPreferenceKey("enable_precision_touchpad", false)
+
+    data object EnableScriptingSupport: BooleanPreferenceKey("enable_scripting_support", false)
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -96,6 +98,7 @@ data class UserPreferences(
     val createNewGadgetForFunctions: Boolean,
     val disableGadgetFunctionsDuringConfiguration: Boolean,
     val enablePrecisionTouchpad: Boolean,
+    val enableScriptingSupport: Boolean,
 )
 
 @Parcelize
@@ -144,6 +147,7 @@ class UserPreferencesRepository private constructor(application: Application) {
                 createNewGadgetForFunctions = AppPreference.CreateNewGadgetForFunctions.getValue(),
                 disableGadgetFunctionsDuringConfiguration = AppPreference.DisableGadgetFunctionsDuringConfiguration.getValue(),
                 enablePrecisionTouchpad = AppPreference.EnablePrecisionTouchpad.getValue(),
+                enableScriptingSupport = AppPreference.EnableScriptingSupport.getValue(),
             )
         }
 

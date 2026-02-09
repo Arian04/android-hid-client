@@ -68,6 +68,9 @@
         \'Invalid argument\' on some devices
     </string>
 
+    <string name="enable_scripting_support_title">Enable scripting support</string>
+    <string name="enable_scripting_support_summary">See "Help" page for more information</string>
+
     <!-- Info ("About") Screen -->
     <string name="info">About</string>
 
