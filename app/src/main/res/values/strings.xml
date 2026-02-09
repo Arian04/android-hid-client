@@ -246,14 +246,15 @@
     </string>
 
     <string name="help_faq_q5">How do I report bugs or submit feature requests?</string>
-    <string name="help_faq_a5">You can create an issue <a href="https://github.com/Arian04/android-hid-client/issues">
-        here</a>. Just make sure it hasn\'t already been reported.
+    <string name="help_faq_a5">You can create an issue
+        <a href="https://github.com/Arian04/android-hid-client/issues">here</a>.
+        Just make sure it hasn\'t already been reported.
     </string>
 
     <string name="help_faq_q6">The app isn\'t working properly, how do I fix it?</string>
-    <string name="help_faq_a6">First, make sure your device satisfies all prerequisites listed <a
-        href="https://github.com/Arian04/android-hid-client#prerequisites">here
-    </a> and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report
+    <string name="help_faq_a6">First, make sure your device satisfies all prerequisites listed
+        <a href="https://github.com/Arian04/android-hid-client#prerequisites">here</a>
+        and read the above answer about how to use the app. If that doesn\'t work, I recommend submitting a bug report
         as explained above.
     </string>
 
