@@ -76,7 +76,7 @@ fun HelpPage() {
             FaqItem(R.string.help_faq_q3, R.string.help_faq_a3),
             FaqItem(R.string.help_faq_q4, R.string.help_faq_a4),
             FaqItem(R.string.help_faq_q5, R.string.help_faq_a5, hasHyperLink = true),
-            FaqItem(R.string.help_faq_q6, R.string.help_faq_a6),
+            FaqItem(R.string.help_faq_q6, R.string.help_faq_a6, hasHyperLink = true),
         )
     }
 
