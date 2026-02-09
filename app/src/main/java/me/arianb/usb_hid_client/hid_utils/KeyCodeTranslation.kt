@@ -62,10 +62,15 @@ object KeyCodeTranslation {
                 (1st pass): {[S]}      // Do note that the {[X]} format for special & modifier keys are being handled by the ManualInput.sendInput()
                 (2nd pass): a
          */
-        private var keyCharToScanCodes_modifier: Byte = 0x0;             // allows the use of modifier for next use of method
-        private var keyCharToScanCodes_isModifierUsed: Boolean = false;  // allows the use of modifier for next use of method
+
+        // allows the use of modifier for next use of method
+        private var keyCharToScanCodes_modifier: Byte = 0x0
+        private var keyCharToScanCodes_isModifierUsed: Boolean = false
+
         fun keyCharToScanCodes(key: String): Pair<Byte, Byte>? {
-            if (key.isEmpty()) {return Pair(0x0, 0x0)}
+            if (key.isEmpty()) {
+                return Pair(0x0, 0x0)
+            }
 
             var keyScanCode: Byte?
 
