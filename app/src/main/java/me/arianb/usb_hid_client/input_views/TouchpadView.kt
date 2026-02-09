@@ -220,9 +220,7 @@ fun Touchpad(mainViewModel: MainViewModel = viewModel()) {
                 }
             },
             update = {
-                if (textColor != null) {
-                    it.setTextColor(textColor)
-                }
+                it.setTextColor(textColor)
             }
         )
     }

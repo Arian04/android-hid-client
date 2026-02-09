@@ -207,9 +207,7 @@ fun ComposeTextView(
         },
         update = {
             it.text = text
-            if (textColor != null) {
-                it.setTextColor(textColor)
-            }
+            it.setTextColor(textColor)
         }
     )
 }
