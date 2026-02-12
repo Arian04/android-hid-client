@@ -18,8 +18,8 @@ android {
         compileSdk = 36
 
         // App Versioning
-        versionCode = 302
-        versionName = "v3.0.2"
+        versionCode = 310
+        versionName = "v3.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -73,7 +73,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    
+
     lint {
         checkAllWarnings = true
 
