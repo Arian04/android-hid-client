@@ -116,34 +116,46 @@ private fun getPointerTriple(motionEvent: MotionEvent, pointerIndex: Int): Tripl
     val yMax: Float = device?.getMotionRange(MotionEvent.AXIS_Y)?.max ?: 3000f
     // --- end of unsafe code ---
 
-    // Get device rotation because if the device is suddenly a wide rectangle instead of a tall rectangle, then the
-    // math changes.
-    val isRotated = motionEvent.orientation != 0f
+    // The underlying touchpad report descriptor says it's physically "portrait" (taller than it is wide, like a phone).
+    // If the device itself is actually wider than it is tall ("landscape"), we need to know, so we can adjust the math.
+    //
+    // Note:
+    //  We cannot just swap x and y values to fix things, because the target device needs to know what physical
+    //  directions the user is inputting. Otherwise, things like an upward swipe gesture, might be registered as a swipe
+    //  to the right or left instead.
+    //
+    // FIXME: this logic is incorrect, i just need to grab true device orientation
+    val isPortrait = motionEvent.orientation == 0f
+
+    Timber.d("motionEvent.orientation = %f", motionEvent.orientation)
 
     val (pointerX, pointerY) = adjustRange(
         point = Pair(rawPointerX.toInt(), rawPointerY.toInt()),
         max = Pair(xMax, yMax),
-        isRotated
+        isPortrait
     )
 
     return Triple(pointerID, pointerX, pointerY)
 }
 
 // "Stretches" the values of the points to use up the entire logical range.
-private fun adjustRange(point: Pair<Int, Int>, max: Pair<Float, Float>, isRotated: Boolean): Pair<Int, Int> {
+private fun adjustRange(point: Pair<Int, Int>, max: Pair<Float, Float>, isPortrait: Boolean): Pair<Int, Int> {
+    Timber.d("--- adjustRange ---")
+    Timber.d("Input point: %s", point)
+    Timber.d("isPortrait: %b", isPortrait)
     Timber.d("DEVICE COORDINATE MAX = (%f, %f)", max.first, max.second)
 
-    val (logicalMaxX, logicalMaxY) = if (isRotated) {
+    val (logicalMaxX, logicalMaxY) = if (isPortrait) {
+        Pair(2500, 5000)
+    } else {
         // This works, but I'm not sure if it's okay to just be sending values higher than the logical maximum
         Pair(5000, 2500)
-    } else {
-        Pair(2500, 5000)
     }
 
-    val (pointerMaxX, pointerMaxY) = if (isRotated) {
-        Pair(max.second, max.first)
-    } else {
+    val (pointerMaxX, pointerMaxY) = if (isPortrait) {
         max
+    } else {
+        Pair(max.second, max.first)
     }
 
     val xRatio: Float = logicalMaxX / pointerMaxX
