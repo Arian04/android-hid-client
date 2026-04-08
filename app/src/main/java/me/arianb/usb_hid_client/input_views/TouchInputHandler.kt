@@ -95,116 +95,118 @@ private class TouchInputHandler {
 
         return true
     }
-}
 
-private fun getPointerTriple(
-    motionEvent: MotionEvent,
-    pointerIndex: Int,
-    deviceOrientation: Int
-): Triple<Int, Int, Int> {
-    val pointerID = motionEvent.getPointerId(pointerIndex)
+    private companion object {
+        private fun getPointerTriple(
+            motionEvent: MotionEvent,
+            pointerIndex: Int,
+            deviceOrientation: Int
+        ): Triple<Int, Int, Int> {
+            val pointerID = motionEvent.getPointerId(pointerIndex)
 
-    val (rawPointerX, rawPointerY) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        Pair(motionEvent.getRawX(pointerIndex), motionEvent.getRawY(pointerIndex))
-    } else {
-        Pair(motionEvent.getX(pointerIndex), motionEvent.getY(pointerIndex))
+            val (rawPointerX, rawPointerY) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                Pair(motionEvent.getRawX(pointerIndex), motionEvent.getRawY(pointerIndex))
+            } else {
+                Pair(motionEvent.getX(pointerIndex), motionEvent.getY(pointerIndex))
+            }
+
+            // NOTE: MotionEvent has a bunch of properties (and properties of those properties) which are platform types.
+            //       I'm writing this note to be explicit about the fact that the following code should be treated cautiously so
+            //       as to not cause NPEs.
+            // --- start of unsafe code ---
+            val device: InputDevice? = motionEvent.device
+
+            // If null, just use some hardcoded safe-ish values
+            val xMax: Float = device?.getMotionRange(MotionEvent.AXIS_X)?.max ?: 1500f
+            val yMax: Float = device?.getMotionRange(MotionEvent.AXIS_Y)?.max ?: 3000f
+            // --- end of unsafe code ---
+
+            // The underlying touchpad report descriptor says it's physically "portrait" (taller than it is wide, like a phone).
+            // If the device itself is actually wider than it is tall ("landscape"), we need to know, so we can adjust the math.
+            //
+            // Note:
+            //  We cannot just swap x and y values to fix things, because the target device needs to know what physical
+            //  directions the user is inputting. Otherwise, things like an upward swipe gesture, might be registered as a swipe
+            //  to the right or left instead.
+            //
+            // If orientation is ORIENTATION_PORTRAIT or ORIENTATION_UNKNOWN or just anything other than landscape, treat it
+            // as being in portrait.
+            val isPortrait = deviceOrientation != ORIENTATION_LANDSCAPE
+
+            Timber.d("motionEvent.orientation = %f", motionEvent.orientation)
+
+            val (pointerX, pointerY) = adjustRange(
+                point = Pair(rawPointerX.toInt(), rawPointerY.toInt()),
+                max = Pair(xMax, yMax),
+                isPortrait
+            )
+
+            return Triple(pointerID, pointerX, pointerY)
+        }
+
+        // "Stretches" the values of the points to use up the entire logical range.
+        private fun adjustRange(point: Pair<Int, Int>, max: Pair<Float, Float>, isPortrait: Boolean): Pair<Int, Int> {
+            Timber.d("--- adjustRange ---")
+            Timber.d("Input point: %s", point)
+            Timber.d("isPortrait: %b", isPortrait)
+            Timber.d("DEVICE COORDINATE MAX = (%f, %f)", max.first, max.second)
+
+            val (logicalMaxX, logicalMaxY) = if (isPortrait) {
+                Pair(2500, 5000)
+            } else {
+                // This works, but I'm not sure if it's okay to just be sending values higher than the logical maximum
+                Pair(5000, 2500)
+            }
+
+            val (pointerMaxX, pointerMaxY) = if (isPortrait) {
+                max
+            } else {
+                Pair(max.second, max.first)
+            }
+
+            val xRatio: Float = logicalMaxX / pointerMaxX
+            val yRatio: Float = logicalMaxY / pointerMaxY
+
+            val adjustedX = (point.first * xRatio).toInt()
+            val adjustedY = (point.second * yRatio).toInt()
+
+            // This will probably never actually be necessary, but might as well do it just in case.
+            val finalX = adjustedX.coerceIn(0, logicalMaxX)
+            val finalY = adjustedY.coerceIn(0, logicalMaxY)
+
+            return Pair(finalX, finalY)
+        }
+
+        private fun getScanTime(): UShort {
+            // Convert nanoseconds to microseconds
+            val microTime = System.nanoTime() / 1000
+
+            // Convert microseconds to 100s of microseconds
+            val hundredMicroTime = microTime / 100
+
+            return hundredMicroTime.toUShort()
+        }
+
+        /**
+         * Helper function to convert between types.
+         */
+        private fun PointerDeviceSender.send(
+            pointerID: Int,
+            tipSwitch: Boolean,
+            x: Int,
+            y: Int,
+            currentScanTime: UShort,
+            pointerCount: Int
+        ) = send(
+            pointerID.toByte(),
+            tipSwitch,
+            x.toShort(),
+            y.toShort(),
+            currentScanTime,
+            pointerCount.toByte()
+        )
     }
-
-    // NOTE: MotionEvent has a bunch of properties (and properties of those properties) which are platform types.
-    //       I'm writing this note to be explicit about the fact that the following code should be treated cautiously so
-    //       as to not cause NPEs.
-    // --- start of unsafe code ---
-    val device: InputDevice? = motionEvent.device
-
-    // If null, just use some hardcoded safe-ish values
-    val xMax: Float = device?.getMotionRange(MotionEvent.AXIS_X)?.max ?: 1500f
-    val yMax: Float = device?.getMotionRange(MotionEvent.AXIS_Y)?.max ?: 3000f
-    // --- end of unsafe code ---
-
-    // The underlying touchpad report descriptor says it's physically "portrait" (taller than it is wide, like a phone).
-    // If the device itself is actually wider than it is tall ("landscape"), we need to know, so we can adjust the math.
-    //
-    // Note:
-    //  We cannot just swap x and y values to fix things, because the target device needs to know what physical
-    //  directions the user is inputting. Otherwise, things like an upward swipe gesture, might be registered as a swipe
-    //  to the right or left instead.
-    //
-    // If orientation is ORIENTATION_PORTRAIT or ORIENTATION_UNKNOWN or just anything other than landscape, treat it
-    // as being in portrait.
-    val isPortrait = deviceOrientation != ORIENTATION_LANDSCAPE
-
-    Timber.d("motionEvent.orientation = %f", motionEvent.orientation)
-
-    val (pointerX, pointerY) = adjustRange(
-        point = Pair(rawPointerX.toInt(), rawPointerY.toInt()),
-        max = Pair(xMax, yMax),
-        isPortrait
-    )
-
-    return Triple(pointerID, pointerX, pointerY)
 }
-
-// "Stretches" the values of the points to use up the entire logical range.
-private fun adjustRange(point: Pair<Int, Int>, max: Pair<Float, Float>, isPortrait: Boolean): Pair<Int, Int> {
-    Timber.d("--- adjustRange ---")
-    Timber.d("Input point: %s", point)
-    Timber.d("isPortrait: %b", isPortrait)
-    Timber.d("DEVICE COORDINATE MAX = (%f, %f)", max.first, max.second)
-
-    val (logicalMaxX, logicalMaxY) = if (isPortrait) {
-        Pair(2500, 5000)
-    } else {
-        // This works, but I'm not sure if it's okay to just be sending values higher than the logical maximum
-        Pair(5000, 2500)
-    }
-
-    val (pointerMaxX, pointerMaxY) = if (isPortrait) {
-        max
-    } else {
-        Pair(max.second, max.first)
-    }
-
-    val xRatio: Float = logicalMaxX / pointerMaxX
-    val yRatio: Float = logicalMaxY / pointerMaxY
-
-    val adjustedX = (point.first * xRatio).toInt()
-    val adjustedY = (point.second * yRatio).toInt()
-
-    // This will probably never actually be necessary, but might as well do it just in case.
-    val finalX = adjustedX.coerceIn(0, logicalMaxX)
-    val finalY = adjustedY.coerceIn(0, logicalMaxY)
-
-    return Pair(finalX, finalY)
-}
-
-fun getScanTime(): UShort {
-    // Convert nanoseconds to microseconds
-    val microTime = System.nanoTime() / 1000
-
-    // Convert microseconds to 100s of microseconds
-    val hundredMicroTime = microTime / 100
-
-    return hundredMicroTime.toUShort()
-}
-
-/**
- * Helper function to convert between types.
- */
-fun PointerDeviceSender.send(
-    pointerID: Int,
-    tipSwitch: Boolean,
-    x: Int,
-    y: Int,
-    currentScanTime: UShort,
-    pointerCount: Int
-) = send(
-    pointerID.toByte(),
-    tipSwitch,
-    x.toShort(),
-    y.toShort(),
-    currentScanTime,
-    pointerCount.toByte()
-)
 
 @Composable
 fun Touchpad(
