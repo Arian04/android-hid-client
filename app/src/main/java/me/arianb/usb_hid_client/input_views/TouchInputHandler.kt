@@ -1,102 +1,107 @@
 package me.arianb.usb_hid_client.input_views
 
-import android.annotation.SuppressLint
-import android.content.Context
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.os.Build
-import android.util.AttributeSet
-import android.view.Gravity
 import android.view.InputDevice
 import android.view.MotionEvent
-import android.view.View
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
-import me.arianb.usb_hid_client.ui.utils.getColorByTheme
 import timber.log.Timber
 
-// LEGACY: migrate this to Compose
-
-// From my understanding of this lint warning, I don't think it applies here.
-@SuppressLint("ClickableViewAccessibility")
-class TouchpadView : AppCompatTextView {
+private class TouchInputHandler {
     private var currentScanTime: UShort = getScanTime()
 
-    constructor(context: Context) : super(context)
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    )
+    fun handleTouchMotionEvent(
+        touchpadSender: PointerDeviceSender,
+        motionEvent: MotionEvent,
+        deviceOrientation: Int,
+    ): Boolean {
+        val (pointerID, pointerX, pointerY) = getPointerTriple(
+            motionEvent,
+            motionEvent.actionIndex,
+            deviceOrientation
+        )
 
-    fun setTouchListeners(touchpadSender: PointerDeviceSender) {
-        setOnTouchListener { _: View?, motionEvent: MotionEvent ->
-            val (pointerID, pointerX, pointerY) = getPointerTriple(motionEvent, pointerIndex = motionEvent.actionIndex)
-
-            // Scan time is reset when pointer 0 is sent
-            if (pointerID == 0) {
-                currentScanTime = getScanTime()
-            }
-
-            val pointerCount = motionEvent.pointerCount
-            when (val action = motionEvent.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    Timber.v("Action Down")
-                    touchpadSender.send(pointerID, true, pointerX, pointerY, currentScanTime, pointerCount)
-                }
-
-                MotionEvent.ACTION_POINTER_DOWN -> {
-                    Timber.v("Action Pointer Down")
-                    touchpadSender.send(pointerID, true, pointerX, pointerY, currentScanTime, pointerCount)
-                }
-
-                MotionEvent.ACTION_MOVE -> {
-                    Timber.v("Action Move")
-                    for (index in 0..<pointerCount) {
-                        val (thisID, thisX, thisY) = getPointerTriple(motionEvent, index)
-
-                        touchpadSender.send(thisID, true, thisX, thisY, currentScanTime, pointerCount)
-                    }
-                }
-
-                MotionEvent.ACTION_UP -> {
-                    Timber.v("Action Up")
-                    touchpadSender.send(pointerID, false, pointerX, pointerY, currentScanTime, pointerCount)
-                }
-
-                MotionEvent.ACTION_POINTER_UP -> {
-                    Timber.v("Action Pointer Up")
-                    touchpadSender.send(pointerID, false, pointerX, pointerY, currentScanTime, pointerCount)
-                }
-
-                MotionEvent.ACTION_CANCEL -> {
-                    Timber.v("Action Cancel")
-                    touchpadSender.send(pointerID, false, pointerX, pointerY, currentScanTime, pointerCount)
-                }
-
-                else -> {
-                    Timber.w("UNHANDLED ACTION CONSTANT: %s", action)
-                }
-            }
-            true
+        // Scan time is reset when pointer 0 is sent
+        if (pointerID == 0) {
+            currentScanTime = getScanTime()
         }
+
+        val pointerCount = motionEvent.pointerCount
+        when (val action = motionEvent.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                Timber.v("Action Down")
+                touchpadSender.send(pointerID, true, pointerX, pointerY, currentScanTime, pointerCount)
+            }
+
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                Timber.v("Action Pointer Down")
+                touchpadSender.send(pointerID, true, pointerX, pointerY, currentScanTime, pointerCount)
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                Timber.v("Action Move")
+                for (index in 0..<pointerCount) {
+                    val (thisID, thisX, thisY) = getPointerTriple(motionEvent, index, deviceOrientation)
+
+                    touchpadSender.send(thisID, true, thisX, thisY, currentScanTime, pointerCount)
+                }
+            }
+
+            MotionEvent.ACTION_UP -> {
+                Timber.v("Action Up")
+                touchpadSender.send(
+                    pointerID, false, pointerX, pointerY, currentScanTime, pointerCount
+                )
+            }
+
+            MotionEvent.ACTION_POINTER_UP -> {
+                Timber.v("Action Pointer Up")
+                touchpadSender.send(pointerID, false, pointerX, pointerY, currentScanTime, pointerCount)
+            }
+
+            MotionEvent.ACTION_CANCEL -> {
+                Timber.v("Action Cancel")
+                touchpadSender.send(pointerID, false, pointerX, pointerY, currentScanTime, pointerCount)
+            }
+
+            else -> {
+                Timber.w("UNHANDLED ACTION CONSTANT: %s", action)
+            }
+        }
+
+        return true
     }
 }
 
-private fun getPointerTriple(motionEvent: MotionEvent, pointerIndex: Int): Triple<Int, Int, Int> {
+private fun getPointerTriple(
+    motionEvent: MotionEvent,
+    pointerIndex: Int,
+    deviceOrientation: Int
+): Triple<Int, Int, Int> {
     val pointerID = motionEvent.getPointerId(pointerIndex)
 
     val (rawPointerX, rawPointerY) = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -124,8 +129,9 @@ private fun getPointerTriple(motionEvent: MotionEvent, pointerIndex: Int): Tripl
     //  directions the user is inputting. Otherwise, things like an upward swipe gesture, might be registered as a swipe
     //  to the right or left instead.
     //
-    // FIXME: this logic is incorrect, i just need to grab true device orientation
-    val isPortrait = motionEvent.orientation == 0f
+    // If orientation is ORIENTATION_PORTRAIT or ORIENTATION_UNKNOWN or just anything other than landscape, treat it
+    // as being in portrait.
+    val isPortrait = deviceOrientation != ORIENTATION_LANDSCAPE
 
     Timber.d("motionEvent.orientation = %f", motionEvent.orientation)
 
@@ -201,39 +207,48 @@ fun PointerDeviceSender.send(
 )
 
 @Composable
-fun Touchpad(mainViewModel: MainViewModel = viewModel()) {
-    val touchpadText = stringResource(R.string.touchpad_label)
-    val touchpadSender by mainViewModel.touchpadSender.collectAsState()
+fun Touchpad(
+    mainViewModel: MainViewModel = viewModel()
+) {
+    val pointerDeviceSender by mainViewModel.touchpadSender.collectAsState()
 
-    val textColor = getColorByTheme()
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceAround,
+    ) {
+        TouchpadContactSurfaceArea(modifier = Modifier.weight(1f), pointerDeviceSender)
+    }
+}
+
+@Composable
+private fun TouchpadContactSurfaceArea(
+    modifier: Modifier = Modifier,
+    touchpadSender: PointerDeviceSender,
+) {
+    val touchInputHandler = remember { TouchInputHandler() }
+
+    val deviceOrientation = LocalConfiguration.current.orientation
 
     Surface(
         modifier = Modifier
-//            .pointerInput(Unit) {
-//
-//            }
-            .fillMaxSize(),
+            .fillMaxSize()
+            .pointerInteropFilter { motionEvent: MotionEvent ->
+                touchInputHandler.handleTouchMotionEvent(
+                    touchpadSender,
+                    motionEvent,
+                    deviceOrientation,
+                )
+            }
+            .then(modifier),
         color = MaterialTheme.colorScheme.background,
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
     ) {
-        // For when I want to Compose-ify this
-//        Text(
-//            text = stringResource(R.string.touchpad_label),
-//            modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
-//            textAlign = TextAlign.Center
-//        )
-        AndroidView(
-            factory = { context ->
-                TouchpadView(context).apply {
-                    text = touchpadText
-                    textSize = 22f
-                    gravity = Gravity.CENTER
-                    setTouchListeners(touchpadSender)
-                }
-            },
-            update = {
-                it.setTextColor(textColor)
-            }
+        Text(
+            text = stringResource(R.string.touchpad_label),
+            modifier = Modifier.wrapContentHeight(Alignment.CenterVertically),
+            textAlign = TextAlign.Center
         )
     }
 }
