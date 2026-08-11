@@ -4,14 +4,15 @@ import android.content.res.Configuration
 import android.os.Build
 import android.view.InputDevice
 import android.view.MotionEvent
-import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
 import timber.log.Timber
 
-class TouchInputHandler {
+class TouchInputHandler(
+    private val touchpadSender: TouchpadSender
+) : PointerDeviceInputHandler() {
     private var currentScanTime: UShort = getScanTime()
 
     fun handleTouchMotionEvent(
-        touchpadSender: PointerDeviceSender,
         motionEvent: MotionEvent,
         deviceOrientation: Int,
     ): Boolean {
@@ -194,24 +195,5 @@ class TouchInputHandler {
 
             return hundredMicroTime.toUShort()
         }
-
-        /**
-         * Helper function to convert between types.
-         */
-        private fun PointerDeviceSender.send(
-            pointerID: Int,
-            tipSwitch: Boolean,
-            x: Int,
-            y: Int,
-            currentScanTime: UShort,
-            pointerCount: Int
-        ) = send(
-            pointerID.toByte(),
-            tipSwitch,
-            x.toShort(),
-            y.toShort(),
-            currentScanTime,
-            pointerCount.toByte()
-        )
     }
 }

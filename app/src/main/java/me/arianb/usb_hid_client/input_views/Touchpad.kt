@@ -25,8 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
+import me.arianb.usb_hid_client.input_views.touch_input_handlers.MouseInputHandler
 import me.arianb.usb_hid_client.input_views.touch_input_handlers.TouchInputHandler
-import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
 
 @Composable
 fun Touchpad(
@@ -34,34 +36,74 @@ fun Touchpad(
 ) {
     val pointerDeviceSender by mainViewModel.touchpadSender.collectAsState()
 
+    when (val it = pointerDeviceSender) {
+        is TouchpadSender -> {
+            val touchInputHandler = remember { TouchInputHandler(it) }
+
+            TouchpadForTouchpad(touchInputHandler)
+        }
+
+        is MouseSender -> {
+            val mouseInputHandler = remember { MouseInputHandler(it) }
+
+            TouchpadForMouse(mouseInputHandler)
+        }
+    }
+}
+
+@Composable
+private fun TouchpadForTouchpad(
+    touchInputHandler: TouchInputHandler,
+) {
     Column(
         modifier = Modifier
             .fillMaxHeight()
             .fillMaxWidth(),
         verticalArrangement = Arrangement.SpaceAround,
     ) {
-        TouchpadContactSurfaceArea(modifier = Modifier.weight(1f), pointerDeviceSender)
+        val deviceOrientation = LocalConfiguration.current.orientation
+
+        TouchpadContactSurfaceArea(
+            modifier = Modifier.weight(1f),
+            onTouchEvent = { motionEvent ->
+                touchInputHandler.handleTouchMotionEvent(
+                    motionEvent,
+                    deviceOrientation,
+                )
+            },
+        )
+    }
+}
+
+@Composable
+private fun TouchpadForMouse(
+    mouseInputHandler: MouseInputHandler
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.SpaceAround,
+    ) {
+        TouchpadContactSurfaceArea(
+            modifier = Modifier.weight(1f),
+            onTouchEvent = { motionEvent ->
+                mouseInputHandler.handleTouchEvent(motionEvent)
+            }
+        )
     }
 }
 
 @Composable
 private fun TouchpadContactSurfaceArea(
     modifier: Modifier = Modifier,
-    touchpadSender: PointerDeviceSender,
+    onTouchEvent: (MotionEvent) -> Boolean = { false }
 ) {
-    val touchInputHandler = remember { TouchInputHandler() }
-
-    val deviceOrientation = LocalConfiguration.current.orientation
-
     Surface(
         modifier = Modifier
             .fillMaxSize()
             .pointerInteropFilter { motionEvent: MotionEvent ->
-                touchInputHandler.handleTouchMotionEvent(
-                    touchpadSender,
-                    motionEvent,
-                    deviceOrientation,
-                )
+                onTouchEvent(motionEvent)
             }
             .then(modifier),
         color = MaterialTheme.colorScheme.background,
