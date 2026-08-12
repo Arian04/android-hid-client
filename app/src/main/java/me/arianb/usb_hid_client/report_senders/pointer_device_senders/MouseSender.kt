@@ -14,19 +14,22 @@ class MouseSender(
         y: Short,
         scanTime: UShort,
         contactCount: Byte,
+        touchpadButtonState: TouchpadButtonState
     ) {
         // Delegating this to another method to make it more obvious which arguments are unused
-        return this.sendMouseReport(x.toByte(), y.toByte())
+        return this.sendMouseReport(x.toByte(), y.toByte(), touchpadButtonState)
     }
 
     fun sendMouseReport(
         relativeX: Byte,
         relativeY: Byte,
+        touchpadButtonState: TouchpadButtonState
     ) {
         super.addReportToChannel(
             getMouseReport(
                 relativeX,
                 relativeY,
+                touchpadButtonState.toByte()
             )
         )
     }
@@ -34,8 +37,8 @@ class MouseSender(
     private fun getMouseReport(
         x: Byte,
         y: Byte,
+        buttonByte: Byte
     ): ByteArray {
-        val buttonByte: Byte = 0
         val trailingPaddingByteArray = ByteArray(5)
 
         return byteArrayOf(

@@ -9,9 +9,17 @@ open class TouchpadSender(
 ) : PointerDeviceSender(
     touchpadDevicePath
 ) {
-    override fun send(contactID: Byte, tipSwitch: Boolean, x: Short, y: Short, scanTime: UShort, contactCount: Byte) {
+    override fun send(
+        contactID: Byte,
+        tipSwitch: Boolean,
+        x: Short,
+        y: Short,
+        scanTime: UShort,
+        contactCount: Byte,
+        touchpadButtonState: TouchpadButtonState
+    ) {
         super.addReportToChannel(
-            getTouchpadReport(contactID, tipSwitch, x, y, scanTime, contactCount)
+            getTouchpadReport(contactID, tipSwitch, x, y, scanTime, contactCount, touchpadButtonState)
         )
     }
 
@@ -21,7 +29,8 @@ open class TouchpadSender(
         x: Short,
         y: Short,
         scanTime: UShort,
-        contactCount: Byte
+        contactCount: Byte,
+        touchpadButtonState: TouchpadButtonState
     ): ByteArray {
         // Only send non-zero contact count in the report of contact ID 0 as per the spec
         val realContactCount: Byte = if (contactID.toInt() == 0) {
@@ -48,7 +57,7 @@ open class TouchpadSender(
 
         val secondByte: Byte = safeBitSetToByte(secondByteBitSet)
 
-        val buttonByte: Byte = 0
+        val buttonByte: Byte = touchpadButtonState.toByte()
         val vendorUsageLowByte: Byte = 0
         val vendorUsageHighByte: Byte = 0
 
