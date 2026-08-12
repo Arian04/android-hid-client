@@ -44,6 +44,13 @@ class MouseInputHandler(
             // getRawX() or getX() below with a negative pointer index.
             if (pointerIndex < 0) {
                 Timber.wtf("handleTouchEvent(): pointerIndex of '$pointerIndex' is negative. This is probably a logic bug.")
+
+                // Reset the active pointer ID so that the next event we receive will treat the first pointer as the new primary pointer.
+                // Should prevent a stale pointerID from getting stuck as the active one in case of a bug.
+                //
+                // Haven't thoroughly tested this (which is why it's commented out)
+                //activePointerId = null
+
                 return false
             }
 
@@ -79,7 +86,10 @@ class MouseInputHandler(
         // Capture activePointerId so we can trust that it doesn't change during the event sequence
         var thisActivePointerId = activePointerId
 
-        val pointerIndex = if (motionEvent.actionMasked == MotionEvent.ACTION_POINTER_UP) {
+        val isPointerActionUp: Boolean =
+            motionEvent.actionMasked == MotionEvent.ACTION_POINTER_UP || motionEvent.actionMasked == MotionEvent.ACTION_UP
+
+        val pointerIndex = if (isPointerActionUp) {
             val activePointerIndex = motionEvent.actionIndex
 
             // Pointer is released, so let's set this to null so that the next iteration can treat the next pointer
