@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.parcelize)
 }
@@ -25,6 +24,9 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Suppressing warning because this has been marked Incubating for a long long time now.
+        @Suppress("UnstableApiUsage")
         externalNativeBuild {
             cmake {
                 cppFlags += ""
@@ -86,8 +88,8 @@ android {
 
     @Suppress("UnstableApiUsage")
     testOptions {
-        val minSDK = android.defaultConfig.minSdk!!
-        val targetSDK = android.defaultConfig.targetSdk!!
+        val minSDK: Int = defaultConfig.minSdk!!
+        val targetSDK: Int = defaultConfig.targetSdk!!
         managedDevices {
             animationsDisabled = true
             localDevices {
@@ -136,18 +138,24 @@ kotlin {
 }
 
 dependencies {
+    // Apply BOM to the different configs, suppressing warnings because they're not true
     val composeBom = platform(libs.androidx.compose.bom)
+    @Suppress("AvoidDuplicateDependencies")
+    implementation(composeBom)
+    @Suppress("AvoidDuplicateDependencies")
+    testImplementation(composeBom)
+    @Suppress("AvoidDuplicateDependencies")
+    androidTestImplementation(composeBom)
 
     implementation(libs.android.material)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.preference.ktx)
 
     // Compose
-    implementation(composeBom)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
@@ -181,8 +189,6 @@ dependencies {
     testImplementation(libs.junit)
 
     // Instrumented Testing
-    androidTestImplementation(composeBom)
-    androidTestImplementation(libs.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
