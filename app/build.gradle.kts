@@ -135,7 +135,11 @@ kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.fromTarget("17")
 
-        freeCompilerArgs = listOf("-Xannotation-default-target=param-property")
+        freeCompilerArgs = listOf(
+            "-Xannotation-default-target=param-property",
+            "-Xjspecify-annotations=strict",
+            "-Xtype-enhancement-improvements-strict-mode"
+        )
     }
 }
 
