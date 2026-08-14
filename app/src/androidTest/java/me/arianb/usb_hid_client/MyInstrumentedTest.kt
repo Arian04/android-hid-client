@@ -8,7 +8,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -50,7 +50,7 @@ class MyInstrumentedTest {
     //       sending inputs to the connected device, I can't easily just run this in an emulator. I also need to
     //       actually observe the behavior in real-time. That's why, for the foreseeable future, I won't be running this
     //       non-interactively. So I think it's okay to include delays that allow me to get a chance to make sure
-    //       things look good.q
+    //       things look good.
     @Test
     fun launchApp() {
         rule.setContent { Entrypoint() }

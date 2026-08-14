@@ -8,9 +8,9 @@ class BitSetTest {
     @Test
     fun bitSetSet_isCorrect() {
         val byte = OneByteBitSet()
-        Assert.assertEquals(byte.asByte(), 0b0.toByte())
+        Assert.assertEquals(0b0.toByte(), byte.asByte())
 
         byte.set(0, true)
-        Assert.assertEquals(byte.asByte(), 0b0000001.toByte())
+        Assert.assertEquals(0b0000001.toByte(), byte.asByte())
     }
 }
