@@ -1,12 +1,11 @@
 Features
 - Add scripting support (credit to @saaiqSAS)
 - Add the ability to hide the Manual Input text (ex: for typing in passwords)
-- Add discrete left/right buttons for the standard Touchpad implementation (not the Precision Touchpad mode, which relies on the receiving OS to interpret gestures)
+- Add discrete left/right buttons for the standard Touchpad implementation
 - Use physical key code when possible for Direct Input
-    - (I believe this is only possible when using an external keyboard on newer Android versions) - #67
 
 Other Changes
-- Disable build-time-generated IDs for the purpose of Reproducible Builds
+- Disable build-time-generated IDs for Reproducible Builds
 - Fix bug where touchpad wouldn't work properly depending on device orientation
 
 See the GitHub release for more details
