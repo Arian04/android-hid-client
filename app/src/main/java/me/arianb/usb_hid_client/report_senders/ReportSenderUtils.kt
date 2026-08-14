@@ -45,7 +45,7 @@ fun safeBitSetToByte(bitSet: BitSet): Byte {
     // Turn it into a byte
     val bitSetByteArray = bitSet.toByteArray()
     if (bitSetByteArray.isEmpty()) {
-        Timber.wtf("ok guys this is REALLY not cool. bitSetByteArray is EMPTY somehow!!")
+        Timber.d("bitSetByteArray is empty. assuming it was all 0s and returning 0")
         return 0
     } else {
         if (bitSetByteArray.size > 1) {
