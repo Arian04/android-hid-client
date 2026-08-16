@@ -1,5 +1,6 @@
 package me.arianb.usb_hid_client.troubleshooting
 
+import android.content.ClipData
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -215,11 +216,12 @@ private fun GadgetStatusItem(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        clipboardManager.text = extraInfo
+                        val clipData = ClipData.newPlainText("extra info", extraInfo)
+                        clipboardManager.setPrimaryClip(clipData)
                         //isShowingInfoAlert = false // TODO: should I close the dialog when text is copied or not?
                     }
                 ) {
-                    // TODO: should i add a "copy" icon here?
+                    // TODO: should I add a "copy" icon here?
                     Text("Copy")
                 }
             }
