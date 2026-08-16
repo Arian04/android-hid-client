@@ -295,8 +295,8 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
     private fun linkFunctionsToConfig(functions: Array<HidFunction>) {
         if (functions.isEmpty()) {
-            // FIXME: handle this?
-            Timber.w("bruh it's empty")
+            // TODO: should I handle this in some way?
+            Timber.wtf("LOGIC BUG: linkFunctionsToConfig() was called with an empty array of functions!!!")
             return
         }
 
