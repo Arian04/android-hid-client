@@ -92,7 +92,7 @@ character devices and knew how to send proper reports to them. Beware of SELinux
 anyone is actually doing that, let
 me know, I'd be glad to help if necessary.
 
-Tested primarily on: Linux (Host computer) and Pixel 5 running Android 14.
+Tested primarily on: Linux (Host computer) and a Pixel 9 Pro running Android 16 (LineageOS).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
