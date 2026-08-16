@@ -2,17 +2,6 @@
 <issues format="6" by="lint 8.3.1" type="baseline" client="gradle" dependencies="false" name="AGP (8.3.1)" variant="all" version="8.3.1">
 
     <issue
-        id="DefaultLocale"
-        message="Implicitly using the default locale is a common source of bugs: Use `toLowerCase(Locale)` instead. For strings meant to be internal use `Locale.ROOT`, otherwise `Locale.getDefault()`."
-        errorLine1="            key = key.toLowerCase();"
-        errorLine2="                      ~~~~~~~~~~~">
-        <location
-            file="src/main/java/me/arianb/usb_hid_client/hid_utils/KeyCodeTranslation.java"
-            line="41"
-            column="23"/>
-    </issue>
-
-    <issue
         id="OldTargetApi"
         message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
         errorLine1="        targetSdk = 33"

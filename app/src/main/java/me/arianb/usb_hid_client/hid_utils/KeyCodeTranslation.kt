@@ -132,7 +132,6 @@ object KeyCodeTranslation {
         return isPresent
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     fun getModifiersScanCode(event: KeyEvent): Byte {
         var modifier: Byte = 0x0
         for ((modifierKeyCode: Int, _) in keyEventModifierKeys) {
