@@ -43,23 +43,32 @@ import java.util.Locale.getDefault
 
 //---------- Contribution by saaiqSAS ----------
 @Composable
-fun ScriptsDisplayView(mainViewModel: MainViewModel = viewModel(), scriptingViewModel: ScriptingViewModel = viewModel()) {
+fun ScriptsDisplayView(
+    mainViewModel: MainViewModel = viewModel(),
+    scriptingViewModel: ScriptingViewModel = viewModel()
+) {
     var scriptPathString by remember { mutableStateOf("") }
     var scriptFileUri by remember { mutableStateOf<Uri?>(null) }
 
     val context = LocalContext.current
     val contentResolver = context.contentResolver
-    val scriptFileExtensions =  listOf(".ahc", ".duck", ".txt")
+    val scriptFileExtensions = listOf(".ahc", ".duck", ".txt")
 
     val filePickerLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 val mimeType = context.contentResolver.getType(uri)
-                if ((mimeType == "text/plain" || mimeType == "application/octet-stream") && scriptFileExtensions.any { uri.path.toString().endsWith(it) }) {
+                if ((mimeType == "text/plain" || mimeType == "application/octet-stream") && scriptFileExtensions.any {
+                        uri.path.toString().endsWith(it)
+                    }) {
                     scriptPathString = uri.path.toString()
                     scriptFileUri = uri
                 } else {
-                    Toast.makeText(context,"Only (${scriptFileExtensions.joinToString(", ")}) files are accepted", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Only (${scriptFileExtensions.joinToString(", ")}) files are accepted",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
 
@@ -67,23 +76,23 @@ fun ScriptsDisplayView(mainViewModel: MainViewModel = viewModel(), scriptingView
 
     Column(
         modifier = Modifier
-            .padding(0.dp, 0.dp,0.dp,0.dp),
+            .padding(0.dp, 0.dp, 0.dp, 0.dp),
         verticalArrangement = Arrangement.spacedBy(PaddingSmall),
         horizontalAlignment = Alignment.CenterHorizontally,
 
-    ) {
+        ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(0.dp, PaddingExtraSmall,0.dp,0.dp),
+                .padding(0.dp, PaddingExtraSmall, 0.dp, 0.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 modifier = Modifier
                     .wrapContentHeight()
-                    .padding(0.dp, 0.dp,0.dp,0.dp),
+                    .padding(0.dp, 0.dp, 0.dp, 0.dp),
                 text = scriptingViewModel.scriptLog,
                 textAlign = TextAlign.Left,
                 style = TextStyle(
@@ -111,7 +120,7 @@ fun ScriptsDisplayView(mainViewModel: MainViewModel = viewModel(), scriptingView
             Button(
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(0.dp,0.dp,PaddingExtraSmall,0.dp),
+                    .padding(0.dp, 0.dp, PaddingExtraSmall, 0.dp),
                 shape = RoundedCornerShape(
                     topStart = 20.dp,
                     topEnd = 0.dp,
@@ -128,7 +137,7 @@ fun ScriptsDisplayView(mainViewModel: MainViewModel = viewModel(), scriptingView
             Button(
                 modifier = Modifier
                     .wrapContentSize()
-                    .padding(0.dp,0.dp, PaddingExtraSmall,0.dp),
+                    .padding(0.dp, 0.dp, PaddingExtraSmall, 0.dp),
                 shape = RoundedCornerShape(
                     topStart = 0.dp,
                     topEnd = 0.dp,
@@ -167,15 +176,18 @@ fun ScriptsDisplayView(mainViewModel: MainViewModel = viewModel(), scriptingView
             }
         }
 
-
     }
-
 
 }
 
-fun executeScriptFile(contentResolver: ContentResolver, scriptFileUri: Uri?, mainViewModel: MainViewModel, scriptingViewModel: ScriptingViewModel) {
+fun executeScriptFile(
+    contentResolver: ContentResolver,
+    scriptFileUri: Uri?,
+    mainViewModel: MainViewModel,
+    scriptingViewModel: ScriptingViewModel
+) {
     if (scriptFileUri != null) {
-        val content = readFileFromUri(contentResolver ,scriptFileUri).toString()
+        val content = readFileFromUri(contentResolver, scriptFileUri)
         scriptExecutor(content, mainViewModel, scriptingViewModel)
     }
 }
@@ -204,7 +216,6 @@ fun readFileFromUri(contentResolver: ContentResolver, fileUri: Uri): String {
     return fileContent.removeSuffix("\n")
 }
 
-
 fun scriptExecutor(script: String, mainViewModel: MainViewModel, scriptingViewModel: ScriptingViewModel) {
     //---------- Contribution by saaiqSAS ----------
     // INTERPRETER FOR SCRIPTING FORMAT
@@ -230,59 +241,59 @@ fun scriptExecutor(script: String, mainViewModel: MainViewModel, scriptingViewMo
         }
 
         when (command.uppercase(getDefault())) {
-            //COMMANDS - only commands takes a parameter
-            "//","REM","NAME","DESC","AUTHOR"   -> {} //do nothing
-            "SEND", "STRING"                    -> sendInputScriptString(para, mainViewModel)
-            "SENDLN", "STRINGLN"                -> sendInputScriptString(para + "\n", mainViewModel)
-            "SLEEP","DELAY"                     -> Thread.sleep(para.toLong())
+            //COMMANDS - only commands take a parameter
+            "//", "REM", "NAME", "DESC", "AUTHOR" -> {} //do nothing
+            "SEND", "STRING" -> sendInputScriptString(para, mainViewModel)
+            "SENDLN", "STRINGLN" -> sendInputScriptString(para + "\n", mainViewModel)
+            "SLEEP", "DELAY" -> Thread.sleep(para.toLong())
 
             //MODIFIER KEYS
-            "L_CTRL", "L_CONTROL", "CTRL"       -> key = "left-ctrl"
-            "L_ALT", "ALT"                      -> key = "left-alt"
-            "L_SHIFT", "SHIFT"                  -> key = "left-shift"
-            "L_META", "L_WIN", "META", "WIN"    -> key = "left-meta"
-            "R_CTRL", "R_CONTROL"               -> key = "right-ctrl"
-            "R_ALT"                             -> key = "right-alt"
-            "R_SHIFT"                           -> key = "right-shift"
-            "R_META", "R_WIN"                   -> key = "right-meta"
+            "L_CTRL", "L_CONTROL", "CTRL" -> key = "left-ctrl"
+            "L_ALT", "ALT" -> key = "left-alt"
+            "L_SHIFT", "SHIFT" -> key = "left-shift"
+            "L_META", "L_WIN", "META", "WIN" -> key = "left-meta"
+            "R_CTRL", "R_CONTROL" -> key = "right-ctrl"
+            "R_ALT" -> key = "right-alt"
+            "R_SHIFT" -> key = "right-shift"
+            "R_META", "R_WIN" -> key = "right-meta"
 
             //SPECIAL KEYS
-            "UP"                                -> key = "up"
-            "DOWN"                              -> key = "down"
-            "LEFT"                              -> key = "left"
-            "RIGHT"                             -> key = "right"
-            "ESCAPE", "ESC"                     -> key = "escape"
-            "TAB"                               -> key = "tab"
-            "BACKSPACE","BACK"                  -> key = "backspace"
-            "DELETE","DEL"                      -> key = "delete"
-            "PRINT"                             -> key = "print"
-            "SPACE"                             -> key = " "
-            "ENTER"                             -> key = "\n"
-            "SCROLL_LOCK"                       -> key = "scroll-lock"
-            "NUM_LOCK"                          -> key = "num-lock"
-            "PAUSE"                             -> key = "pause"
-            "INSERT"                            -> key = "insert"
-            "HOME"                              -> key = "home"
-            "END"                               -> key = "end"
-            "PAGE_UP", "PG_UP"                  -> key = "page-up"
-            "PAGE_DOWN", "PG_DOWN"              -> key = "page-down"
-            "NEXT"                              -> key = "next"
-            "PREVIOUS", "PREV"                  -> key = "previous"
-            "PLAY_PAUSE", "PLAY","PP"           -> key = "play-pause"
-            "VOLUME_UP", "VOL_UP"               -> key = "volume-up"
-            "VOLUME_DOWN", "VOL_DOWN"           -> key = "volume-down"
-            "F1"                                -> key = "f1"
-            "F2"                                -> key = "f2"
-            "F3"                                -> key = "f3"
-            "F4"                                -> key = "f4"
-            "F5"                                -> key = "f5"
-            "F6"                                -> key = "f6"
-            "F7"                                -> key = "f7"
-            "F8"                                -> key = "f8"
-            "F9"                                -> key = "f9"
-            "F10"                               -> key = "f10"
-            "F11"                               -> key = "f11"
-            "F12"                               -> key = "f12"
+            "UP" -> key = "up"
+            "DOWN" -> key = "down"
+            "LEFT" -> key = "left"
+            "RIGHT" -> key = "right"
+            "ESCAPE", "ESC" -> key = "escape"
+            "TAB" -> key = "tab"
+            "BACKSPACE", "BACK" -> key = "backspace"
+            "DELETE", "DEL" -> key = "delete"
+            "PRINT" -> key = "print"
+            "SPACE" -> key = " "
+            "ENTER" -> key = "\n"
+            "SCROLL_LOCK" -> key = "scroll-lock"
+            "NUM_LOCK" -> key = "num-lock"
+            "PAUSE" -> key = "pause"
+            "INSERT" -> key = "insert"
+            "HOME" -> key = "home"
+            "END" -> key = "end"
+            "PAGE_UP", "PG_UP" -> key = "page-up"
+            "PAGE_DOWN", "PG_DOWN" -> key = "page-down"
+            "NEXT" -> key = "next"
+            "PREVIOUS", "PREV" -> key = "previous"
+            "PLAY_PAUSE", "PLAY", "PP" -> key = "play-pause"
+            "VOLUME_UP", "VOL_UP" -> key = "volume-up"
+            "VOLUME_DOWN", "VOL_DOWN" -> key = "volume-down"
+            "F1" -> key = "f1"
+            "F2" -> key = "f2"
+            "F3" -> key = "f3"
+            "F4" -> key = "f4"
+            "F5" -> key = "f5"
+            "F6" -> key = "f6"
+            "F7" -> key = "f7"
+            "F8" -> key = "f8"
+            "F9" -> key = "f9"
+            "F10" -> key = "f10"
+            "F11" -> key = "f11"
+            "F12" -> key = "f12"
 
             else -> {
                 scriptingViewModel.updateScriptLog("Error at line $lineNum")
@@ -291,7 +302,7 @@ fun scriptExecutor(script: String, mainViewModel: MainViewModel, scriptingViewMo
 
         }
 
-        if (!key.isEmpty()) {
+        if (key.isNotEmpty()) {
             val scanCodes = KeyCodeTranslation.Scripting.keyCharToScanCodes(key)
 
             if (scanCodes == null) {
