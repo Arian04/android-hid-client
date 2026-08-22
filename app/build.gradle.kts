@@ -95,6 +95,14 @@ android {
 
     @Suppress("UnstableApiUsage")
     testOptions {
+        unitTests {
+            // Tells Gradle to use the JUnit Platform for local unit tests
+            all {
+                it.useJUnitPlatform()
+                it.jvmArgs("-XX:+EnableDynamicAgentLoading")
+            }
+        }
+
         val minSDK: Int = defaultConfig.minSdk!!
         val targetSDK: Int = defaultConfig.targetSdk!!
         managedDevices {
@@ -196,8 +204,16 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    // Unit Testing
-    testImplementation(libs.junit)
+    // Unit Testing (using up-to-date JUnit, instrumented tests still use JUnit 4)
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testRuntimeOnly(libs.junit.platform.launcher)
+
+    testImplementation(libs.mockk.jvm)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.mockk.agent)
 
     // Instrumented Testing
     debugImplementation(libs.androidx.compose.ui.test.manifest)
