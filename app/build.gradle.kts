@@ -36,12 +36,19 @@ android {
 
     // Build configuration
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
             )
+        }
+
+        debug {
+            // Enable coverage for unit tests
+            enableUnitTestCoverage = true
+            // Enable coverage for instrumentation tests
+            enableAndroidTestCoverage = true
         }
     }
     packaging {
