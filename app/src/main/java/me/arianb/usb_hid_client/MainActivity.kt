@@ -33,7 +33,6 @@ class MyApplication : Application() {
     }
 }
 
-
 // TODO: move all misc strings used in snackbars and alerts throughout the app into strings.xml for translation purposes.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
