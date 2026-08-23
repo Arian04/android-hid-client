@@ -9,6 +9,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.topjohnwu.superuser.Shell
 import me.arianb.usb_hid_client.BuildConfig
@@ -32,6 +33,7 @@ testing with "" '' "' "" ''' quotes
 testing with \a\b\n escaped chars
 """.trim()
 
+@LargeTest
 class MyInstrumentedTest {
     @get:Rule
     val rule = createAndroidComposeRule<ComponentActivity>()
