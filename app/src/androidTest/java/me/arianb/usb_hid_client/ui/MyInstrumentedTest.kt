@@ -57,6 +57,8 @@ class MyInstrumentedTest {
 
         // TODO: automate accepting magisk root prompt. Right now I just click it manually.
         // Trigger Magisk root permissions prompt, returning if we don't have root permissions
+        //
+        // NOTE: if this test is running on an unrooted device, it'll just end here.
         if (!Shell.getShell().isRoot) {
             return
         }
