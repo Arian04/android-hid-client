@@ -1,25 +1,23 @@
-package me.arianb.usb_hid_client
+package me.arianb.usb_hid_client.ui
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.filterToOne
-import androidx.compose.ui.test.hasClickAction
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.isDisplayed
-import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.topjohnwu.superuser.Shell
+import me.arianb.usb_hid_client.BuildConfig
+import me.arianb.usb_hid_client.Entrypoint
+import me.arianb.usb_hid_client.onAllClickableNodes
+import me.arianb.usb_hid_client.onEditableNode
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 val MANUAL_INPUT_TEST_STRING = """
 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -34,7 +32,6 @@ testing with "" '' "' "" ''' quotes
 testing with \a\b\n escaped chars
 """.trim()
 
-@RunWith(AndroidJUnit4::class)
 class MyInstrumentedTest {
     @get:Rule
     val rule = createAndroidComposeRule<ComponentActivity>()
@@ -107,12 +104,3 @@ class MyInstrumentedTest {
         }
     }
 }
-
-fun AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, ComponentActivity>.onAllClickableNodes() =
-    onAllNodes(hasClickAction())
-
-fun AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, ComponentActivity>.onClickableNode() =
-    onNode(hasClickAction())
-
-fun AndroidComposeTestRule<ActivityScenarioRule<ComponentActivity>, ComponentActivity>.onEditableNode() =
-    onNode(hasSetTextAction())
