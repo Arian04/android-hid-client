@@ -61,7 +61,8 @@ object LogBuffer {
         buffer.add(entry)
     }
 
-    private fun priorityToLevel(priority: Int): String {
+    @JvmStatic
+    fun priorityToLevel(priority: Int): String {
         return when (priority) {
             Level.VERBOSE.priority -> Level.VERBOSE.name
             Level.DEBUG.priority -> Level.DEBUG.name
