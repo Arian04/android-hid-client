@@ -6,20 +6,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
 
-enum class RootMethod {
-    UNKNOWN,
-    UNROOTED,
-    MAGISK,
-    KERNELSU
-}
-
-data class RootState(
-    val missingRootPrivileges: Boolean = false,
-)
-
-class RootStateHolder private constructor() {
+class RootStateHolder private constructor() : IRootStateHolder {
     private val _uiState = MutableStateFlow(RootState())
-    val uiState = _uiState.asStateFlow()
+    override val uiState = _uiState.asStateFlow()
 
     private val sepolicyMap: Map<RootMethod, String?> = buildMap {
         put(RootMethod.UNKNOWN, null)
@@ -34,14 +23,14 @@ class RootStateHolder private constructor() {
     }
 
     // TODO: should this be part of RootState?
-    val sepolicyCommand: String?
+    override val sepolicyCommand: String?
         get() {
             val rootMethod = detectRootMethod()
 
             return sepolicyMap[rootMethod]
         }
 
-    fun hasRootPermissions(): Boolean {
+    override fun hasRootPermissions(): Boolean {
         val hasRootPermissions = Shell.getShell().isRoot
 
         _uiState.update { it.copy(missingRootPrivileges = !hasRootPermissions) }
@@ -49,7 +38,7 @@ class RootStateHolder private constructor() {
         return hasRootPermissions
     }
 
-    fun detectRootMethod(): RootMethod {
+    override fun detectRootMethod(): RootMethod {
         if (!hasRootPermissions()) {
             Timber.i("Failed to get root shell. Device is most likely not rooted or hasn't given the app root permissions")
             return RootMethod.UNROOTED
@@ -69,7 +58,7 @@ class RootStateHolder private constructor() {
     companion object {
         @Volatile
         private var INSTANCE: RootStateHolder? = null
-        fun getInstance(): RootStateHolder {
+        fun getInstance(): IRootStateHolder {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE?.let {
                     return it
