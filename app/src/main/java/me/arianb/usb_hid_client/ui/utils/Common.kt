@@ -25,19 +25,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingLarge
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.USBHIDClientTheme
 
 @Composable
 fun BasicPage(
+    settingsViewModel: SettingsViewModel = viewModel(),
     topBar: @Composable () -> Unit,
     snackbarHostState: SnackbarHostState? = null,
     padding: PaddingValues = PaddingValues(all = PaddingLarge),
@@ -52,7 +57,14 @@ fun BasicPage(
         Modifier
     }
 
-    USBHIDClientTheme {
+    val preferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
+    val appThemePreference = preferencesState.appTheme
+    val isDynamicColorEnabledPreference = preferencesState.isDynamicColorEnabled
+
+    USBHIDClientTheme(
+        appTheme = appThemePreference,
+        isDynamicColorEnabled = isDynamicColorEnabledPreference
+    ) {
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background

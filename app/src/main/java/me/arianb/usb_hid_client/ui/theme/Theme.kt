@@ -10,15 +10,11 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.settings.AppTheme
-import me.arianb.usb_hid_client.settings.SettingsViewModel
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -39,21 +35,18 @@ fun isDynamicColorAvailable(): Boolean {
 
 @Composable
 fun USBHIDClientTheme(
-    settingsViewModel: SettingsViewModel = viewModel(),
+    appTheme: AppTheme,
+    isDynamicColorEnabled: Boolean,
     content: @Composable () -> Unit
 ) {
-    val preferencesState by settingsViewModel.userPreferencesFlow.collectAsState()
-
-    val darkTheme = when (preferencesState.appTheme) {
+    val darkTheme = when (appTheme) {
         AppTheme.DarkMode -> true
         AppTheme.LightMode -> false
         else -> isSystemInDarkTheme()
     }
 
-    val dynamicColor = preferencesState.isDynamicColorEnabled
-
     val colorScheme = when {
-        dynamicColor && isDynamicColorAvailable() -> {
+        isDynamicColorEnabled && isDynamicColorAvailable() -> {
             val context = LocalContext.current
             if (darkTheme) {
                 dynamicDarkColorScheme(context)

@@ -1,14 +1,15 @@
 package me.arianb.usb_hid_client.unit_ui
 
 import android.content.Context
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import me.arianb.usb_hid_client.R
+import me.arianb.usb_hid_client.settings.AppTheme
 import me.arianb.usb_hid_client.ui.standalone_screens.ExpandableText
+import me.arianb.usb_hid_client.ui.theme.USBHIDClientTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -56,7 +57,10 @@ class ExpandableTextTest {
 
     private fun setContent() {
         composeTestRule.setContent {
-            MaterialTheme {
+            USBHIDClientTheme(
+                appTheme = AppTheme.System,
+                isDynamicColorEnabled = true
+            ) {
                 ExpandableText(
                     titleResource = TITLE_RESOURCE,
                     textResource = BODY_TEXT_RESOURCE,
