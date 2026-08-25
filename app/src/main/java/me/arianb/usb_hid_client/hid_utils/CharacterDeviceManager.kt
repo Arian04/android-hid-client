@@ -19,7 +19,7 @@ import java.io.File
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
-class CharacterDeviceManager private constructor(private val application: Application) {
+class CharacterDeviceManager private constructor(private val application: Application) : ICharacterDeviceManager {
     private val rootStateHolder = RootStateHolder.getInstance()
 
     private val mConnection = UsbGadgetServiceConnection()
@@ -60,7 +60,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
         }
     }
 
-    suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
+    override suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
         useService {
             it.createGadget(gadgetUserPreferences)
         }
@@ -94,9 +94,9 @@ class CharacterDeviceManager private constructor(private val application: Applic
         Shell.cmd(selinuxPolicyCommand).exec()
     }
 
-    fun fixCharacterDevicePermissions(device: DevicePath) = fixCharacterDevicePermissions(device.path)
+    override fun fixCharacterDevicePermissions(device: DevicePath) = fixCharacterDevicePermissions(device.path)
 
-    fun fixCharacterDevicePermissions(device: String) {
+    override fun fixCharacterDevicePermissions(device: String) {
         val appUID: Int = application.applicationInfo.uid
 
         // Set Linux permissions -> only my app user can r/w to the char device
@@ -133,14 +133,14 @@ class CharacterDeviceManager private constructor(private val application: Applic
         return categories
     }
 
-    suspend fun deleteCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
+    override suspend fun deleteCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
         useService {
             it.deleteGadget(gadgetUserPreferences)
         }
     }
 
     @ModifiesStateDirectly
-    fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
+    override fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
         val isCharDevMissing = if (!DevicePaths.all.contains(charDevicePath)) {
             true
         } else !charDevicePath.exists()
@@ -149,7 +149,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     @ModifiesStateDirectly
-    fun anyCharacterDeviceMissing(): Boolean {
+    override fun anyCharacterDeviceMissing(): Boolean {
         for (charDevicePath in DevicePaths.all) {
             if (!charDevicePath.exists()) {
                 return true
@@ -160,6 +160,9 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     companion object {
+        // FIXME: (POSSIBLE BUG)
+        //  I think this should be taking a stateflow of the device path from the preferences, otherwise
+        //  the calls here could be stuck using default paths even if the user updates prefs.
         object DevicePaths {
             val DEFAULT_KEYBOARD_DEVICE_PATH = KeyboardDevicePath("/dev/hidg0")
             val DEFAULT_TOUCHPAD_DEVICE_PATH = TouchpadDevicePath("/dev/hidg1")
@@ -180,7 +183,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         @Volatile
         private var INSTANCE: CharacterDeviceManager? = null
-        fun getInstance(application: Application): CharacterDeviceManager {
+        fun getInstance(application: Application): ICharacterDeviceManager {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE?.let {
                     return it
