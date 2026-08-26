@@ -16,7 +16,6 @@ abstract class ReportSender(
         Timber.wtf("A channel with an unlimited buffer shouldn't be failing to receive elements")
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     suspend fun start(onSuccess: () -> Unit, onException: (e: IOException) -> Unit) = withContext(Dispatchers.IO) {
         for (report in reportsChannel) {
             try {
