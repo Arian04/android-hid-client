@@ -98,33 +98,45 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     private fun fixSelinuxPermissions() {
-        val selinuxPolicyCommand = "${rootStateHolder.sepolicyCommand} '$SELINUX_POLICY'"
-        Shell.cmd(selinuxPolicyCommand).exec()
+        val sepolicyCmd = rootStateHolder.sepolicyCommand
+        if (sepolicyCmd == null) {
+            Timber.e("fixSelinuxPermissions(): sepolicyCommand is null, skipping SELinux policy application")
+            return
+        }
+
+        val selinuxPolicyCommand = "$sepolicyCmd '$SELINUX_POLICY'"
+        execShellCommandAndLogResult(selinuxPolicyCommand)
     }
 
     override fun fixCharacterDevicePermissions(device: DevicePath) = fixCharacterDevicePermissions(device.path)
 
     override fun fixCharacterDevicePermissions(device: String) {
+        Timber.i("fixCharacterDevicePermissions() called for device: $device")
+
         val appUID: Int = application.applicationInfo.uid
 
         // Set Linux permissions -> only my app user can r/w to the char device
         val chownCommand = "chown '${appUID}:${appUID}' $device"
         val chmodCommand = "chmod 600 $device"
-        Shell.cmd(chownCommand).exec()
-        Shell.cmd(chmodCommand).exec()
+        execShellCommandAndLogResult(chownCommand)
+        execShellCommandAndLogResult(chmodCommand)
 
         // Set SELinux permissions -> only my app's selinux context can r/w to the char device
         val chconCommand = "chcon 'u:object_r:device:s0:${getSelinuxCategories()}' $device"
-        Shell.cmd(chconCommand).exec()
+        execShellCommandAndLogResult(chconCommand)
+
+        Timber.i("fixCharacterDevicePermissions(): done")
 
         return
     }
 
     private fun getSelinuxCategories(): String {
+        Timber.i("getSelinuxCategories() called")
+
         val appDataDirPath: String = application.applicationInfo.dataDir
 
         // Get selinux context for app
-        val commandResult = Shell.cmd("stat -c %C $appDataDirPath").exec()
+        val commandResult = execShellCommandAndLogResult("stat -c %C $appDataDirPath")
 
         val selinuxContextString = commandResult.out.joinToString(separator = "\n").trim()
 
@@ -133,10 +145,10 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         // If it hasn't changed, then the previous piece of code failed to get the substring
         if (categories == selinuxContextString) {
-            Timber.wtf("Failed to get app's selinux context")
+            Timber.wtf("Failed to get app's selinux context from output: '$selinuxContextString'")
         }
 
-        Timber.d("context (before,after): (%s,%s)", selinuxContextString, categories)
+        Timber.i("context (before,after): (%s,%s)", selinuxContextString, categories)
 
         return categories
     }
@@ -153,6 +165,8 @@ class CharacterDeviceManager private constructor(private val application: Applic
             true
         } else !charDevicePath.exists()
 
+        Timber.i("characterDeviceMissing($charDevicePath) -> $isCharDevMissing")
+
         return isCharDevMissing
     }
 
@@ -160,9 +174,11 @@ class CharacterDeviceManager private constructor(private val application: Applic
     override fun anyCharacterDeviceMissing(): Boolean {
         for (charDevicePath in DevicePaths.all) {
             if (!charDevicePath.exists()) {
+                Timber.v("anyCharacterDeviceMissing(): $charDevicePath is missing")
                 return true
             }
         }
+        Timber.i("anyCharacterDeviceMissing(): all character devices exist")
 
         return false
     }
@@ -203,6 +219,13 @@ class CharacterDeviceManager private constructor(private val application: Applic
             }
         }
     }
+}
+
+private fun execShellCommandAndLogResult(command: String): Shell.Result {
+    val result = Shell.cmd(command).exec()
+    logShellCommandResult(command, result)
+
+    return result
 }
 
 private fun logShellCommandResult(label: String, commandResult: Shell.Result) {
