@@ -3,6 +3,7 @@ package me.arianb.usb_hid_client.troubleshooting
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.collection.mutableIntSetOf
@@ -28,9 +29,24 @@ import timber.log.Timber
 import java.io.IOException
 
 data class TroubleshootingInfo(
+    val deviceInfo: DeviceInfo,
     val rootPermissionInfo: RootPermissionInfo,
     val characterDevicesInfoList: List<CharacterDeviceInfo>? = null,
-    val kernelInfo: KernelInfo? = null
+    val kernelInfo: KernelInfo? = null,
+    val usbGadgetSystemInfo: UsbGadgetSystemInfo? = null,
+)
+
+// Not sure if the BUILD.* strings are nullable or not, so marking them as nullable just to be safe.
+data class DeviceInfo(
+    val manufacturer: String? = Build.MANUFACTURER,
+    val model: String? = Build.MODEL,
+    val brand: String? = Build.BRAND,
+    val device: String? = Build.DEVICE,
+    val product: String? = Build.PRODUCT,
+    val board: String? = Build.BOARD,
+    val hardware: String? = Build.HARDWARE,
+    val sdkInt: Int = Build.VERSION.SDK_INT,
+    val buildId: String? = Build.DISPLAY,
 )
 
 data class RootPermissionInfo(
@@ -52,8 +68,23 @@ data class KernelInfo(
     val hasConfigFsHidFunctionSupport: Boolean?,
 )
 
+data class UsbGadgetSystemInfo(
+    val selinuxMode: String?,
+    val sysUsbController: String?,
+    val sysUsbState: String?,
+    val sysUsbConfig: String?,
+    val udcListing: List<String>,
+    val usbGadgetListing: List<String>,
+    val characterDevicesListing: List<String>,
+)
+
 // TODO: make this run in a coroutine in case something takes a while or hangs?
 fun detectIssues(): TroubleshootingInfo {
+    Timber.i("detectIssues() called")
+
+    val deviceInfo = DeviceInfo()
+    Timber.v("detectIssues(): deviceInfo = $deviceInfo")
+
     val rootStateHolder = RootStateHolder.getInstance()
 
     // Root permission stuff
@@ -63,6 +94,7 @@ fun detectIssues(): TroubleshootingInfo {
         hasRootPermissions,
         rootMethod,
     )
+    Timber.v("detectIssues(): rootPermissionInfo = $rootPermissionInfo")
 
     // Character device stuff
     val characterDevicesInfoList: List<CharacterDeviceInfo>?
@@ -70,7 +102,11 @@ fun detectIssues(): TroubleshootingInfo {
     // Kernel stuff
     val kernelInfo: KernelInfo?
 
+    // USB Gadget system info
+    val usbGadgetSystemInfo: UsbGadgetSystemInfo?
+
     if (hasRootPermissions) {
+        Timber.d("detectIssues(): gathering debugging info that requires root permissions")
         // Check character device stuff
         characterDevicesInfoList = buildList {
             for (path in CharacterDeviceManager.Companion.DevicePaths.all) {
@@ -80,25 +116,34 @@ fun detectIssues(): TroubleshootingInfo {
 
         // Check kernel support
         kernelInfo = getKernelInfo()
+
+        // Check USB gadget system info
+        usbGadgetSystemInfo = getUsbGadgetSystemInfo()
     } else {
+        Timber.w("detectIssues(): we don't have root permissions, skipping root-level checks")
         characterDevicesInfoList = null
         kernelInfo = null
+        usbGadgetSystemInfo = null
     }
 
     return TroubleshootingInfo(
+        deviceInfo = deviceInfo,
         rootPermissionInfo = rootPermissionInfo,
         characterDevicesInfoList = characterDevicesInfoList,
-        kernelInfo = kernelInfo
+        kernelInfo = kernelInfo,
+        usbGadgetSystemInfo = usbGadgetSystemInfo,
     )
 }
 
 @RequiresRoot
 private fun getCharacterDeviceInfo(gadgetPath: DevicePath): CharacterDeviceInfo {
+    Timber.d("getCharacterDeviceInfo() called for: ${gadgetPath.path}")
     val safeGadgetPathString = ShellUtils.escapedString(gadgetPath.path)
 
     // Check if it exists
     val shellResult = Shell.cmd("test -e $safeGadgetPathString").exec()
     val isPresent = shellResult.code == 0
+    Timber.v("getCharacterDeviceInfo(): path=${gadgetPath.path}, isPresent=$isPresent (code=${shellResult.code})")
 
     val isVisibleWithoutRoot: Boolean
     val permissionsString: String?
@@ -107,12 +152,14 @@ private fun getCharacterDeviceInfo(gadgetPath: DevicePath): CharacterDeviceInfo 
         // Check if it's still visible if we check without root permissions
         // this verifies that selinux policy was added correctly
         isVisibleWithoutRoot = gadgetPath.exists()
+        Timber.v("getCharacterDeviceInfo(): path=${gadgetPath.path}, isVisibleWithoutRoot=$isVisibleWithoutRoot")
         if (!isVisibleWithoutRoot) {
-            // selinux policy is probably not right
+            Timber.w("getCharacterDeviceInfo(): path=${gadgetPath.path} exists with root, but is NOT visible without root! SELinux policy may be missing or failing.")
         }
 
         // read permissions
         val result = Shell.cmd("ls -lZ -- $safeGadgetPathString").exec()
+        Timber.v("getCharacterDeviceInfo(): ls -lZ exit code=${result.code}, stdout=${result.out}, stderr=${result.err}")
 
         permissionsString = buildString {
             // Check if command ran successfully
@@ -123,12 +170,9 @@ private fun getCharacterDeviceInfo(gadgetPath: DevicePath): CharacterDeviceInfo 
             // Check if output seems alright
             val outputLinesList = result.out
             if (outputLinesList.isNotEmpty()) {
-                append("stdout (with extra newlines): ")
-                appendLine()
+                append("stdout: ")
                 for (line in outputLinesList) {
-                    val adjustedLine = line.replace(' ', '\n')
-                    append(adjustedLine)
-                    appendLine()
+                    appendLine(line)
                 }
             }
 
@@ -169,6 +213,8 @@ private fun getCharacterDeviceInfo(gadgetPath: DevicePath): CharacterDeviceInfo 
 
 @RequiresRoot
 private fun getKernelInfo(): KernelInfo {
+    Timber.d("getKernelInfo() called")
+
     // constants
     val configFsKernelOption = "CONFIG_USB_CONFIGFS"
     val configFsHidKernelOption = "${configFsKernelOption}_F_HID"
@@ -231,6 +277,8 @@ private fun getKernelInfo(): KernelInfo {
         }
     }
 
+    Timber.i("getKernelInfo(): version=$kernelVersion, hasConfigFsSupport=$hasConfigFsSupport, hasConfigFsHidFunctionSupport=$hasConfigFsHidFunctionSupport")
+
     return KernelInfo(
         kernelVersion ?: "unknown",
         kernelConfigAnnotatedString,
@@ -241,7 +289,9 @@ private fun getKernelInfo(): KernelInfo {
 
 @RequiresRoot
 private fun getKernelConfig(): List<String> {
+    Timber.d("getKernelConfig() called")
     val commandResult = Shell.cmd("gunzip -c /proc/config.gz | grep -i configfs").exec()
+    Timber.v("getKernelConfig(): exit code=${commandResult.code}, out lines count=${commandResult.out.size}")
 
     val kernelConfigLinesList = commandResult.out
 
@@ -269,10 +319,67 @@ private fun getKernelConfig(): List<String> {
     //  - if empty, grab config without using grep to filter?
 
     if (kernelConfigLinesList.isEmpty()) {
-        Timber.e("failed to read kernel config")
+        Timber.e("failed to read kernel config or no configfs options found in /proc/config.gz (exit code=${commandResult.code}, err=${commandResult.err})")
     }
 
     return kernelConfigLinesList
+}
+
+@RequiresRoot
+private fun getUsbGadgetSystemInfo(): UsbGadgetSystemInfo {
+    Timber.d("getUsbGadgetSystemInfo() called")
+    val selinuxResult = Shell.cmd("getenforce").exec()
+    val selinuxMode = selinuxResult.out.firstOrNull()?.trim()
+    Timber.v("getUsbGadgetSystemInfo(): SELinux mode = $selinuxMode")
+
+    val sysUsbController = Shell.cmd("getprop sys.usb.controller").exec().out.firstOrNull()?.trim()
+    val sysUsbState = Shell.cmd("getprop sys.usb.state").exec().out.firstOrNull()?.trim()
+    val sysUsbConfig = Shell.cmd("getprop sys.usb.config").exec().out.firstOrNull()?.trim()
+    Timber.v("getUsbGadgetSystemInfo(): sys.usb.controller=$sysUsbController, state=$sysUsbState, config=$sysUsbConfig")
+
+    fun commandResultToStringList(result: Shell.Result): List<String> = buildList {
+        if (result.out.isEmpty()) {
+            add("stdout: (empty)")
+        } else {
+            add("stdout:")
+            addAll(result.out)
+        }
+
+        if (result.err.isEmpty()) {
+            add("stderr: (empty)")
+        } else {
+            add("stderr:")
+            addAll(result.err)
+        }
+    }
+
+    val udcListingLines = Shell.cmd("ls -la /sys/class/udc").exec().let {
+        val lines = commandResultToStringList(it)
+        Timber.v("getUsbGadgetSystemInfo(): /sys/class/udc = $lines")
+        lines
+    }
+
+    val usbGadgetListingLines = Shell.cmd("ls -la /config/usb_gadget").exec().let {
+        val lines = commandResultToStringList(it)
+        Timber.v("getUsbGadgetSystemInfo(): /config/usb_gadget = $lines")
+        lines
+    }
+
+    val characterDevicesListingLines = Shell.cmd("ls -laZ /dev/hid*").exec().let {
+        val lines = commandResultToStringList(it)
+        Timber.v("getUsbGadgetSystemInfo(): /dev/hid* = $lines")
+        lines
+    }
+
+    return UsbGadgetSystemInfo(
+        selinuxMode = selinuxMode,
+        sysUsbController = sysUsbController,
+        sysUsbState = sysUsbState,
+        sysUsbConfig = sysUsbConfig,
+        udcListing = udcListingLines,
+        usbGadgetListing = usbGadgetListingLines,
+        characterDevicesListing = characterDevicesListingLines,
+    )
 }
 
 /**
@@ -282,8 +389,6 @@ annotation class RequiresRoot
 
 @Composable
 fun ExportLogsButton() {
-    val troubleshootingInfo = detectIssues()
-
     val mainViewModel: MainViewModel = viewModel()
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -292,6 +397,7 @@ fun ExportLogsButton() {
 
         Timber.v("selected file URI: %s", uri)
 
+        val troubleshootingInfo = detectIssues()
         mainViewModel.syncLogsToMainProcess()
         saveLogFile(context, uri, troubleshootingInfo)
     }
@@ -320,17 +426,47 @@ private fun StringBuilder.appendDivider(): StringBuilder =
 private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: TroubleshootingInfo) {
     try {
         val logString = buildString {
+            val deviceInfo = troubleshootingInfo.deviceInfo
+            deviceInfo.let {
+                appendLine("Device Information:")
+                appendLine("Manufacturer: ${it.manufacturer}")
+                appendLine("Model: ${it.model}")
+                appendLine("Brand: ${it.brand}")
+                appendLine("Device: ${it.device}")
+                appendLine("Product: ${it.product}")
+                appendLine("Board: ${it.board}")
+                appendLine("Hardware: ${it.hardware}")
+                appendLine("SDK Int: ${it.sdkInt}")
+                appendLine("Build ID: ${it.buildId}")
+                appendDivider()
+            }
+
             val rootPermissionInfo = troubleshootingInfo.rootPermissionInfo
-            val characterDevicesInfoList = troubleshootingInfo.characterDevicesInfoList
-            val kernelInfo = troubleshootingInfo.kernelInfo
+            rootPermissionInfo.let {
+                appendLine("Do we have root permissions?: ${it.hasRootPermissions}")
+                appendLine("Root method: ${it.rootMethod.name}")
+                appendDivider()
+            }
 
-            appendLine("Do we have root permissions?: ${rootPermissionInfo.hasRootPermissions}")
-            appendLine("Root method: ${rootPermissionInfo.rootMethod.name}")
+            val usbGadgetSystemInfo = troubleshootingInfo.usbGadgetSystemInfo
+            usbGadgetSystemInfo?.let {
+                appendLine("SELinux Mode: ${it.selinuxMode}")
+                appendLine("sys.usb.controller: ${it.sysUsbController}")
+                appendLine("sys.usb.state: ${it.sysUsbState}")
+                appendLine("sys.usb.config: ${it.sysUsbConfig}")
 
+                appendLsOutputLines("/sys/class/udc", it.udcListing)
+                appendLsOutputLines("/config/usb_gadget", it.usbGadgetListing)
+                appendLsOutputLines("/dev/hid*", it.characterDevicesListing)
+            } ?: run {
+                appendLine("usbGadgetSystemInfo is null")
+            }
             appendDivider()
 
-            if (characterDevicesInfoList != null) {
-                for (characterDevice in characterDevicesInfoList) {
+            val characterDevicesInfoList = troubleshootingInfo.characterDevicesInfoList
+            characterDevicesInfoList?.let {
+                appendLine("Character Devices Info:")
+                it.forEach { characterDevice ->
                     appendLine("character device info for: ${characterDevice.path}")
                     appendLine("does it exist?: ${characterDevice.isPresent}")
                     appendLine("is it visible without root?: ${characterDevice.isVisibleWithoutRoot}")
@@ -339,28 +475,27 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
 
                     appendLine()
                 }
-            } else {
-                appendLine("character device info list is null, that's bad.")
+            } ?: run {
+                appendLine("character device info list is null")
             }
-
             appendDivider()
 
-            if (kernelInfo != null) {
-                appendLine("version: ${kernelInfo.version}")
-                appendLine("has ConfigFS support?: ${kernelInfo.hasConfigFsSupport}")
-                appendLine("has ConfigFS HID function support?: ${kernelInfo.hasConfigFsHidFunctionSupport}")
+            val kernelInfo = troubleshootingInfo.kernelInfo
+            kernelInfo?.let {
+                appendLine("Kernel Info:")
+                appendLine("version: ${it.version}")
+                appendLine("has ConfigFS support?: ${it.hasConfigFsSupport}")
+                appendLine("has ConfigFS HID function support?: ${it.hasConfigFsHidFunctionSupport}")
                 appendLine("-")
                 appendLine("relevant snippet of kernel config: ")
-                appendLine(kernelInfo.kernelConfigAnnotated.text)
-            } else {
+                appendLine(it.kernelConfigAnnotated.text)
+            } ?: run {
                 appendLine("kernel info is null, that's bad.")
             }
-
             appendDivider()
 
-            appendLine("Logs: ")
-
             // Append all logs
+            appendLine("Logs: ")
             for (entry in LogBuffer.getLogList()) {
                 appendLine(entry.toString())
             }
@@ -377,9 +512,21 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
             outputStream.write(logString.toByteArray())
         }
 
-        Timber.v("Successfully exported logs")
+        Timber.i("Successfully exported logs")
     } catch (e: IOException) {
         Timber.e(e)
         Timber.e("IOException occurred while exporting logs")
+    }
+}
+
+private fun StringBuilder.appendLsOutputLines(label: String, lines: List<String>) {
+    appendLine("listing for: '$label'")
+
+    if (lines.isEmpty()) {
+        appendLine("  (empty or unreadable)")
+    } else {
+        for (line in lines) {
+            appendLine("  $line")
+        }
     }
 }
