@@ -222,8 +222,13 @@ class CharacterDeviceManager private constructor(private val application: Applic
 }
 
 private fun execShellCommandAndLogResult(command: String): Shell.Result {
+    Timber.i("executing shell command: $command")
+
     val result = Shell.cmd(command).exec()
-    logShellCommandResult(command, result)
+
+    // NOTE: do NOT pass the command in here as a label because it'll be passed to String.format, and if
+    // the command contains '%' characters, it can lead to failed formatting.
+    logShellCommandResult("result", result)
 
     return result
 }
