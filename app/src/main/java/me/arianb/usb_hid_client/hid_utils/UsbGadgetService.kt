@@ -253,18 +253,23 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
     }
 
     fun createCharacterDevices() {
+        Timber.i("createCharacterDevices() called with preferences: $gadgetUserPreferences")
+
         // TODO:
         //  check if symlinks already exist in configs dir bc if they do, writes will fail due to "device or resource busy",
         //  which is reasonable, since the function would be active.
 
         val gadgetFunctionLinksToRestore: List<Pair<Path, Path>> =
             if (gadgetUserPreferences.disableGadgetFunctionsDuringConfiguration) {
+                Timber.i("disableGadgetFunctionsDuringConfiguration is true, collecting function links to restore")
                 getGadgetFunctionLinksToRestore().apply {
                     // Delete links
                     forEach { (linkPath, _) ->
                         Timber.i("About to attempt to delete link at path: $linkPath")
                         runCatching {
                             linkPath.deleteIfExists()
+                        }.onSuccess { deleted ->
+                            Timber.v("Deletion of link at '$linkPath': deleted=$deleted")
                         }.onFailure {
                             Timber.e("Failed to delete link at path: $linkPath")
                             Timber.e(it)
@@ -272,6 +277,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
                     }
                 }
             } else {
+                Timber.i("disableGadgetFunctionsDuringConfiguration is false, skipping existing links deletion")
                 emptyList()
             }
 
@@ -282,40 +288,51 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         // Credit to @alryaz on GitHub for submitting a PR that I unfortunately couldn't accept, since it was based
         // on outdated code from the main branch
         //  - https://github.com/Arian04/android-hid-client/pull/64
+        Timber.i("Attempting to disable USB gadget before configuring HID functions")
         try {
             disableGadget()
+            Timber.i("Successfully disabled USB gadget")
         } catch (e: IOException) {
             Timber.e("Failed to disable usb gadget")
             Timber.e(e)
         }
 
         for (hidFunction in allHidFunctions) {
+            Timber.i("Attempting to add HID function: ${hidFunction.name}")
             try {
                 addHidFunction(hidFunction)
+                Timber.i("Successfully added HID function: ${hidFunction.name}")
             } catch (e: IOException) {
                 Timber.e("Failed to add '${hidFunction.name}' function to usb gadget")
                 Timber.e(e)
             }
         }
 
+        Timber.i("Linking HID functions to config at $CONFIGS_PATH")
         linkFunctionsToConfig(allHidFunctions)
 
         Timber.i("about to restore the following symlinks: $gadgetFunctionLinksToRestore")
         gadgetFunctionLinksToRestore.forEach { (linkPath, targetPath) ->
             runCatching {
                 linkPath.createSymbolicLinkPointingTo(targetPath)
+            }.onSuccess {
+                Timber.i("Successfully restored symlink: link=$linkPath -> target=$targetPath")
             }.onFailure {
                 Timber.e("ugh it didn't work, here's some info: link=$linkPath target=$targetPath")
                 Timber.e(it)
             }
         }
 
+        Timber.i("Attempting to enable/reset USB gadget after configuration")
         try {
             enableGadget()
+            Timber.i("Successfully enabled USB gadget")
         } catch (e: IOException) {
             Timber.e("Failed to reset usb gadget")
             Timber.e(e)
         }
+
+        Timber.i("createCharacterDevices() finished")
     }
 
     private fun getGadgetFunctionLinksToRestore(): List<Pair<Path, Path>> {
@@ -358,21 +375,30 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             Timber.v("Creating directory at path: $it")
             it.createDirectories()
 
-            Timber.v("About to begin writing properties of the HID function to the respective files")
+            Timber.v("About to begin writing properties of the HID function to the respective files in $it")
 
+            Timber.v("Writing protocol")
             (it / "protocol").writeAsString(function.protocol)
+
+            Timber.v("Writing subclass")
             (it / "subclass").writeAsString(function.subclass)
+
             try {
                 // Not critical, so don't let this one fail the whole operation
+                Timber.v("Writing no_out_endpoint")
                 (it / "no_out_endpoint").writeAsString(1u)
             } catch (e: IOException) {
-                Timber.w(e)
+                Timber.w(e, "Failed to write no_out_endpoint to ${it / "no_out_endpoint"} (non-critical)")
             }
+
+            Timber.v("Writing report_length")
             (it / "report_length").writeAsString(function.reportLength)
+
+            Timber.v("Writing report_desc")
             (it / "report_desc").writeBytes(function.reportDescriptor.asByteArray())
         }
 
-        Timber.i("returning from addHidFunction()")
+        Timber.i("returning from addHidFunction() successfully for: ${function.name}")
     }
 
     private fun linkFunctionsToConfig(functions: Array<HidFunction>) {
@@ -397,9 +423,12 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             Timber.v("Creating symlink from path '${it.configPath}' to target path '${it.functionPath}'")
             try {
                 it.configPath.createSymbolicLinkPointingTo(it.functionPath)
+                Timber.v("Successfully created symlink")
             } catch (e: java.nio.file.FileAlreadyExistsException) {
                 // NOTE: it's extremely important to make sure you catch Java's FileAlreadyExistsException, not Kotlin's
                 Timber.w(e, "Attempted to create a symlink in a location that already had a file")
+            } catch (e: IOException) {
+                Timber.e(e, "Failed to create symlink from '${it.configPath}' to '${it.functionPath}'")
             }
         }
 
@@ -428,30 +457,37 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
     @Throws(IOException::class)
     private fun disableGadget() {
+        Timber.i("disableGadget(): clearing UDC at path: $UDC_PATH")
         UDC_PATH.writer(options = arrayOf(StandardOpenOption.SYNC)).use {
             // For some reason, it was refusing to clear without writing a newline, other whitespace didn't seem to work.
             it.write("\n")
         }
+        Timber.i("disableGadget(): successfully wrote to $UDC_PATH")
     }
 
     @Throws(IOException::class)
     private fun enableGadget() {
         val udc = getUDC()
-
+        Timber.i("enableGadget(): enabling UDC '$udc' by writing to $UDC_PATH")
         UDC_PATH.writer(options = arrayOf(StandardOpenOption.SYNC)).use {
             // This part seems to happen implicitly
             it.write(udc)
         }
+        Timber.i("enableGadget(): successfully wrote UDC")
     }
 
     @OptIn(ExperimentalPathApi::class)
     fun deleteCharacterDevices() {
+        Timber.i("deleteCharacterDevices() called")
+
         for (hidFunction in allHidFunctions) {
             try {
                 // Clear out function configuration directory (should just point to function path)
+                Timber.i("deleteCharacterDevices(): deleting function config path recursively at ${hidFunction.configPath}")
                 hidFunction.configPath.deleteRecursively()
 
                 // Delete function directories
+                Timber.i("deleteCharacterDevices(): deleting function directory at ${hidFunction.functionPath}")
                 hidFunction.functionPath.deleteIfExists()
             } catch (e: IOException) {
                 Timber.e("Failed to remove '${hidFunction.name}' function from usb gadget")
@@ -459,17 +495,23 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             }
 
             // Apply changes
+            Timber.i("deleteCharacterDevices(): resetting gadget")
             resetGadget()
 
             // Delete character devices
             CharacterDeviceManager.Companion.DevicePaths.all.map { Path(it.path) }.forEach {
+                Timber.i("deleteCharacterDevices(): deleting character device at $it")
                 it.deleteIfExists()
             }
         }
+
+        Timber.i("deleteCharacterDevices() finished")
     }
 
     @Throws(IOException::class)
     fun getUDC(): String {
+        Timber.i("getUDC() called")
+
         // NOTE:
         //  Reading the "sys.usb.controller" property will return null when (I think) the gadget is disabled.
         //  My guess is it returns the *active* UDC, so I can't read the UDC when it's inactive. So we're doing
