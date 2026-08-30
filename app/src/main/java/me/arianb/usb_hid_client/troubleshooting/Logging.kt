@@ -26,10 +26,12 @@ data class LogEntry(
     val throwableString: String? = null,
 ) : Parcelable {
     override fun toString(): String {
-        return if (throwableString != null) {
-            "${tag}\t\t${priority}\t\t${message}\t\t${throwableString}"
+        val strWithoutThrowable = String.format("%-50s %-10s %s", tag, priority, message)
+
+        return if (throwableString == null) {
+            strWithoutThrowable
         } else {
-            "${tag}\t\t${priority}\t\t${message}"
+            strWithoutThrowable + ("\t\t" + throwableString)
         }
     }
 }
