@@ -461,26 +461,35 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
         val udcPath: Path = if (udcList.isEmpty()) {
             // TODO: What do we even do at this point
+            Timber.wtf("getUDC(): /sys/class/udc has no entries at all. This is a known unhandled case (see TODO in source).")
             Path("")
         } else if (udcList.size == 1) {
+            Timber.i("getUDC(): exactly one UDC entry found, using it: ${udcList.first()}")
             udcList.first()
         } else {
+            Timber.i("getUDC(): more than one UDC entry found ($udcList), attempting to filter down to symlinks")
+
             // There's more than one, attempt to filter it down I guess
             val filteredList = udcList.filter { it.isSymbolicLink() }
 
             if (filteredList.isEmpty()) {
                 // Just use the unfiltered list I guess
-                udcList.first()
+                val fallback = udcList.first()
+                Timber.w("getUDC(): filtered list is empty. Falling back to first entry from unfiltered list: $fallback")
+                fallback
             } else if (filteredList.size == 1) {
+                Timber.i("getUDC(): filtering narrowed it down to exactly one entry, using it: ${filteredList.first()}")
                 filteredList.first()
             } else {
-                Timber.w("filtered list of UDCs has more than one, using first one: $udcList")
+                Timber.w("getUDC(): filtered list of UDCs still has more than one, using first one: $filteredList (unfiltered: $udcList)")
 
                 filteredList.first()
             }
         }
 
         val udc = udcPath.name
+
+        Timber.i("getUDC(): returning UDC: '$udc'")
 
         return udc
     }
