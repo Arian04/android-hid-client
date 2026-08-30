@@ -114,6 +114,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Character Device Manager
+    fun syncLogsToMainProcess() = viewModelScope.launch {
+        characterDeviceManager.syncLogsToMainProcessLogBuffer()
+    }
+
     fun createCharacterDevices() {
         if (!rootStateHolder.hasRootPermissions()) {
             Timber.w("Can't create character devices, missing root permissions")

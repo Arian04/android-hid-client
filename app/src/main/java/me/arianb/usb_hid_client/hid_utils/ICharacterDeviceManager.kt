@@ -3,6 +3,7 @@ package me.arianb.usb_hid_client.hid_utils
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 
 interface ICharacterDeviceManager {
+    suspend fun syncLogsToMainProcessLogBuffer()
     suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences)
     fun fixCharacterDevicePermissions(device: DevicePath)
     fun fixCharacterDevicePermissions(device: String)

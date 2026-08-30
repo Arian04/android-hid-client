@@ -79,7 +79,7 @@ fun TroubleshootingPage() {
             DebuggingInfoList()
         }
 
-        ExportLogsPreferenceButton()
+        ExportLogsButton()
     }
 }
 

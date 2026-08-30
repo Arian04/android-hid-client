@@ -1,11 +1,16 @@
 package me.arianb.usb_hid_client.troubleshooting
 
-import android.util.Log
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
-class ProductionTree : Timber.Tree() {
+class ProductionTree(logLevel: Level) : Timber.DebugTree() {
+    val androidLogLevel: Int = logLevel.priority
+
+    constructor() : this(Level.INFO)
+
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        if (priority <= Log.DEBUG) {
+        if (priority < androidLogLevel) {
             return
         }
 
@@ -13,12 +18,13 @@ class ProductionTree : Timber.Tree() {
     }
 }
 
+@Parcelize
 data class LogEntry(
     val priority: String,
     val tag: String,
     val message: String,
     val throwableString: String? = null,
-) {
+) : Parcelable {
     override fun toString(): String {
         return if (throwableString != null) {
             "${tag}\t\t${priority}\t\t${message}\t\t${throwableString}"
@@ -61,6 +67,12 @@ object LogBuffer {
         buffer.add(entry)
     }
 
+    fun addLogArray(entries: Array<LogEntry>) {
+        for (entry in entries) {
+            add(entry)
+        }
+    }
+
     @JvmStatic
     fun priorityToLevel(priority: Int): String {
         return when (priority) {
@@ -76,5 +88,21 @@ object LogBuffer {
 
     fun getLogList(): List<LogEntry> {
         return buffer.toList()
+    }
+
+    fun getLogArray(): Array<LogEntry> {
+        return buffer.toTypedArray()
+    }
+
+    /**
+     * This is synchronized to (hopefully) avoid a race condition where someone `get`s the log list more than once
+     * before the `clear()` call has been run.
+     */
+    @Synchronized
+    fun getAndClearLogList(): Array<LogEntry> {
+        val list = getLogArray()
+        buffer.clear()
+
+        return list
     }
 }

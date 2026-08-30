@@ -8,12 +8,16 @@ import android.os.Message
 import android.os.Messenger
 import android.os.Parcelable
 import android.os.Process
+import android.os.RemoteException
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ipc.RootService
 import kotlinx.parcelize.Parcelize
 import me.arianb.usb_hid_client.BuildConfig
 import me.arianb.usb_hid_client.getParcelableCompat
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
+import me.arianb.usb_hid_client.troubleshooting.Level
+import me.arianb.usb_hid_client.troubleshooting.LogBuffer
+import me.arianb.usb_hid_client.troubleshooting.ProductionTree
 import timber.log.Timber
 import java.io.IOException
 import java.nio.file.Path
@@ -41,7 +45,8 @@ class UsbGadgetService : RootService() {
             Timber.plant(Timber.DebugTree())
             Shell.enableVerboseLogging = true
         }
-//        Timber.plant(ProductionTree())
+
+        Timber.plant(ProductionTree(Level.VERBOSE))
     }
 
     private val mMessenger: Messenger by lazy {
@@ -50,28 +55,16 @@ class UsbGadgetService : RootService() {
         )
     }
 
-    internal class MessageHandler : Handler.Callback {
+    private class MessageHandler : Handler.Callback {
         override fun handleMessage(msg: Message): Boolean {
-            Timber.d("Message received in service, running with UID = ${Process.myUid()}")
+            Timber.i("Message (what = ${msg.what}) received in service, running with UID = ${Process.myUid()}")
 
-            val gadgetUserPreferences: GadgetUserPreferences? = run {
-                val bundle = msg.data.apply {
-                    classLoader = GadgetUserPreferences::class.java.classLoader
-                }
-                bundle.getParcelableCompat(GADGET_PREF_BUNDLE_KEY)
-            }
-            if (gadgetUserPreferences == null) {
-                Timber.e("Failed to unmarshal GadgetUserPreferences")
-                return false
-            }
-            Timber.d("GadgetUserPreferences = $gadgetUserPreferences")
             try {
-                val usbGadgetManager = UsbGadgetManager(gadgetUserPreferences)
                 when (msg.what) {
-                    MSG_CREATE -> usbGadgetManager.createCharacterDevices()
-                    MSG_DELETE -> usbGadgetManager.deleteCharacterDevices()
+                    MSG_CREATE, MSG_DELETE -> handleGadgetManagerMessage(msg)
+                    MSG_GET_LOGS -> sendLogs(msg.replyTo)
                     else -> {
-                        Timber.w("Unhandled message: $msg")
+                        Timber.wtf("Unhandled message: $msg")
                         return false
                     }
                 }
@@ -84,15 +77,59 @@ class UsbGadgetService : RootService() {
 
             return true
         }
+
+        private fun handleGadgetManagerMessage(msg: Message): Boolean {
+            val gadgetUserPreferences: GadgetUserPreferences? = run {
+                val bundle = msg.data.apply {
+                    classLoader = GadgetUserPreferences::class.java.classLoader
+                }
+                bundle.getParcelableCompat(GADGET_PREF_BUNDLE_KEY)
+            }
+            if (gadgetUserPreferences == null) {
+                Timber.e("Failed to unmarshal GadgetUserPreferences")
+                return false
+            }
+            Timber.v("GadgetUserPreferences = $gadgetUserPreferences")
+
+            val usbGadgetManager = UsbGadgetManager(gadgetUserPreferences)
+            when (msg.what) {
+                MSG_CREATE -> usbGadgetManager.createCharacterDevices()
+                MSG_DELETE -> usbGadgetManager.deleteCharacterDevices()
+                else -> {
+                    Timber.w("Unhandled message: $msg")
+                    return false
+                }
+            }
+
+            return true
+        }
+
+        private fun sendLogs(messenger: Messenger?) {
+            if (messenger == null) {
+                Timber.w("Attempted to communicate with service using unbound connection")
+                return
+            }
+            val logArray = LogBuffer.getAndClearLogList()
+            Timber.d("RootService sending logs array: ${logArray.contentToString()}")
+            val msg = Message.obtain(null, MSG_GET_LOGS).apply {
+                data.putParcelableArray(null, logArray)
+            }
+
+            try {
+                messenger.send(msg)
+            } catch (e: RemoteException) {
+                Timber.e(e)
+            }
+        }
     }
 
     override fun onBind(intent: Intent): IBinder {
-        Timber.d("UsbGadgetService onBind() called")
+        Timber.v("UsbGadgetService onBind() called")
         return mMessenger.binder
     }
 
     override fun onUnbind(intent: Intent): Boolean {
-        Timber.d("UsbGadgetService onUnbind() called")
+        Timber.v("UsbGadgetService onUnbind() called")
         return super.onUnbind(intent)
     }
 
@@ -101,6 +138,7 @@ class UsbGadgetService : RootService() {
 
         const val MSG_CREATE = 0
         const val MSG_DELETE = 1
+        const val MSG_GET_LOGS = 2
     }
 }
 
@@ -126,6 +164,10 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
         val configPath: Path
             get() = CONFIGS_PATH / name
+
+        override fun toString(): String {
+            return "HidFunction(name='$name', protocol=$protocol, subclass=$subclass, reportLength=$reportLength, reportDescriptor=${reportDescriptor.toHexString()}, functionPath=$functionPath, configPath=$configPath)"
+        }
     }
 
     private val allHidFunctions = arrayOf(
@@ -194,8 +236,12 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
                 getGadgetFunctionLinksToRestore().apply {
                     // Delete links
                     forEach { (linkPath, _) ->
+                        Timber.i("About to attempt to delete link at path: $linkPath")
                         runCatching {
                             linkPath.deleteIfExists()
+                        }.onFailure {
+                            Timber.e("Failed to delete link at path: $linkPath")
+                            Timber.e(it)
                         }
                     }
                 }
@@ -228,6 +274,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
         linkFunctionsToConfig(allHidFunctions)
 
+        Timber.i("about to restore the following symlinks: $gadgetFunctionLinksToRestore")
         gadgetFunctionLinksToRestore.forEach { (linkPath, targetPath) ->
             runCatching {
                 linkPath.createSymbolicLinkPointingTo(targetPath)
@@ -246,15 +293,17 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
     }
 
     private fun getGadgetFunctionLinksToRestore(): List<Pair<Path, Path>> {
+        Timber.i("in getGadgetFunctionLinksToRestore()")
+
         val entries: List<Path> = runCatching { CONFIGS_PATH.listDirectoryEntries() }.getOrNull() ?: run {
             Timber.e("Failed to list directory entries at path: $CONFIGS_PATH")
             emptyList()
         }
 
-        Timber.i(entries.toString())
+        Timber.i("in getGadgetFunctionLinksToRestore(), CONFIGS_PATH.listDirectoryEntries() returned: $entries")
 
         val links = entries.filter { it.isSymbolicLink() }
-        Timber.i(links.toString())
+        Timber.i("out of those entries, the following satisfy isSymbolicLink(): $links")
 
         val linkPairs: List<Pair<Path, Path>> = links.mapNotNull {
             runCatching {
@@ -265,7 +314,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             }.getOrNull()
         }
 
-        Timber.i(linkPairs.toString())
+        Timber.i("returning linkPairs: $linkPairs")
 
         return linkPairs
     }
@@ -276,9 +325,14 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
     @Throws(IOException::class)
     private fun addHidFunction(function: HidFunction) {
+        Timber.i("addHidFunction() called with: function = $function")
+
         function.functionPath.let {
             // Ensure this directory (and all its parents) exist
+            Timber.v("Creating directory at path: $it")
             it.createDirectories()
+
+            Timber.v("About to begin writing properties of the HID function to the respective files")
 
             (it / "protocol").writeAsString(function.protocol)
             (it / "subclass").writeAsString(function.subclass)
@@ -291,9 +345,13 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             (it / "report_length").writeAsString(function.reportLength)
             (it / "report_desc").writeBytes(function.reportDescriptor.asByteArray())
         }
+
+        Timber.i("returning from addHidFunction()")
     }
 
     private fun linkFunctionsToConfig(functions: Array<HidFunction>) {
+        Timber.i("linkFunctionsToConfig() called with: functions = ${functions.contentToString()}")
+
         if (functions.isEmpty()) {
             // TODO: should I handle this in some way?
             Timber.wtf("LOGIC BUG: linkFunctionsToConfig() was called with an empty array of functions!!!")
@@ -302,6 +360,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
         // Ensure this directory (and all its parents) exist
         try {
+            Timber.v("Creating all directories within (and up until) path: $CONFIGS_PATH")
             CONFIGS_PATH.createDirectories()
         } catch (e: IOException) {
             Timber.e("IOException occurred while trying to create all directories in path: $CONFIGS_PATH")
@@ -309,28 +368,36 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         }
 
         functions.forEach {
+            Timber.v("Creating symlink from path '${it.configPath}' to target path '${it.functionPath}'")
             try {
                 it.configPath.createSymbolicLinkPointingTo(it.functionPath)
             } catch (e: java.nio.file.FileAlreadyExistsException) {
                 // NOTE: it's extremely important to make sure you catch Java's FileAlreadyExistsException, not Kotlin's
-                Timber.w("Attempted to create a symlink in a location that already had a file")
-                Timber.d(e)
+                Timber.w(e, "Attempted to create a symlink in a location that already had a file")
             }
         }
+
+        Timber.i("returning from linkFunctionsToConfig()")
     }
 
     private fun resetGadget() {
+        Timber.i("resetGadget() called")
+
         try {
+            Timber.i("disabling USB gadget")
             disableGadget()
         } catch (e: IOException) {
             Timber.w(e, "Failed to disable USB gadget during reset procedure")
         }
 
         try {
+            Timber.i("enabling USB gadget")
             enableGadget()
         } catch (e: IOException) {
             Timber.w(e, "Failed to enable USB gadget during reset procedure")
         }
+
+        Timber.i("returning from resetGadget()")
     }
 
     @Throws(IOException::class)
@@ -387,7 +454,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
             udcDirectoryPath.listDirectoryEntries()
         }
-        Timber.d("UDC value from file listing is: $udcList")
+        Timber.v("UDC value from file listing is: $udcList")
 
         val udcPath: Path = if (udcList.isEmpty()) {
             // TODO: What do we even do at this point

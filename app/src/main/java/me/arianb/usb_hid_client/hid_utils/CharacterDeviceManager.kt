@@ -38,10 +38,10 @@ class CharacterDeviceManager private constructor(private val application: Applic
         withTimeout(timeout) {
             // wait until the service is bound before trying to use it
             while (!mConnection.isBound) {
-                Timber.d("not bound yet, sleeping for a bit before trying again...")
+                Timber.v("not bound yet, sleeping for a bit before trying again...")
                 delay(pollInterval)
             }
-            Timber.d("service is bound now!!!")
+            Timber.i("service is bound now!!!")
         }
     }
 
@@ -55,9 +55,17 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         block(mConnection)
 
+        // After every call to the service, sync the logs to the main process's log buffer
+        mConnection.getLogs()
+
         if (mConnection.isBound) {
             RootService.unbind(mConnection)
         }
+    }
+
+    override suspend fun syncLogsToMainProcessLogBuffer() = useService {
+        // empty block, because useService logs after any call anyway, so leaving this empty means
+        // it'll still just run that getLogs() call.
     }
 
     override suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {

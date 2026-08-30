@@ -13,9 +13,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ShellUtils
 import me.arianb.usb_hid_client.BuildConfig
+import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.DevicePath
@@ -279,15 +281,18 @@ private fun getKernelConfig(): List<String> {
 annotation class RequiresRoot
 
 @Composable
-fun ExportLogsPreferenceButton() {
+fun ExportLogsButton() {
     val troubleshootingInfo = detectIssues()
 
+    val mainViewModel: MainViewModel = viewModel()
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         // If the user doesn't choose a location to save the file, don't continue
         val uri = result.data?.data ?: return@rememberLauncherForActivityResult
 
         Timber.d("selected file URI: %s", uri)
+
+        mainViewModel.syncLogsToMainProcess()
         saveLogFile(context, uri, troubleshootingInfo)
     }
 
@@ -314,7 +319,7 @@ private fun StringBuilder.appendDivider(): StringBuilder =
 
 private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: TroubleshootingInfo) {
     try {
-        val stringBuilder = buildString {
+        val logString = buildString {
             val rootPermissionInfo = troubleshootingInfo.rootPermissionInfo
             val characterDevicesInfoList = troubleshootingInfo.characterDevicesInfoList
             val kernelInfo = troubleshootingInfo.kernelInfo
@@ -361,7 +366,7 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
             }
         }
 
-        Timber.d(stringBuilder)
+        Timber.d(logString)
 
         // Write out file
         context.contentResolver.openOutputStream(uri).use { outputStream ->
@@ -369,7 +374,7 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
                 Timber.e("Failed to open output stream for writing log file.")
                 return
             }
-            outputStream.write(stringBuilder.toByteArray())
+            outputStream.write(logString.toByteArray())
         }
 
         Timber.d("Successfully exported logs")
