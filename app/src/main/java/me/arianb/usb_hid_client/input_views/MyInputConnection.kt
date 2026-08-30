@@ -19,7 +19,7 @@ class MyInputConnection(
             Timber.w("input connection received null KeyEvent")
             return false
         }
-        Timber.d("input connection received KeyEvent: %s", event.toString())
+        Timber.v("input connection received KeyEvent: %s", event.toString())
 
         val keyCode = event.keyCode
         val action = event.action
@@ -36,7 +36,7 @@ class MyInputConnection(
             return true
         }
 
-        Timber.d("keyCode constant: %s", KeyEvent.keyCodeToString(keyCode))
+        Timber.v("keyCode constant: %s", KeyEvent.keyCodeToString(keyCode))
 
         // If this is one of the problematic keys, handle it early in a special way
         val problematicKeyScanCodePair = KeyCodeTranslation.problematicKeyEventKeys[keyCode]
@@ -83,7 +83,7 @@ class MyInputConnection(
                 Timber.w("keyCode for location (Android Key Code): %s", "device is null")
             } else {
                 val keyCodeForLocation = device.getKeyCodeForKeyLocation(keyCode)
-                Timber.d("keyCode for location (Android Key Code): %s", keyCodeForLocation)
+                Timber.v("keyCode for location (Android Key Code): %s", keyCodeForLocation)
                 return keyCodeForLocation
             }
         }

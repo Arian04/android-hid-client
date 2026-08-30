@@ -19,11 +19,11 @@ abstract class ReportSender(
     suspend fun start(onSuccess: () -> Unit, onException: (e: IOException) -> Unit) = withContext(Dispatchers.IO) {
         for (report in reportsChannel) {
             try {
-                Timber.d("REPORT HEX (len = %d): %s", report.size, report.toHexString())
+                Timber.v("REPORT HEX (len = %d): %s", report.size, report.toHexString())
                 sendReport(report)
                 onSuccess()
             } catch (e: IOException) {
-                Timber.d(e)
+                Timber.v(e)
 
                 // TODO: map exception to a sealed error type and pass that to lambda?
                 onException(e)

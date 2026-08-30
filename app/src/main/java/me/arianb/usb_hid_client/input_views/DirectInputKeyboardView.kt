@@ -77,7 +77,7 @@ fun DirectInput(
             // As another note, this key listener seems to be triggered all the time when the key is sent from a
             // hardware keyboard (during admittedly limited testing).
             etDirectInput.setOnKeyListener { _, keyCode, event ->
-                Timber.d("OnKeyListener received KeyEvent: %s", event.toString())
+                Timber.v("OnKeyListener received KeyEvent: %s", event.toString())
                 // If key is a media key and user doesn't want us to pass it through, then just
                 // ignore it and let the system handle it normally. Otherwise, send it.
                 // TODO: rename this preference to "media key passthrough" or something similar since that's more accurate

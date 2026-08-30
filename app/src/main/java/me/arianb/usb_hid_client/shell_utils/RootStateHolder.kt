@@ -32,7 +32,7 @@ class RootStateHolder private constructor() : IRootStateHolder {
 
     override fun hasRootPermissions(): Boolean {
         val hasRootPermissions = Shell.getShell().isRoot
-        Timber.d("hasRootPermissions(): $hasRootPermissions")
+        Timber.v("hasRootPermissions(): $hasRootPermissions")
 
         _uiState.update { it.copy(missingRootPrivileges = !hasRootPermissions) }
 
@@ -46,7 +46,7 @@ class RootStateHolder private constructor() : IRootStateHolder {
         }
 
         for ((binary, matchingRootMethod) in rootBinaryMap) {
-            //Timber.d("checking for binary: %s", binary);
+            //Timber.v("checking for binary: %s", binary);
             val commandResult = Shell.cmd("type $binary").exec()
             if (commandResult.code == 0) {
                 Timber.i("Detected root method as: %s (detected by presence of binary: %s)", matchingRootMethod, binary)

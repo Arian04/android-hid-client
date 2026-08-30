@@ -7,7 +7,7 @@ import timber.log.Timber
 class ProductionTree(logLevel: Level) : Timber.DebugTree() {
     val androidLogLevel: Int = logLevel.priority
 
-    constructor() : this(Level.VERBOSE)
+    constructor() : this(Level.DEBUG)
 
     override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
         if (priority < androidLogLevel) {

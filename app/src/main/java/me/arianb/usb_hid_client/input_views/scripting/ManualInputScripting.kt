@@ -112,7 +112,7 @@ fun ManualInputForScripting(
                         return@onClick
                     }
                     val stringToSend = manualInputString
-                    Timber.d("manual input sending string: %s", stringToSend)
+                    Timber.v("manual input sending string: %s", stringToSend)
 
                     // Clear ManualInput if the user's preference is to clear it
                     if (shouldClearManualInputOnSend) {
@@ -141,7 +141,7 @@ fun ManualInputForScripting(
 
                     // Save string
                     val stringToSend = manualInputString
-                    Timber.d("manual input sending string: %s", stringToSend)
+                    Timber.v("manual input sending string: %s", stringToSend)
 
                     // Clear EditText if the user's preference is to clear it
                     if (shouldClearManualInputOnSend) {

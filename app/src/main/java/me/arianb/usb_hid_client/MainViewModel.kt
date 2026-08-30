@@ -110,7 +110,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 //            showSnackbar("ERROR: Failed to send mouse report.", Snackbar.LENGTH_SHORT)
         }
 
-        Timber.d("in MainViewModel, new state is: %s", uiState.value.toString())
+        Timber.v("in MainViewModel, new state is: %s", uiState.value.toString())
     }
 
     // Character Device Manager

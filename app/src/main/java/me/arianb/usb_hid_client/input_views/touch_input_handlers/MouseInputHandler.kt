@@ -38,7 +38,7 @@ class MouseInputHandler(
             val pointerIndexWrapper = getActivePointerInfo(motionEvent)
             val pointerIndex = pointerIndexWrapper.index
 
-            Timber.d("handleTouchEvent(): pointerIndex: $pointerIndex")
+            Timber.v("handleTouchEvent(): pointerIndex: $pointerIndex")
 
             // This just guards against a potential bug causing a complete app crash due to calling
             // getRawX() or getX() below with a negative pointer index.
@@ -78,10 +78,10 @@ class MouseInputHandler(
      * reverse of that worked properly though.
      */
     private fun getActivePointerInfo(motionEvent: MotionEvent): PointerIndex {
-        Timber.d("getActivePointerInfo()")
-        Timber.d("\tmotionEvent: $motionEvent")
-        Timber.d("\tactionIndex: ${motionEvent.actionIndex}")
-        Timber.d("\taction: ${MotionEvent.actionToString(motionEvent.actionMasked)}")
+        Timber.v("getActivePointerInfo()")
+        Timber.v("\tmotionEvent: $motionEvent")
+        Timber.v("\tactionIndex: ${motionEvent.actionIndex}")
+        Timber.v("\taction: ${MotionEvent.actionToString(motionEvent.actionMasked)}")
 
         // Capture activePointerId so we can trust that it doesn't change during the event sequence
         var thisActivePointerId = activePointerId
@@ -111,8 +111,8 @@ class MouseInputHandler(
             activePointerIndex
         }
 
-        Timber.d("\tpointerID: $thisActivePointerId")
-        Timber.d("\tpointerIndex: $pointerIndex")
+        Timber.v("\tpointerID: $thisActivePointerId")
+        Timber.v("\tpointerIndex: $pointerIndex")
 
         activePointerId = thisActivePointerId
 

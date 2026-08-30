@@ -38,7 +38,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
         withTimeout(timeout) {
             // wait until the service is bound before trying to use it
             while (!mConnection.isBound) {
-                Timber.v("not bound yet, sleeping for a bit before trying again...")
+                Timber.d("not bound yet, sleeping for a bit before trying again...")
                 delay(pollInterval)
             }
             Timber.i("service is bound now!!!")
@@ -82,10 +82,10 @@ class CharacterDeviceManager private constructor(private val application: Applic
                         withTimeout(3000) {
                             // wait until the device file exists before trying to fix its permissions
                             while (!devicePath.exists()) {
-                                Timber.d("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
+                                Timber.v("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
                                 delay(200)
                             }
-                            Timber.d("$devicePath exists now!!!")
+                            Timber.v("$devicePath exists now!!!")
                         }
                         fixCharacterDevicePermissions(devicePath)
                     } catch (e: TimeoutCancellationException) {
@@ -174,7 +174,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
     override fun anyCharacterDeviceMissing(): Boolean {
         for (charDevicePath in DevicePaths.all) {
             if (!charDevicePath.exists()) {
-                Timber.v("anyCharacterDeviceMissing(): $charDevicePath is missing")
+                Timber.d("anyCharacterDeviceMissing(): $charDevicePath is missing")
                 return true
             }
         }

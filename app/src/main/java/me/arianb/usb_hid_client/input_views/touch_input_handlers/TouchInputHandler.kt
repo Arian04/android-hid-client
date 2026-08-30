@@ -51,32 +51,32 @@ class TouchInputHandler(
 
         when (val action = motionEvent.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                Timber.v("Action Down")
+                Timber.d("Action Down")
                 handlePointerDown()
             }
 
             MotionEvent.ACTION_POINTER_DOWN -> {
-                Timber.v("Action Pointer Down")
+                Timber.d("Action Pointer Down")
                 handlePointerDown()
             }
 
             MotionEvent.ACTION_UP -> {
-                Timber.v("Action Up")
+                Timber.d("Action Up")
                 handlePointerUp()
             }
 
             MotionEvent.ACTION_POINTER_UP -> {
-                Timber.v("Action Pointer Up")
+                Timber.d("Action Pointer Up")
                 handlePointerUp()
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                Timber.v("Action Cancel")
+                Timber.d("Action Cancel")
                 handlePointerUp()
             }
 
             MotionEvent.ACTION_MOVE -> {
-                Timber.v("Action Move")
+                Timber.d("Action Move")
                 for (index in 0..<pointerCount) {
                     val (thisID, thisX, thisY) = getPointerTriple(
                         motionEvent,
@@ -144,17 +144,17 @@ class TouchInputHandler(
 
             val pointerTriple = Triple(pointerID, pointerX, pointerY)
 
-            Timber.d("getPointerTriple() returning: $pointerTriple")
+            Timber.v("getPointerTriple() returning: $pointerTriple")
 
             return pointerTriple
         }
 
         // "Stretches" the values of the points to use up the entire logical range.
         private fun adjustRange(point: Pair<Int, Int>, max: Pair<Float, Float>, isPortrait: Boolean): Pair<Int, Int> {
-            Timber.d("--- adjustRange ---")
-            Timber.d("Input point: %s", point)
-            Timber.d("isPortrait: %b", isPortrait)
-            Timber.d("DEVICE COORDINATE MAX = (%f, %f)", max.first, max.second)
+            Timber.v("--- adjustRange ---")
+            Timber.v("Input point: %s", point)
+            Timber.v("isPortrait: %b", isPortrait)
+            Timber.v("DEVICE COORDINATE MAX = (%f, %f)", max.first, max.second)
 
             val (logicalMaxX, logicalMaxY) = if (isPortrait) {
                 // FIXME:
@@ -181,7 +181,7 @@ class TouchInputHandler(
             val finalX = adjustedX.coerceIn(0, logicalMaxX)
             val finalY = adjustedY.coerceIn(0, logicalMaxY)
 
-            Timber.d("Final point: (%d, %d)", finalX, finalY)
+            Timber.v("Final point: (%d, %d)", finalX, finalY)
 
             return Pair(finalX, finalY)
         }

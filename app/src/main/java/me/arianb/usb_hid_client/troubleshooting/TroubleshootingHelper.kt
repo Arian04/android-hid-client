@@ -290,7 +290,7 @@ fun ExportLogsButton() {
         // If the user doesn't choose a location to save the file, don't continue
         val uri = result.data?.data ?: return@rememberLauncherForActivityResult
 
-        Timber.d("selected file URI: %s", uri)
+        Timber.v("selected file URI: %s", uri)
 
         mainViewModel.syncLogsToMainProcess()
         saveLogFile(context, uri, troubleshootingInfo)
@@ -366,7 +366,7 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
             }
         }
 
-        Timber.d(logString)
+        Timber.v(logString)
 
         // Write out file
         context.contentResolver.openOutputStream(uri).use { outputStream ->
@@ -377,7 +377,7 @@ private fun saveLogFile(context: Context, uri: Uri, troubleshootingInfo: Trouble
             outputStream.write(logString.toByteArray())
         }
 
-        Timber.d("Successfully exported logs")
+        Timber.v("Successfully exported logs")
     } catch (e: IOException) {
         Timber.e(e)
         Timber.e("IOException occurred while exporting logs")

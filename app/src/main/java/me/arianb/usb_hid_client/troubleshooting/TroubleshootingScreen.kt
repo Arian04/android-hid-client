@@ -147,7 +147,7 @@ private fun GadgetActionButtons(mainViewModel: MainViewModel = viewModel()) {
 @Composable
 private fun DebuggingInfoList() {
     val troubleshootingInfo = detectIssues()
-    Timber.d("debug info: %s", troubleshootingInfo.toString())
+    Timber.v("debug info: %s", troubleshootingInfo.toString())
 
     with(troubleshootingInfo.rootPermissionInfo) {
         GadgetStatusItem(
@@ -324,13 +324,13 @@ fun AutoResizeText(text: AnnotatedString, style: TextStyle, minFontSize: TextUni
         },
         onTextLayout = { textLayoutResult ->
             if (textLayoutResult.didOverflowWidth && textStyle.fontSize > minFontSize) {
-                Timber.d("fixing font size, current value: %s", textStyle.fontSize)
+                Timber.v("fixing font size, current value: %s", textStyle.fontSize)
                 textStyle = textStyle.copy(
                     fontSize = textStyle.fontSize * 0.95,
                     lineHeight = textStyle.fontSize * codeLineHeightScaleFactor
                 )
             } else {
-                Timber.d("FONT SIZE THAT FITS: %s", textStyle.fontSize)
+                Timber.v("FONT SIZE THAT FITS: %s", textStyle.fontSize)
                 readyToDraw = true
             }
         },
