@@ -15,7 +15,6 @@ import kotlinx.parcelize.Parcelize
 import me.arianb.usb_hid_client.BuildConfig
 import me.arianb.usb_hid_client.getParcelableCompat
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
-import me.arianb.usb_hid_client.troubleshooting.Level
 import me.arianb.usb_hid_client.troubleshooting.LogBuffer
 import me.arianb.usb_hid_client.troubleshooting.ProductionTree
 import timber.log.Timber
@@ -46,7 +45,7 @@ class UsbGadgetService : RootService() {
             Shell.enableVerboseLogging = true
         }
 
-        Timber.plant(ProductionTree(Level.VERBOSE))
+        Timber.plant(ProductionTree())
     }
 
     private val mMessenger: Messenger by lazy {
