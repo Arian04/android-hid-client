@@ -130,6 +130,9 @@ class UsbGadgetService : RootService() {
 
     override fun onUnbind(intent: Intent): Boolean {
         Timber.v("UsbGadgetService onUnbind() called")
+
+        // TODO: maybe block if service is still doing some work? Not yet sure if that's a good idea though.
+
         return super.onUnbind(intent)
     }
 
