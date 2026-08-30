@@ -204,28 +204,52 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             this.add(CONFIG_FS_PATH / "g2")
         }
 
+        Timber.v("determineGadgetPath(): trying preferred paths in order: $pathsToTry")
+
         for (path in pathsToTry) {
+            Timber.v("determineGadgetPath(): checking if path isDirectory(): $path")
+
             if (path.isDirectory()) {
+                Timber.i("determineGadgetPath(): found existing directory at preferred path, using it: $path")
                 return path
             }
         }
 
+        Timber.w("determineGadgetPath(): none of the preferred paths exist. Falling back to listing entries at: $CONFIG_FS_PATH")
+
         val gadgetPaths = (runCatching { CONFIG_FS_PATH.listDirectoryEntries() }.getOrNull() ?: run {
-            Timber.e("Failed to list entries at path: $CONFIG_FS_PATH")
+            Timber.e("determineGadgetPath(): Failed to list entries at path: $CONFIG_FS_PATH")
             emptyList()
         }).filter { it.isDirectory() }
 
+        Timber.i("determineGadgetPath(): directories found under $CONFIG_FS_PATH: $gadgetPaths")
+
         if (gadgetPaths.isEmpty()) {
             // TODO: This is WRONG, but it's better than a RuntimeException and I don't have better handling yet
-            return pathsToTry.first()
+            val fallback = pathsToTry.first()
+            Timber.wtf(
+                "determineGadgetPath(): no gadget directories found anywhere. Returning an unverified fallback path that " +
+                        "almost certainly doesn't exist: $fallback. If things are broken, this is probably the cause."
+            )
+            return fallback
         } else {
+            // Look for gadget with UDC, if we find one, use it
             for (path in gadgetPaths) {
-                if ((path / "UDC").isRegularFile()) {
+                val udcPathUnderGadget = path / "UDC"
+                if (udcPathUnderGadget.isRegularFile()) {
+                    Timber.i("determineGadgetPath(): found a gadget directory with a UDC file, using it: $path")
+
                     return path
+                } else {
+                    Timber.d("determineGadgetPath(): gadget directory has no UDC file at $udcPathUnderGadget, skipping: $path")
                 }
             }
 
-            return gadgetPaths.first()
+            val fallback = gadgetPaths.first()
+
+            Timber.e("determineGadgetPath(): none of the gadget dirs had a UDC file. Falling back to the first one found: $fallback")
+
+            return fallback
         }
     }
 
