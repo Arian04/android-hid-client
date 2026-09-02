@@ -18,6 +18,7 @@ import timber.log.Timber
 import java.io.File
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class CharacterDeviceManager private constructor(private val application: Application) : ICharacterDeviceManager {
     private val rootStateHolder = RootStateHolder.getInstance()
@@ -79,13 +80,14 @@ class CharacterDeviceManager private constructor(private val application: Applic
             launch {
                 for (devicePath in DevicePaths.all) {
                     try {
-                        withTimeout(3000) {
+                        Timber.i("createCharacterDevices(): about to poll for existence of device path, then fix its permissions. for path: $devicePath")
+                        withTimeout(3.seconds) {
                             // wait until the device file exists before trying to fix its permissions
                             while (!devicePath.exists()) {
                                 Timber.v("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
-                                delay(200)
+                                delay(200.milliseconds)
                             }
-                            Timber.v("$devicePath exists now!!!")
+                            Timber.i("$devicePath exists now!!!")
                         }
                         fixCharacterDevicePermissions(devicePath)
                     } catch (e: TimeoutCancellationException) {
