@@ -148,6 +148,7 @@ class UsbGadgetService : RootService() {
 // FIXME: implement CreateNewGadgetForFunctions preference
 @OptIn(ExperimentalUnsignedTypes::class)
 internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences) {
+    private val UDC_ROOT_PATH: Path = Path("/sys/class/udc")
     private val CONFIG_FS_PATH: Path = Path("/config/usb_gadget")
     private val USB_GADGET_PATH: Path = determineGadgetPath()
     private val UDC_PATH: Path = USB_GADGET_PATH / "UDC"
@@ -513,21 +514,27 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
     fun getUDC(): String {
         Timber.i("getUDC() called")
 
+        val udcDirectoryPath = UDC_ROOT_PATH
+
         // NOTE:
         //  Reading the "sys.usb.controller" property will return null when (I think) the gadget is disabled.
         //  My guess is it returns the *active* UDC, so I can't read the UDC when it's inactive. So we're doing
         //  it this way instead.
 
-        val udcList: List<Path> = run {
-            val udcDirectoryPath = Path("/sys/class/udc")
-
+        val unfilteredUdcList: List<Path> = run {
             udcDirectoryPath.listDirectoryEntries()
         }
-        Timber.v("UDC value from file listing is: $udcList")
+        Timber.d("Unfiltered list of UDCs is: $unfilteredUdcList")
+
+        val udcList = unfilteredUdcList.filter {
+            // a "dummy" UDC can be present on some devices, that seems to just act as a loopback gadget that makes
+            // the device act as if it is connected to itself. This is unintended, so we need to filter it out.
+            !it.fileName.toString().contains("dummy")
+        }
 
         val udcPath: Path = if (udcList.isEmpty()) {
             // TODO: What do we even do at this point
-            Timber.wtf("getUDC(): /sys/class/udc has no entries at all. This is a known unhandled case (see TODO in source).")
+            Timber.wtf("getUDC(): $udcDirectoryPath has no entries at all. This is a known unhandled case (see TODO in source).")
             Path("")
         } else if (udcList.size == 1) {
             Timber.i("getUDC(): exactly one UDC entry found, using it: ${udcList.first()}")
