@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
+import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManagerUserPreferences
 import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.hid_utils.ModifiesStateDirectly
 import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
@@ -45,6 +46,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
     private val rootStateHolder = RootStateHolder.getInstance()
     private val userPreferencesStateFlow = UserPreferencesRepository.getInstance(application).userPreferencesFlow
+    private val characterDeviceUserPrefs = userPreferencesStateFlow.mapState {
+        CharacterDeviceManagerUserPreferences.fromUserPreferences(it)
+    }
 
     val keySender: StateFlow<KeySender> = userPreferencesStateFlow
         .mapState {
@@ -159,7 +163,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @OptIn(ModifiesStateDirectly::class)
     fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
-        val result = characterDeviceManager.characterDeviceMissing(charDevicePath)
+        val result = characterDeviceManager.characterDeviceMissing(charDevicePath, characterDeviceUserPrefs.value)
 
         _uiState.update { it.copy(missingCharacterDevice = result) }
 
@@ -168,7 +172,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @OptIn(ModifiesStateDirectly::class)
     fun anyCharacterDeviceMissing(): Boolean {
-        val result = characterDeviceManager.anyCharacterDeviceMissing()
+        val result = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs.value)
 
         _uiState.update { it.copy(missingCharacterDevice = result) }
 

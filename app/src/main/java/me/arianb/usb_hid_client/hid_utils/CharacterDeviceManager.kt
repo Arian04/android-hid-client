@@ -2,23 +2,39 @@ package me.arianb.usb_hid_client.hid_utils
 
 import android.app.Application
 import android.content.Intent
+import android.os.Parcelable
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ipc.RootService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.parcelize.Parcelize
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
+import me.arianb.usb_hid_client.settings.UserPreferences
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.File
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+
+data class CharacterDeviceManagerUserPreferences(
+    val keyboardCharacterDevicePath: KeyboardDevicePath,
+    val touchpadCharacterDevicePath: TouchpadDevicePath,
+) {
+    val allCharacterDevicePathsList: List<DevicePath> = listOf(keyboardCharacterDevicePath, touchpadCharacterDevicePath)
+
+    companion object {
+        fun fromUserPreferences(it: UserPreferences): CharacterDeviceManagerUserPreferences =
+            CharacterDeviceManagerUserPreferences(
+                it.keyboardCharacterDevicePath,
+                it.touchpadCharacterDevicePath
+            )
+    }
+}
 
 class CharacterDeviceManager private constructor(private val application: Application) : ICharacterDeviceManager {
     private val rootStateHolder = RootStateHolder.getInstance()
@@ -78,7 +94,8 @@ class CharacterDeviceManager private constructor(private val application: Applic
             fixSelinuxPermissions()
 
             launch {
-                for (devicePath in DevicePaths.all) {
+                val allCharacterDevicePathsList = gadgetUserPreferences.allCharacterDevicePathsList
+                for (devicePath in allCharacterDevicePathsList) {
                     try {
                         Timber.i("createCharacterDevices(): about to poll for existence of device path, then fix its permissions. for path: $devicePath")
                         withTimeout(3.seconds) {
@@ -162,8 +179,12 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     @ModifiesStateDirectly
-    override fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
-        val isCharDevMissing = if (!DevicePaths.all.contains(charDevicePath)) {
+    override fun characterDeviceMissing(
+        charDevicePath: DevicePath,
+        userPreferences: CharacterDeviceManagerUserPreferences
+    ): Boolean {
+        val allCharacterDevicePathsList = userPreferences.allCharacterDevicePathsList
+        val isCharDevMissing = if (!allCharacterDevicePathsList.contains(charDevicePath)) {
             true
         } else !charDevicePath.exists()
 
@@ -173,8 +194,9 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     @ModifiesStateDirectly
-    override fun anyCharacterDeviceMissing(): Boolean {
-        for (charDevicePath in DevicePaths.all) {
+    override fun anyCharacterDeviceMissing(userPreferences: CharacterDeviceManagerUserPreferences): Boolean {
+        val allCharacterDevicePathsList = userPreferences.allCharacterDevicePathsList
+        for (charDevicePath in allCharacterDevicePathsList) {
             if (!charDevicePath.exists()) {
                 Timber.d("anyCharacterDeviceMissing(): $charDevicePath is missing")
                 return true
@@ -186,22 +208,8 @@ class CharacterDeviceManager private constructor(private val application: Applic
     }
 
     companion object {
-        // FIXME: (POSSIBLE BUG)
-        //  I think this should be taking a stateflow of the device path from the preferences, otherwise
-        //  the calls here could be stuck using default paths even if the user updates prefs.
-        object DevicePaths {
-            val DEFAULT_KEYBOARD_DEVICE_PATH = KeyboardDevicePath("/dev/hidg0")
-            val DEFAULT_TOUCHPAD_DEVICE_PATH = TouchpadDevicePath("/dev/hidg1")
-
-            private val _keyboard = MutableStateFlow(DEFAULT_KEYBOARD_DEVICE_PATH)
-            private val _touchpad = MutableStateFlow(DEFAULT_TOUCHPAD_DEVICE_PATH)
-
-            val keyboard: StateFlow<KeyboardDevicePath> = _keyboard
-            val touchpad: StateFlow<TouchpadDevicePath> = _touchpad
-
-            val all: List<DevicePath>
-                get() = listOf(keyboard.value, touchpad.value)
-        }
+        val DEFAULT_KEYBOARD_DEVICE_PATH = KeyboardDevicePath("/dev/hidg0")
+        val DEFAULT_TOUCHPAD_DEVICE_PATH = TouchpadDevicePath("/dev/hidg1")
 
         // SELinux stuff
         private const val SELINUX_DOMAIN = "appdomain"
@@ -251,14 +259,16 @@ private fun logShellCommandResult(label: String, commandResult: Shell.Result) {
 )
 annotation class ModifiesStateDirectly
 
-interface DevicePath {
+interface DevicePath : Parcelable {
     val path: String
 
     fun exists(): Boolean = File(path).exists()
 }
 
 @JvmInline
+@Parcelize
 value class KeyboardDevicePath(override val path: String) : DevicePath
 
 @JvmInline
+@Parcelize
 value class TouchpadDevicePath(override val path: String) : DevicePath

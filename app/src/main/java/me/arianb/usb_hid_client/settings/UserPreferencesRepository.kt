@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
+import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.hid_utils.KeyboardDevicePath
 import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.hid_utils.UsbGadgetPath
@@ -45,13 +46,13 @@ sealed class AppPreference(val preference: PreferenceKey<*>) {
     )
 
     data object KeyboardCharacterDevicePath : ObjectPreferenceKey<KeyboardDevicePath>(
-        "keyboard_character_device_path", CharacterDeviceManager.Companion.DevicePaths.DEFAULT_KEYBOARD_DEVICE_PATH,
+        "keyboard_character_device_path", CharacterDeviceManager.DEFAULT_KEYBOARD_DEVICE_PATH,
         fromStringPreference = { KeyboardDevicePath(it) },
         toStringPreference = { it.path }
     )
 
     data object TouchpadCharacterDevicePath : ObjectPreferenceKey<TouchpadDevicePath>(
-        "touchpad_character_device_path", CharacterDeviceManager.Companion.DevicePaths.DEFAULT_TOUCHPAD_DEVICE_PATH,
+        "touchpad_character_device_path", CharacterDeviceManager.DEFAULT_TOUCHPAD_DEVICE_PATH,
         fromStringPreference = { TouchpadDevicePath(it) },
         toStringPreference = { it.path }
     )
@@ -63,7 +64,7 @@ sealed class AppPreference(val preference: PreferenceKey<*>) {
 
     data object EnablePrecisionTouchpad : BooleanPreferenceKey("enable_precision_touchpad", false)
 
-    data object EnableScriptingSupport: BooleanPreferenceKey("enable_scripting_support", false)
+    data object EnableScriptingSupport : BooleanPreferenceKey("enable_scripting_support", false)
 }
 
 sealed class SealedString(val key: String, @StringRes val id: Int)
@@ -104,14 +105,21 @@ data class UserPreferences(
 @Parcelize
 data class GadgetUserPreferences(
     val usbGadgetPath: UsbGadgetPath,
+    val keyboardCharacterDevicePath: KeyboardDevicePath,
+    val touchpadCharacterDevicePath: TouchpadDevicePath,
     val createNewGadgetForFunctions: Boolean,
     val disableGadgetFunctionsDuringConfiguration: Boolean,
     val enablePrecisionTouchpad: Boolean,
 ) : Parcelable {
+    val allCharacterDevicePathsList: List<DevicePath>
+        get() = listOf(keyboardCharacterDevicePath, touchpadCharacterDevicePath)
+
     companion object {
         fun fromUserPreferences(userPreferences: UserPreferences): GadgetUserPreferences {
             return GadgetUserPreferences(
                 usbGadgetPath = userPreferences.usbGadgetPath,
+                keyboardCharacterDevicePath = userPreferences.keyboardCharacterDevicePath,
+                touchpadCharacterDevicePath = userPreferences.touchpadCharacterDevicePath,
                 createNewGadgetForFunctions = userPreferences.createNewGadgetForFunctions,
                 disableGadgetFunctionsDuringConfiguration = userPreferences.disableGadgetFunctionsDuringConfiguration,
                 enablePrecisionTouchpad = userPreferences.enablePrecisionTouchpad,

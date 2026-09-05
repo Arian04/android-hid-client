@@ -8,6 +8,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.collection.mutableIntSetOf
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -20,9 +22,10 @@ import com.topjohnwu.superuser.ShellUtils
 import me.arianb.usb_hid_client.BuildConfig
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
-import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.settings.OnClickPreference
+import me.arianb.usb_hid_client.settings.SettingsViewModel
+import me.arianb.usb_hid_client.settings.UserPreferences
 import me.arianb.usb_hid_client.shell_utils.RootMethod
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
@@ -79,7 +82,7 @@ data class UsbGadgetSystemInfo(
 )
 
 // TODO: make this run in a coroutine in case something takes a while or hangs?
-fun detectIssues(): TroubleshootingInfo {
+fun detectIssues(userPreferences: UserPreferences): TroubleshootingInfo {
     Timber.i("detectIssues() called")
 
     val deviceInfo = DeviceInfo()
@@ -108,8 +111,11 @@ fun detectIssues(): TroubleshootingInfo {
     if (hasRootPermissions) {
         Timber.d("detectIssues(): gathering debugging info that requires root permissions")
         // Check character device stuff
+        val allCharacterDevicePaths: List<DevicePath> = userPreferences.let {
+            listOf(it.keyboardCharacterDevicePath, it.touchpadCharacterDevicePath)
+        }
         characterDevicesInfoList = buildList {
-            for (path in CharacterDeviceManager.Companion.DevicePaths.all) {
+            for (path in allCharacterDevicePaths) {
                 add(getCharacterDeviceInfo(path))
             }
         }
@@ -389,6 +395,8 @@ annotation class RequiresRoot
 
 @Composable
 fun ExportLogsButton() {
+    val settingsViewModel: SettingsViewModel = viewModel()
+    val userPreferences by settingsViewModel.userPreferencesFlow.collectAsState()
     val mainViewModel: MainViewModel = viewModel()
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -397,7 +405,7 @@ fun ExportLogsButton() {
 
         Timber.v("selected file URI: %s", uri)
 
-        val troubleshootingInfo = detectIssues()
+        val troubleshootingInfo = detectIssues(userPreferences)
         mainViewModel.syncLogsToMainProcess()
         saveLogFile(context, uri, troubleshootingInfo)
     }

@@ -156,6 +156,8 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
     private val CONFIGS_PATH: Path = USB_GADGET_PATH / "configs/b.1/"
     private val FUNCTIONS_PATH: Path = USB_GADGET_PATH / "functions/"
 
+    private val allCharacterDevicePaths: List<DevicePath> = gadgetUserPreferences.allCharacterDevicePathsList
+
     private inner class HidFunction(
         val name: String,
         val protocol: UByte,
@@ -501,7 +503,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             resetGadget()
 
             // Delete character devices
-            CharacterDeviceManager.Companion.DevicePaths.all.map { Path(it.path) }.forEach {
+            allCharacterDevicePaths.map { Path(it.path) }.forEach {
                 Timber.i("deleteCharacterDevices(): deleting character device at $it")
                 it.deleteIfExists()
             }

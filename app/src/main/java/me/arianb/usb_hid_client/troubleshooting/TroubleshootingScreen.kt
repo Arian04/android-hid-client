@@ -40,6 +40,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
+import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.shell_utils.RootMethod
 import me.arianb.usb_hid_client.ui.theme.codeLineHeightScaleFactor
 import me.arianb.usb_hid_client.ui.theme.codeStyle
@@ -146,7 +147,9 @@ private fun GadgetActionButtons(mainViewModel: MainViewModel = viewModel()) {
 
 @Composable
 private fun DebuggingInfoList() {
-    val troubleshootingInfo = detectIssues()
+    val settingsViewModel: SettingsViewModel = viewModel()
+    val userPreferences by settingsViewModel.userPreferencesFlow.collectAsState()
+    val troubleshootingInfo = detectIssues(userPreferences)
     Timber.v("debug info: %s", troubleshootingInfo.toString())
 
     with(troubleshootingInfo.rootPermissionInfo) {
