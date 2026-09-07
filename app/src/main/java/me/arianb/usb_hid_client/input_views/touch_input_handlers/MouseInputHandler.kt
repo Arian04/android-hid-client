@@ -36,6 +36,16 @@ class MouseInputHandler(
     fun handleTouchEvent(motionEvent: MotionEvent): Boolean {
         val (pointerX, pointerY) = run {
             val pointerIndexWrapper = getActivePointerInfo(motionEvent)
+
+            // If activePointerId is null, that means getActivePointerInfo() set it to null due to the pointer being released,
+            // so let's set the previous coordinates to null so that the next pointer event won't use that old coordinate.
+            // to calculate the difference. We also need to return *from the whole method* here so that the call at the
+            // end of this method doesn't reset previousCoordinates to a non-null value.
+            if (activePointerId == null) {
+                previousCoordinates = null
+                return false
+            }
+
             val pointerIndex = pointerIndexWrapper.index
 
             Timber.v("handleTouchEvent(): pointerIndex: $pointerIndex")
