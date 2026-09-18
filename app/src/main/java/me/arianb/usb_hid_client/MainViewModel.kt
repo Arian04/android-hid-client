@@ -2,7 +2,9 @@ package me.arianb.usb_hid_client
 
 import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -129,11 +131,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
-            characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
+            runCatching {
+                val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+                characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
 
-            // Re-evaluate state
-            anyCharacterDeviceMissing()
+                // Re-evaluate state
+                anyCharacterDeviceMissing()
+            }.onFailure {
+                Toast.makeText(
+                    application.applicationContext,
+                    "[BUG] Exception thrown while creating character devices: ${it.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                Timber.wtf(
+                    it,
+                    "Unhandled exception bubbled up to MainViewModel while creating character devices"
+                )
+            }
         }
     }
 
