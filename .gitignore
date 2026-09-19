@@ -13,20 +13,6 @@ captures/
 .externalNativeBuild/
 .cxx/
 
-# IntelliJ
-*.iml
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-/.idea/misc.xml
-/.idea/deploymentTargetDropDown.xml
-/.idea/deploymentTargetSelector.xml
-/.idea/other.xml
-render.experimental.xml
-
 # Log/OS Files
 *.log
 
@@ -39,9 +25,6 @@ google-services.json
 
 # Android Profiling
 *.hprof
-
-# Plugin config
-/.idea/git_toolbox_prj.xml
 
 # Other
 .DS_Store

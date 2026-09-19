@@ -1,3 +1,13 @@
-# Default ignored files
+### Default ignored files
 /shelf/
 /workspace.xml
+
+### NOT ignored
+!/vcs.xml
+!/compiler.xml
+!/codeStyles/
+!/runConfigurations/
+!/runConfigurations.xml
+
+### Let's just ignore everything else
+/*
