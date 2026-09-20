@@ -30,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -159,6 +161,18 @@ fun MainPage(
                     SnackbarResult.Dismissed -> {}
                 }
             }
+        }
+
+        val lifecycleOwner = LocalLifecycleOwner.current
+        val snackbarFlow = mainViewModel.snackbarFlow
+        LaunchedEffect(snackbarFlow, lifecycleOwner) {
+            snackbarFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
+                .collect { message ->
+                    snackbarHostState.showSnackbar(
+                        message = message,
+                        duration = SnackbarDuration.Long
+                    )
+                }
         }
     }
 }

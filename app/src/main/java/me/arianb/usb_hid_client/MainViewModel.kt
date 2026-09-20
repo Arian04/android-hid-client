@@ -2,13 +2,17 @@ package me.arianb.usb_hid_client
 
 import android.app.Application
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onClosed
+import kotlinx.coroutines.channels.onFailure
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
@@ -44,6 +48,10 @@ data class MyUiState(
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(MyUiState())
     val uiState: StateFlow<MyUiState> = _uiState
+
+    // Snackbar queue
+    private val _snackbarChannel = Channel<String>(capacity = 5, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val snackbarFlow: Flow<String> = _snackbarChannel.receiveAsFlow()
 
     private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
     private val rootStateHolder = RootStateHolder.getInstance()
@@ -87,7 +95,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         onException = { e ->
                             val characterDevicePath = sender.characterDevicePath
                             if (e is FileNotFoundException && characterDeviceMissing(characterDevicePath)) {
-                                Timber.i("Character device '$characterDevicePath' doesn't exist. The user probably skipped the character device creation prompt.")
+                                Timber.w("Character device '$characterDevicePath' doesn't exist. The user probably skipped the character device creation prompt.")
+
+                                // TODO:
+                                //  uncomment this once I make it not show on startup (since if it's missing on startup,
+                                //  it will be showing the prompt)
+                                //sendSnackbar("Character device '$characterDevicePath' doesn't exist. Did you skip the character device creation prompt?")
                             } else {
                                 handleException(e, sender.characterDevicePath)
                             }
@@ -96,6 +109,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
+    }
+
+    private fun sendSnackbar(message: String) {
+        _snackbarChannel.trySend(message)
+            .onFailure {
+                Timber.e("Failed to add snackbar to channel: $it")
+            }
+            .onClosed {
+                Timber.wtf("Failed to add snackbar to channel because it was closed, but it should NEVER be closed.")
+            }
     }
 
     private fun handleException(e: IOException, devicePath: DevicePath) {
@@ -110,10 +133,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isCharacterDevicePermissionsBroken = devicePath.path) }
         } else if (lowercaseExceptionString.contains("enxio")) {
             Timber.i("somehow the HID gadget is disabled but the character devices are still present")
+            sendSnackbar("ERROR: Failed to send mouse report. HID gadget has been disabled (but character devices are still present)")
         } else {
-            Timber.e(e)
-            Timber.e("unknown error has occurred while trying to write to character device")
-//            showSnackbar("ERROR: Failed to send mouse report.", Snackbar.LENGTH_SHORT)
+            val message = "unknown error has occurred while trying to write to character device"
+            Timber.e(e, message)
+            sendSnackbar("ERROR: $message")
         }
 
         Timber.v("in MainViewModel, new state is: %s", uiState.value.toString())
@@ -126,7 +150,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun createCharacterDevices() {
         if (!rootStateHolder.hasRootPermissions()) {
-            Timber.w("Can't create character devices, missing root permissions")
+            val message = "Can't create character devices, missing root permissions"
+            Timber.w(message)
+            sendSnackbar(message)
             return
         }
 
@@ -138,23 +164,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 // Re-evaluate state
                 anyCharacterDeviceMissing()
             }.onFailure {
-                Toast.makeText(
-                    application.applicationContext,
-                    "[BUG] Exception thrown while creating character devices: ${it.message}",
-                    Toast.LENGTH_LONG
-                ).show()
-
                 Timber.wtf(
                     it,
                     "Unhandled exception bubbled up to MainViewModel while creating character devices"
                 )
+
+                sendSnackbar("[BUG] Unhandled exception thrown while creating character devices: ${it.message}")
             }
         }
     }
 
     fun deleteCharacterDevices() {
         if (!rootStateHolder.hasRootPermissions()) {
-            Timber.w("Can't delete character devices, missing root permissions")
+            val message = "Can't delete character devices, missing root permissions"
+            Timber.w(message)
+            sendSnackbar(message)
             return
         }
 
@@ -169,7 +193,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun fixCharacterDevicePermissions(device: String) {
         if (!rootStateHolder.hasRootPermissions()) {
-            Timber.w("Can't fix character device permissions, missing root permissions")
+            val message = "Can't fix character device permissions, missing root permissions"
+            Timber.w(message)
+            sendSnackbar(message)
             return
         }
 
