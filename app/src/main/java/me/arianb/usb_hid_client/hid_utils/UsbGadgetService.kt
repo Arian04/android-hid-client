@@ -38,6 +38,13 @@ import kotlin.io.path.writeBytes
 import kotlin.io.path.writeText
 import kotlin.io.path.writer
 
+/**
+ * The UsbGadgetService class is a RootService (from libsu). This means that all the code running in that class is
+ * running in a separate process than the main application process, and running with root permissions. This is important
+ * to keep in mind, as it has consequences like needing to reconfigure logging and such. It also means you can't read
+ * some info (like preferences) by simply re-using existing singletons that were created in the main process, as this
+ * is a new process.
+ */
 class UsbGadgetService : RootService() {
     init {
         // This is called in a different process, so we gotta replant Timber stuff
