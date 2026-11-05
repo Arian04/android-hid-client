@@ -38,8 +38,24 @@ class UsbGadgetServiceConnection : ServiceConnection {
 
     private class IncomingHandler : Handler.Callback {
         override fun handleMessage(msg: Message): Boolean {
-            Timber.v("Message received in service, running with UID = ${Process.myUid()}")
+            Timber.i("Message (what = ${msg.what}) received in service, running with UID = ${Process.myUid()}")
 
+            when (msg.what) {
+                UsbGadgetService.MSG_GET_LOGS -> {
+                    val didSucceed = handleGetLogsResponse(msg)
+                    Timber.v("handleGetLogsResponse returned $didSucceed")
+                }
+
+                else -> {
+                    Timber.w("Unhandled message: $msg")
+                    return false
+                }
+            }
+
+            return true
+        }
+
+        private fun handleGetLogsResponse(msg: Message): Boolean {
             val logArray: Array<LogEntry>? = run {
                 val bundle = msg.data.apply {
                     classLoader = LogEntry::class.java.classLoader
@@ -50,18 +66,11 @@ class UsbGadgetServiceConnection : ServiceConnection {
                 Timber.e("Failed to unmarshal log entries")
                 return false
             }
-            Timber.v("logs array received from RootService: ${logArray.contentToString()}")
-            when (msg.what) {
-                UsbGadgetService.MSG_GET_LOGS -> {
-                    Timber.i("Appending log entries to buffer: num entries=${logArray.size}")
-                    LogBuffer.addLogArray(logArray)
-                }
 
-                else -> {
-                    Timber.w("Unhandled message: $msg")
-                    return false
-                }
-            }
+            Timber.v("logs array received from RootService: ${logArray.contentToString()}")
+
+            Timber.i("Appending log entries to buffer: num entries=${logArray.size}")
+            LogBuffer.addLogArray(logArray)
 
             return true
         }
