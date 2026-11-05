@@ -328,63 +328,6 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         Timber.i("deleteCharacterDevices() finished")
     }
 
-    @Throws(IOException::class)
-    fun getUDC(): String {
-        Timber.i("getUDC() called")
-
-        val udcDirectoryPath = UDC_ROOT_PATH
-
-        // NOTE:
-        //  Reading the "sys.usb.controller" property will return null when (I think) the gadget is disabled.
-        //  My guess is it returns the *active* UDC, so I can't read the UDC when it's inactive. So we're doing
-        //  it this way instead.
-
-        val unfilteredUdcList: List<Path> = run {
-            udcDirectoryPath.listDirectoryEntries()
-        }
-        Timber.d("Unfiltered list of UDCs is: $unfilteredUdcList")
-
-        val udcList = unfilteredUdcList.filter {
-            // a "dummy" UDC can be present on some devices, that seems to just act as a loopback gadget that makes
-            // the device act as if it is connected to itself. This is unintended, so we need to filter it out.
-            !it.fileName.toString().contains("dummy")
-        }
-
-        val udcPath: Path = if (udcList.isEmpty()) {
-            // TODO: What do we even do at this point
-            Timber.wtf("getUDC(): $udcDirectoryPath has no entries at all. This is a known unhandled case (see TODO in source).")
-            Path("")
-        } else if (udcList.size == 1) {
-            Timber.i("getUDC(): exactly one UDC entry found, using it: ${udcList.first()}")
-            udcList.first()
-        } else {
-            Timber.i("getUDC(): more than one UDC entry found ($udcList), attempting to filter down to symlinks")
-
-            // There's more than one, attempt to filter it down I guess
-            val filteredList = udcList.filter { it.isSymbolicLink() }
-
-            if (filteredList.isEmpty()) {
-                // Just use the unfiltered list I guess
-                val fallback = udcList.first()
-                Timber.w("getUDC(): filtered list is empty. Falling back to first entry from unfiltered list: $fallback")
-                fallback
-            } else if (filteredList.size == 1) {
-                Timber.i("getUDC(): filtering narrowed it down to exactly one entry, using it: ${filteredList.first()}")
-                filteredList.first()
-            } else {
-                Timber.w("getUDC(): filtered list of UDCs still has more than one, using first one: $filteredList (unfiltered: $udcList)")
-
-                filteredList.first()
-            }
-        }
-
-        val udc = udcPath.name
-
-        Timber.i("getUDC(): returning UDC: '$udc'")
-
-        return udc
-    }
-
     private companion object {
         private val UDC_ROOT_PATH: Path = Path("/sys/class/udc")
         private val CONFIG_FS_PATH: Path = Path("/config/usb_gadget")
@@ -449,5 +392,61 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             }
         }
 
+        @Throws(IOException::class)
+        fun getUDC(): String {
+            Timber.i("getUDC() called")
+
+            val udcDirectoryPath = UDC_ROOT_PATH
+
+            // NOTE:
+            //  Reading the "sys.usb.controller" property will return null when (I think) the gadget is disabled.
+            //  My guess is it returns the *active* UDC, so I can't read the UDC when it's inactive. So we're doing
+            //  it this way instead.
+
+            val unfilteredUdcList: List<Path> = run {
+                udcDirectoryPath.listDirectoryEntries()
+            }
+            Timber.d("Unfiltered list of UDCs is: $unfilteredUdcList")
+
+            val udcList = unfilteredUdcList.filter {
+                // a "dummy" UDC can be present on some devices, that seems to just act as a loopback gadget that makes
+                // the device act as if it is connected to itself. This is unintended, so we need to filter it out.
+                !it.fileName.toString().contains("dummy")
+            }
+
+            val udcPath: Path = if (udcList.isEmpty()) {
+                // TODO: What do we even do at this point
+                Timber.wtf("getUDC(): $udcDirectoryPath has no entries at all. This is a known unhandled case (see TODO in source).")
+                Path("")
+            } else if (udcList.size == 1) {
+                Timber.i("getUDC(): exactly one UDC entry found, using it: ${udcList.first()}")
+                udcList.first()
+            } else {
+                Timber.i("getUDC(): more than one UDC entry found ($udcList), attempting to filter down to symlinks")
+
+                // There's more than one, attempt to filter it down I guess
+                val filteredList = udcList.filter { it.isSymbolicLink() }
+
+                if (filteredList.isEmpty()) {
+                    // Just use the unfiltered list I guess
+                    val fallback = udcList.first()
+                    Timber.w("getUDC(): filtered list is empty. Falling back to first entry from unfiltered list: $fallback")
+                    fallback
+                } else if (filteredList.size == 1) {
+                    Timber.i("getUDC(): filtering narrowed it down to exactly one entry, using it: ${filteredList.first()}")
+                    filteredList.first()
+                } else {
+                    Timber.w("getUDC(): filtered list of UDCs still has more than one, using first one: $filteredList (unfiltered: $udcList)")
+
+                    filteredList.first()
+                }
+            }
+
+            val udc = udcPath.name
+
+            Timber.i("getUDC(): returning UDC: '$udc'")
+
+            return udc
+        }
     }
 }
