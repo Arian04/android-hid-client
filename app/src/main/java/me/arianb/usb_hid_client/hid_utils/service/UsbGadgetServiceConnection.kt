@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client.hid_utils
+package me.arianb.usb_hid_client.hid_utils.service
 
 import android.content.ComponentName
 import android.content.ServiceConnection
@@ -11,7 +11,6 @@ import android.os.Process
 import android.os.RemoteException
 import kotlinx.coroutines.CompletableDeferred
 import me.arianb.usb_hid_client.getParcelableArrayCompat
-import me.arianb.usb_hid_client.hid_utils.service.UsbGadgetService
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.troubleshooting.LogBuffer
 import me.arianb.usb_hid_client.troubleshooting.LogEntry
