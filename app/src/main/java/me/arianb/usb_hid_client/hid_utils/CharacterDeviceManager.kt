@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
+import me.arianb.usb_hid_client.hid_utils.service.UsbGadgetService
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.settings.UserPreferences
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder

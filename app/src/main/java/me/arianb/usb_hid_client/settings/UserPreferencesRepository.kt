@@ -14,7 +14,7 @@ import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.hid_utils.KeyboardDevicePath
 import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
-import me.arianb.usb_hid_client.hid_utils.UsbGadgetPath
+import me.arianb.usb_hid_client.hid_utils.service.UsbGadgetPath
 
 sealed class AppPreference(val preference: PreferenceKey<*>) {
     data object OnboardingDoneKey : BooleanPreferenceKey("onboarding_done", false)

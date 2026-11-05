@@ -1,4 +1,4 @@
-package me.arianb.usb_hid_client.hid_utils
+package me.arianb.usb_hid_client.hid_utils.service
 
 import android.content.Intent
 import android.os.Handler
@@ -14,6 +14,7 @@ import com.topjohnwu.superuser.ipc.RootService
 import kotlinx.parcelize.Parcelize
 import me.arianb.usb_hid_client.BuildConfig
 import me.arianb.usb_hid_client.getParcelableCompat
+import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.troubleshooting.Level
 import me.arianb.usb_hid_client.troubleshooting.LogBuffer
