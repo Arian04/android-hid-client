@@ -209,21 +209,23 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         }
     }
 
-    private val allHidFunctions = arrayOf(
-        HidFunction(
-            "hid.keyboard",
-            protocol = 1u,
-            subclass = 1u,
-            reportLength = 5u,
-            reportDescriptor = KEYBOARD_REPORT_DESCRIPTOR
-        ), HidFunction(
-            "hid.touchpad",
-            protocol = 2u,
-            subclass = 0u,
-            reportLength = 12u,
-            reportDescriptor = TOUCHPAD_REPORT_DESCRIPTOR
-        )
+    private val keyboardHidFunction = HidFunction(
+        "hid.keyboard",
+        protocol = 1u,
+        subclass = 1u,
+        reportLength = 5u,
+        reportDescriptor = KEYBOARD_REPORT_DESCRIPTOR
     )
+
+    private val touchpadHidFunction = HidFunction(
+        "hid.touchpad",
+        protocol = 2u,
+        subclass = 0u,
+        reportLength = 12u,
+        reportDescriptor = TOUCHPAD_REPORT_DESCRIPTOR
+    )
+
+    private val allHidFunctions = arrayOf(keyboardHidFunction, touchpadHidFunction)
 
     private fun determineGadgetPath(): Path {
         val pathsToTry: List<Path> = buildList {
