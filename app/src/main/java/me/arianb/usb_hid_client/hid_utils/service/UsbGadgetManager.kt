@@ -1,6 +1,8 @@
 package me.arianb.usb_hid_client.hid_utils.service
 
 import me.arianb.usb_hid_client.hid_utils.DevicePath
+import me.arianb.usb_hid_client.hid_utils.service.HidFunction.Companion.keyboardHidFunction
+import me.arianb.usb_hid_client.hid_utils.service.HidFunction.Companion.touchpadHidFunction
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import timber.log.Timber
 import java.io.IOException
@@ -18,15 +20,12 @@ import kotlin.io.path.isRegularFile
 import kotlin.io.path.isSymbolicLink
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
-import kotlin.io.path.writeBytes
-import kotlin.io.path.writeText
 import kotlin.io.path.writer
 
 // FIXME: implement CreateNewGadgetForFunctions preference
 /**
  * This is only meant to be used by UsbGadgetService. If Kotlin had package-private, this would be package-private.
  */
-@OptIn(ExperimentalUnsignedTypes::class)
 internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences) {
     private val USB_GADGET_PATH: Path = determineGadgetPath(gadgetUserPreferences)
     private val UDC_PATH: Path = USB_GADGET_PATH / "UDC"
@@ -36,41 +35,22 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
     private val allCharacterDevicePaths: List<DevicePath> = gadgetUserPreferences.allCharacterDevicePathsList
 
-    private inner class HidFunction(
-        val name: String,
-        val protocol: UByte,
-        val subclass: UByte,
-        val reportLength: UInt,
-        val reportDescriptor: UByteArray
-    ) {
-        val functionPath: Path
-            get() = FUNCTIONS_PATH / name
+    // ----- Helpers to avoid needing to pass the base paths in at every call site -----
+    private fun GadgetFunction.getFunctionPath(): Path =
+        this.getFunctionPath(FUNCTIONS_PATH)
 
-        val configPath: Path
-            get() = CONFIGS_PATH / name
+    private fun GadgetFunction.getConfigPath(): Path =
+        this.getConfigPath(CONFIGS_PATH)
 
-        override fun toString(): String {
-            return "HidFunction(name='$name', protocol=$protocol, subclass=$subclass, reportLength=$reportLength, reportDescriptor=${reportDescriptor.toHexString()}, functionPath=$functionPath, configPath=$configPath)"
-        }
-    }
+    private fun GadgetFunction.addFunction() =
+        this.addFunction(FUNCTIONS_PATH)
 
-    private val keyboardHidFunction = HidFunction(
-        "hid.keyboard",
-        protocol = 1u,
-        subclass = 1u,
-        reportLength = 5u,
-        reportDescriptor = KEYBOARD_REPORT_DESCRIPTOR
-    )
+    private fun GadgetFunction.deleteFunctionDirectory() =
+        this.deleteFunctionDirectory(FUNCTIONS_PATH)
 
-    private val touchpadHidFunction = HidFunction(
-        "hid.touchpad",
-        protocol = 2u,
-        subclass = 0u,
-        reportLength = 12u,
-        reportDescriptor = TOUCHPAD_REPORT_DESCRIPTOR
-    )
+    // ----------
 
-    private val allHidFunctions = arrayOf(keyboardHidFunction, touchpadHidFunction)
+    private val allHidFunctions: Array<GadgetFunction> = arrayOf(keyboardHidFunction, touchpadHidFunction)
 
     fun createCharacterDevices() {
         Timber.i("createCharacterDevices() called with preferences: $gadgetUserPreferences")
@@ -120,7 +100,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         for (hidFunction in allHidFunctions) {
             Timber.i("Attempting to add HID function: ${hidFunction.name}")
             try {
-                addHidFunction(hidFunction)
+                hidFunction.addFunction()
                 Timber.i("Successfully added HID function: ${hidFunction.name}")
             } catch (e: IOException) {
                 Timber.e("Failed to add '${hidFunction.name}' function to usb gadget")
@@ -182,46 +162,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         return linkPairs
     }
 
-    private fun Path.writeAsString(uByte: UByte) = writeAsString(uByte.toUInt())
-
-    private fun Path.writeAsString(uInt: UInt) = writeText(uInt.toString())
-
-    @Throws(IOException::class)
-    private fun addHidFunction(function: HidFunction) {
-        Timber.i("addHidFunction() called with: function = $function")
-
-        function.functionPath.let {
-            // Ensure this directory (and all its parents) exist
-            Timber.v("Creating directory at path: $it")
-            it.createDirectories()
-
-            Timber.v("About to begin writing properties of the HID function to the respective files in $it")
-
-            Timber.v("Writing protocol")
-            (it / "protocol").writeAsString(function.protocol)
-
-            Timber.v("Writing subclass")
-            (it / "subclass").writeAsString(function.subclass)
-
-            try {
-                // Not critical, so don't let this one fail the whole operation
-                Timber.v("Writing no_out_endpoint")
-                (it / "no_out_endpoint").writeAsString(1u)
-            } catch (e: IOException) {
-                Timber.w(e, "Failed to write no_out_endpoint to ${it / "no_out_endpoint"} (non-critical)")
-            }
-
-            Timber.v("Writing report_length")
-            (it / "report_length").writeAsString(function.reportLength)
-
-            Timber.v("Writing report_desc")
-            (it / "report_desc").writeBytes(function.reportDescriptor.asByteArray())
-        }
-
-        Timber.i("returning from addHidFunction() successfully for: ${function.name}")
-    }
-
-    private fun linkFunctionsToConfig(functions: Array<HidFunction>) {
+    private fun linkFunctionsToConfig(functions: Array<GadgetFunction>) {
         Timber.i("linkFunctionsToConfig() called with: functions = ${functions.contentToString()}")
 
         if (functions.isEmpty()) {
@@ -240,15 +181,15 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         }
 
         functions.forEach {
-            Timber.v("Creating symlink from path '${it.configPath}' to target path '${it.functionPath}'")
+            Timber.v("Creating symlink from path '${it.getConfigPath()}' to target path '${it.getFunctionPath()}'")
             try {
-                it.configPath.createSymbolicLinkPointingTo(it.functionPath)
+                it.getConfigPath().createSymbolicLinkPointingTo(it.getFunctionPath())
                 Timber.v("Successfully created symlink")
             } catch (e: java.nio.file.FileAlreadyExistsException) {
                 // NOTE: it's extremely important to make sure you catch Java's FileAlreadyExistsException, not Kotlin's
                 Timber.w(e, "Attempted to create a symlink in a location that already had a file")
             } catch (e: IOException) {
-                Timber.e(e, "Failed to create symlink from '${it.configPath}' to '${it.functionPath}'")
+                Timber.e(e, "Failed to create symlink from '${it.getConfigPath()}' to '${it.getFunctionPath()}'")
             }
         }
 
@@ -303,12 +244,11 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         for (hidFunction in allHidFunctions) {
             try {
                 // Clear out function configuration directory (should just point to function path)
-                Timber.i("deleteCharacterDevices(): deleting function config path recursively at ${hidFunction.configPath}")
-                hidFunction.configPath.deleteRecursively()
+                Timber.i("deleteCharacterDevices(): deleting function config path recursively at ${hidFunction.getConfigPath()}")
+                hidFunction.getConfigPath().deleteRecursively()
 
                 // Delete function directories
-                Timber.i("deleteCharacterDevices(): deleting function directory at ${hidFunction.functionPath}")
-                hidFunction.functionPath.deleteIfExists()
+                hidFunction.deleteFunctionDirectory()
             } catch (e: IOException) {
                 Timber.e("Failed to remove '${hidFunction.name}' function from usb gadget")
                 Timber.e(e)
