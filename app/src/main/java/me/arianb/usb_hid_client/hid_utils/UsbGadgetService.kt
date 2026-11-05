@@ -68,7 +68,11 @@ class UsbGadgetService : RootService() {
 
             try {
                 when (msg.what) {
-                    MSG_CREATE, MSG_DELETE -> handleGadgetManagerMessage(msg)
+                    MSG_CREATE, MSG_DELETE -> {
+                        val didSucceed = handleGadgetManagerMessage(msg)
+                        sendOperationComplete(msg.replyTo, msg.what, didSucceed)
+                    }
+
                     MSG_GET_LOGS -> sendLogs(msg.replyTo)
                     else -> {
                         Timber.wtf("Unhandled message: $msg")
@@ -80,6 +84,9 @@ class UsbGadgetService : RootService() {
                 // when I didn't
                 Timber.w("Oh no, an unhandled exception occurred in UsbGadgetService")
                 Timber.w(e)
+
+                // TODO: should we sendOperationComplete here? I don't wanna double-send depending on where the
+                //  exception is thrown from. Maybe I should wrap each "when" block in its own try-catch or runCatching
             }
 
             return true
@@ -109,6 +116,24 @@ class UsbGadgetService : RootService() {
             }
 
             return true
+        }
+
+        private fun sendOperationComplete(messenger: Messenger?, completedMsgWhat: Int, didSucceed: Boolean) {
+            if (messenger == null) {
+                Timber.w("Attempted to send operation completion using null replyTo messenger")
+                return
+            }
+
+            val replyMsg = Message.obtain(null, MSG_OPERATION_COMPLETE).apply {
+                arg1 = completedMsgWhat
+                arg2 = if (didSucceed) 1 else 0
+            }
+
+            try {
+                messenger.send(replyMsg)
+            } catch (e: RemoteException) {
+                Timber.e(e)
+            }
         }
 
         private fun sendLogs(messenger: Messenger?) {
@@ -149,6 +174,7 @@ class UsbGadgetService : RootService() {
         const val MSG_CREATE = 0
         const val MSG_DELETE = 1
         const val MSG_GET_LOGS = 2
+        const val MSG_OPERATION_COMPLETE = 3
     }
 }
 
