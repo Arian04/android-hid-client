@@ -55,31 +55,21 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
     fun createCharacterDevices() {
         Timber.i("createCharacterDevices() called with preferences: $gadgetUserPreferences")
 
+        val gadgetFunctionLinksToRestore: List<Pair<Path, Path>> = prepareFunctions()
+
+        activateFunctions(gadgetFunctionLinksToRestore)
+
+        Timber.i("createCharacterDevices() finished")
+    }
+
+    private fun prepareFunctions(): List<Pair<Path, Path>> {
+        Timber.i("prepareFunctions() called")
+
         // TODO:
         //  check if symlinks already exist in configs dir bc if they do, writes will fail due to "device or resource busy",
         //  which is reasonable, since the function would be active.
 
-        val gadgetFunctionLinksToRestore: List<Pair<Path, Path>> =
-            if (gadgetUserPreferences.disableGadgetFunctionsDuringConfiguration) {
-                Timber.i("disableGadgetFunctionsDuringConfiguration is true, collecting function links to restore")
-                getGadgetFunctionLinksToRestore().apply {
-                    // Delete links
-                    forEach { (linkPath, _) ->
-                        Timber.i("About to attempt to delete link at path: $linkPath")
-                        runCatching {
-                            linkPath.deleteIfExists()
-                        }.onSuccess { deleted ->
-                            Timber.v("Deletion of link at '$linkPath': deleted=$deleted")
-                        }.onFailure {
-                            Timber.e("Failed to delete link at path: $linkPath")
-                            Timber.e(it)
-                        }
-                    }
-                }
-            } else {
-                Timber.i("disableGadgetFunctionsDuringConfiguration is false, skipping existing links deletion")
-                emptyList()
-            }
+        val gadgetFunctionLinksToRestore: List<Pair<Path, Path>> = unlinkFunctionsAndGetLinksToRestore()
 
         // Disable gadget before configuring it to work around possible device-specific issue
         //
@@ -108,20 +98,15 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             }
         }
 
+        Timber.i("prepareFunctions() finished")
+        return gadgetFunctionLinksToRestore
+    }
+
+    private fun activateFunctions(gadgetFunctionLinksToRestore: List<Pair<Path, Path>>) {
         Timber.i("Linking HID functions to config at $CONFIGS_PATH")
         linkFunctionsToConfig(allHidFunctions)
 
-        Timber.i("about to restore the following symlinks: $gadgetFunctionLinksToRestore")
-        gadgetFunctionLinksToRestore.forEach { (linkPath, targetPath) ->
-            runCatching {
-                linkPath.createSymbolicLinkPointingTo(targetPath)
-            }.onSuccess {
-                Timber.i("Successfully restored symlink: link=$linkPath -> target=$targetPath")
-            }.onFailure {
-                Timber.e("ugh it didn't work, here's some info: link=$linkPath target=$targetPath")
-                Timber.e(it)
-            }
-        }
+        restoreGadgetFunctionLinks(gadgetFunctionLinksToRestore)
 
         Timber.i("Attempting to enable/reset USB gadget after configuration")
         try {
@@ -131,9 +116,29 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
             Timber.e("Failed to reset usb gadget")
             Timber.e(e)
         }
-
-        Timber.i("createCharacterDevices() finished")
     }
+
+    private fun unlinkFunctionsAndGetLinksToRestore(): List<Pair<Path, Path>> =
+        if (gadgetUserPreferences.disableGadgetFunctionsDuringConfiguration) {
+            Timber.i("disableGadgetFunctionsDuringConfiguration is true, collecting function links to restore")
+            getGadgetFunctionLinksToRestore().apply {
+                // Delete links
+                forEach { (linkPath, _) ->
+                    Timber.i("About to attempt to delete link at path: $linkPath")
+                    runCatching {
+                        linkPath.deleteIfExists()
+                    }.onSuccess { deleted ->
+                        Timber.v("Deletion of link at '$linkPath': deleted=$deleted")
+                    }.onFailure {
+                        Timber.e("Failed to delete link at path: $linkPath")
+                        Timber.e(it)
+                    }
+                }
+            }
+        } else {
+            Timber.i("disableGadgetFunctionsDuringConfiguration is false, skipping existing links deletion")
+            emptyList()
+        }
 
     private fun getGadgetFunctionLinksToRestore(): List<Pair<Path, Path>> {
         Timber.i("in getGadgetFunctionLinksToRestore()")
@@ -160,6 +165,20 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         Timber.i("returning linkPairs: $linkPairs")
 
         return linkPairs
+    }
+
+    private fun restoreGadgetFunctionLinks(gadgetFunctionLinksToRestore: List<Pair<Path, Path>>) {
+        Timber.i("about to restore the following symlinks: $gadgetFunctionLinksToRestore")
+        gadgetFunctionLinksToRestore.forEach { (linkPath, targetPath) ->
+            runCatching {
+                linkPath.createSymbolicLinkPointingTo(targetPath)
+            }.onSuccess {
+                Timber.i("Successfully restored symlink: link=$linkPath -> target=$targetPath")
+            }.onFailure {
+                Timber.e("ugh it didn't work, here's some info: link=$linkPath target=$targetPath")
+                Timber.e(it)
+            }
+        }
     }
 
     private fun linkFunctionsToConfig(functions: Array<GadgetFunction>) {
