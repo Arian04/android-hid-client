@@ -260,6 +260,12 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
     fun deleteCharacterDevices() {
         Timber.i("deleteCharacterDevices() called")
 
+        try {
+            disableGadget()
+        } catch (e: IOException) {
+            Timber.w(e, "Failed to disable gadget before deleting character devices")
+        }
+
         for (hidFunction in allHidFunctions) {
             try {
                 // Clear out function configuration directory (should just point to function path)
@@ -272,16 +278,16 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
                 Timber.e("Failed to remove '${hidFunction.name}' function from usb gadget")
                 Timber.e(e)
             }
+        }
 
-            // Apply changes
-            Timber.i("deleteCharacterDevices(): resetting gadget")
-            resetGadget()
+        // Apply changes
+        Timber.i("deleteCharacterDevices(): resetting gadget")
+        resetGadget()
 
-            // Delete character devices
-            allCharacterDevicePaths.map { Path(it.path) }.forEach {
-                Timber.i("deleteCharacterDevices(): deleting character device at $it")
-                it.deleteIfExists()
-            }
+        // Delete character devices
+        allCharacterDevicePaths.map { Path(it.path) }.forEach {
+            Timber.i("deleteCharacterDevices(): deleting character device at $it")
+            it.deleteIfExists()
         }
 
         Timber.i("deleteCharacterDevices() finished")
