@@ -96,24 +96,30 @@ class CharacterDeviceManager private constructor(private val application: Applic
             fixSelinuxPermissions()
 
             launch {
-                val allCharacterDevicePathsList = gadgetUserPreferences.allCharacterDevicePathsList
-                for (devicePath in allCharacterDevicePathsList) {
-                    try {
-                        Timber.i("createCharacterDevices(): about to poll for existence of device path, then fix its permissions. for path: $devicePath")
-                        withTimeout(3.seconds) {
-                            // wait until the device file exists before trying to fix its permissions
-                            while (!devicePath.exists()) {
-                                Timber.v("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
-                                delay(200.milliseconds)
-                            }
-                            Timber.i("$devicePath exists now!!!")
-                        }
-                        fixCharacterDevicePermissions(devicePath)
-                    } catch (e: TimeoutCancellationException) {
-                        // FIXME: show this error to the user
-                        Timber.e("Timed out while waiting for character device '$devicePath' to be created.")
+                fixPermissionsOnceDevicesExist(gadgetUserPreferences.allCharacterDevicePathsList)
+            }
+        }
+    }
+
+    /**
+     * For each device, waits (up to a timeout) for it to exist, then fixes its permissions.
+     */
+    private suspend fun CharacterDeviceManager.fixPermissionsOnceDevicesExist(devicePaths: List<DevicePath>) {
+        for (devicePath in devicePaths) {
+            try {
+                Timber.i("fixPermissionsOnceDevicesExist(): about to poll for existence of device path, then fix its permissions. for path: $devicePath")
+                withTimeout(3.seconds) {
+                    // wait until the device file exists before trying to fix its permissions
+                    while (!devicePath.exists()) {
+                        Timber.v("$devicePath doesn't exist yet, sleeping for a bit before trying again...")
+                        delay(200.milliseconds)
                     }
+                    Timber.i("$devicePath exists now!!!")
                 }
+                fixCharacterDevicePermissions(devicePath)
+            } catch (e: TimeoutCancellationException) {
+                // FIXME: show this error to the user
+                Timber.e("Timed out while waiting for character device '$devicePath' to be created.")
             }
         }
     }
