@@ -126,6 +126,9 @@ android {
                             } else {
                                 testPrimarySystemImage
                             }
+
+                            // ABI for the machine running the tests.
+                            testedAbi = "x86_64"
                         }
                     }
                 }
