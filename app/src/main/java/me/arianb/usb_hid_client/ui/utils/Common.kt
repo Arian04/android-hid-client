@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -76,6 +78,7 @@ fun BasicPage(
                 } else {
                     { SnackbarHost(snackbarHostState) }
                 },
+                contentWindowInsets = WindowInsets.safeDrawing,
                 content = { innerPadding: PaddingValues ->
                     Column(
                         modifier = Modifier

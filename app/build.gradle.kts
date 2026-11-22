@@ -13,7 +13,7 @@ android {
 
         // SDK support
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 37
         compileSdk = 37
 
         // App Versioning

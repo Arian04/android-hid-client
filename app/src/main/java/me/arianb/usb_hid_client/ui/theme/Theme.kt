@@ -10,7 +10,6 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -64,11 +63,10 @@ fun USBHIDClientTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
+            val insetsController = WindowCompat.getInsetsController(window, view)
 
-            // FIXME: I'm flipping darkTheme because for SOME REASON, this property seems to be having
-            //        the exact opposite effect of what it says it should do. Or I'm misunderstanding.
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightStatusBars = !darkTheme
+            insetsController.isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

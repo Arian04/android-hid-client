@@ -2,17 +2,6 @@
 <issues format="6" by="lint 8.3.1" type="baseline" client="gradle" dependencies="false" name="AGP (8.3.1)" variant="all" version="8.3.1">
 
     <issue
-        id="OldTargetApi"
-        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
-        errorLine1="        targetSdk = 33"
-        errorLine2="        ~~~~~~~~~~~~~~">
-        <location
-            file="build.gradle.kts"
-            line="19"
-            column="9"/>
-    </issue>
-
-    <issue
         id="ComposableLambdaParameterNaming"
         message="Composable lambda parameter should be named `content`"
         errorLine1="    actions: @Composable (RowScope.() -> Unit) = {}"
