@@ -72,28 +72,37 @@ class CharacterDeviceManager private constructor(private val application: Applic
         }
     }
 
-    private suspend fun useService(block: suspend (UsbGadgetServiceConnection) -> Unit) {
+    private suspend fun useService(block: suspend (UsbGadgetServiceConnection) -> Boolean): Boolean {
         if (!ensureServiceIsBound()) {
-            return
+            return false
         }
 
-        block(mConnection)
+        val succeeded = block(mConnection)
 
         // After every call to the service, sync the logs to the main process's log buffer
         mConnection.getLogs()
+
+        return succeeded
     }
 
-    override suspend fun syncLogsToMainProcessLogBuffer() = useService {
-        // empty block, because useService logs after any call anyway, so leaving this empty means
-        // it'll still just run that getLogs() call.
-    }
-
-    override suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
-        useService {
-            it.createGadget(gadgetUserPreferences)
+    override suspend fun syncLogsToMainProcessLogBuffer(): Boolean {
+        if (!ensureServiceIsBound()) {
+            return false
         }
 
-        withContext(Dispatchers.IO) {
+        return mConnection.getLogs()
+    }
+
+    override suspend fun createCharacterDevices(gadgetUserPreferences: GadgetUserPreferences): Boolean {
+        val didCreateGadget = useService {
+            it.createGadget(gadgetUserPreferences)
+        }
+        if (!didCreateGadget) {
+            Timber.e("createCharacterDevices(): failed to create gadget via service, skipping permission setup")
+            return false
+        }
+
+        return withContext(Dispatchers.IO) {
             fixSelinuxPermissions()
             fixPermissionsOnceDevicesExist(gadgetUserPreferences.allCharacterDevicePathsList)
         }
@@ -101,8 +110,11 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
     /**
      * For each device, waits (up to a timeout) for it to exist, then fixes its permissions.
+     *
+     * @return true if all devices existed within the timeout, false otherwise.
      */
-    private suspend fun fixPermissionsOnceDevicesExist(devicePaths: List<DevicePath>) {
+    private suspend fun fixPermissionsOnceDevicesExist(devicePaths: List<DevicePath>): Boolean {
+        var allDevicesFound = true
         for (devicePath in devicePaths) {
             try {
                 Timber.i("fixPermissionsOnceDevicesExist(): about to poll for existence of device path, then fix its permissions. for path: $devicePath")
@@ -118,8 +130,10 @@ class CharacterDeviceManager private constructor(private val application: Applic
             } catch (_: TimeoutCancellationException) {
                 // FIXME: show this error to the user
                 Timber.e("Timed out while waiting for character device '$devicePath' to be created.")
+                allDevicesFound = false
             }
         }
+        return allDevicesFound
     }
 
     private fun fixSelinuxPermissions() {
