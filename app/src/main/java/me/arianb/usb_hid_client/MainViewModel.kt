@@ -32,6 +32,7 @@ import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.IOException
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Data class that represents the UI state
@@ -157,19 +158,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         viewModelScope.launch {
-            runCatching {
+            try {
                 val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
                 characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
 
                 // Re-evaluate state
                 anyCharacterDeviceMissing()
-            }.onFailure {
+            } catch (e: CancellationException) {
+                // Re-throw so coroutine structured cancellation propagates normally
+                throw e
+            } catch (e: Exception) {
                 Timber.wtf(
-                    it,
+                    e,
                     "Unhandled exception bubbled up to MainViewModel while creating character devices"
                 )
 
-                sendSnackbar("[BUG] Unhandled exception thrown while creating character devices: ${it.message}")
+                sendSnackbar("[BUG] Unhandled exception thrown while creating character devices: ${e.message}")
             }
         }
     }
