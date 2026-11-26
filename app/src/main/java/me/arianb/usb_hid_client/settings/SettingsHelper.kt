@@ -65,7 +65,7 @@ fun SwitchPreference(
     var isChecked by remember { mutableStateOf(viewModel.getPreference(preference)) }
 
     ListItem(
-        headlineContent = { Text(title) },
+        content = { Text(title) },
         supportingContent = {
             if (summary != null) {
                 Text(summary)
@@ -163,10 +163,10 @@ fun OnClickPreference(
         defaults
     } else {
         ListItemDefaults.colors(
-            headlineColor = defaults.disabledHeadlineColor,
-            leadingIconColor = defaults.disabledLeadingIconColor,
-            trailingIconColor = defaults.disabledTrailingIconColor,
-            supportingColor = defaults.disabledHeadlineColor
+            headlineColor = defaults.disabledContentColor,
+            leadingIconColor = defaults.disabledLeadingContentColor,
+            trailingIconColor = defaults.disabledTrailingContentColor,
+            supportingColor = defaults.disabledContentColor
         )
     }
     val modifier = if (enabled) {
@@ -178,7 +178,7 @@ fun OnClickPreference(
     ListItem(
         modifier = modifier,
         colors = listItemColors,
-        headlineContent = { Text(title) },
+        content = { Text(title) },
         supportingContent = { Text(summary) },
         trailingContent = trailingContent
     )
