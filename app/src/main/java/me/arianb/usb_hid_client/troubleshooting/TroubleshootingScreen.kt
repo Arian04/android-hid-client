@@ -112,7 +112,10 @@ private fun GadgetActionButtons(mainViewModel: MainViewModel = viewModel()) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
     ) {
-        Button(onClick = { isShowingConfirmationAlert = true }) {
+        Button(
+            onClick = { isShowingConfirmationAlert = true },
+            enabled = !gadgetState.isOperationInProgress,
+        ) {
             Text(actionLabel)
         }
     }

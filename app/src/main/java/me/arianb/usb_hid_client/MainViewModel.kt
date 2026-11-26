@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -47,6 +48,7 @@ data class MyUiState(
 
 data class GadgetState(
     val areCharacterDevicesMissing: Boolean = false,
+    val isOperationInProgress: Boolean = false,
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -173,8 +175,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
+        val previous = _gadgetState.getAndUpdate { it.copy(isOperationInProgress = true) }
+        if (previous.isOperationInProgress) {
+            Timber.w("Ignoring '$operationName' request: another gadget operation is already in progress")
+            return
+        }
+
         viewModelScope.launch {
-            block()
+            try {
+                block()
+            } finally {
+                _gadgetState.update { it.copy(isOperationInProgress = false) }
+            }
         }
     }
 
