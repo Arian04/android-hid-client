@@ -28,6 +28,7 @@ import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.settings.UserPreferences
 import me.arianb.usb_hid_client.shell_utils.RootMethod
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
+import me.arianb.usb_hid_client.ui.utils.activityViewModel
 import timber.log.Timber
 import java.io.IOException
 
@@ -397,7 +398,7 @@ annotation class RequiresRoot
 fun ExportLogsButton() {
     val settingsViewModel: SettingsViewModel = viewModel()
     val userPreferences by settingsViewModel.userPreferencesFlow.collectAsState()
-    val mainViewModel: MainViewModel = viewModel()
+    val mainViewModel: MainViewModel = activityViewModel()
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         // If the user doesn't choose a location to save the file, don't continue

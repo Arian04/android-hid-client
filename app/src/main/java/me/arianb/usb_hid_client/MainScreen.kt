@@ -53,6 +53,7 @@ import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.BasicTopBar
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
+import me.arianb.usb_hid_client.ui.utils.activityViewModel
 import timber.log.Timber
 
 class MainScreen : Screen {
@@ -64,7 +65,7 @@ class MainScreen : Screen {
 
 @Composable
 fun MainPage(
-    mainViewModel: MainViewModel = viewModel(),
+    mainViewModel: MainViewModel = activityViewModel(),
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
     val rootStateHolder = RootStateHolder.getInstance()
@@ -247,7 +248,10 @@ private fun MainTopBar() {
 }
 
 @Composable
-private fun CreateCharDevicesAlertDialog(showAlert: MutableState<Boolean>, mainViewModel: MainViewModel = viewModel()) {
+private fun CreateCharDevicesAlertDialog(
+    showAlert: MutableState<Boolean>,
+    mainViewModel: MainViewModel = activityViewModel()
+) {
     AlertDialog(
         title = { Text("Character device(s) do not exist") },
         text = { Text("Add HID functions to the default USB gadget? This must be re-done after every reboot.\n\n**The app will not work if you decline**") },

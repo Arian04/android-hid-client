@@ -31,11 +31,12 @@ import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingLarge
+import me.arianb.usb_hid_client.ui.utils.activityViewModel
 import timber.log.Timber
 
 @Composable
 fun ManualInput(
-    mainViewModel: MainViewModel = viewModel(),
+    mainViewModel: MainViewModel = activityViewModel(),
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
     var manualInputString by remember { mutableStateOf("") }

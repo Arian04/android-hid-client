@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.input_views.touch_input_handlers.MouseInputHandler
@@ -38,10 +37,11 @@ import me.arianb.usb_hid_client.input_views.touch_input_handlers.TouchInputHandl
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
+import me.arianb.usb_hid_client.ui.utils.activityViewModel
 
 @Composable
 fun Touchpad(
-    mainViewModel: MainViewModel = viewModel()
+    mainViewModel: MainViewModel = activityViewModel()
 ) {
     val pointerDeviceSender by mainViewModel.touchpadSender.collectAsState()
 

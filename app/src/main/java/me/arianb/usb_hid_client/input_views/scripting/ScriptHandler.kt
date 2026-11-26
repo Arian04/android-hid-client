@@ -35,6 +35,7 @@ import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation
 import me.arianb.usb_hid_client.ui.theme.PaddingExtraSmall
 import me.arianb.usb_hid_client.ui.theme.PaddingSmall
+import me.arianb.usb_hid_client.ui.utils.activityViewModel
 import timber.log.Timber
 import java.io.BufferedReader
 import java.io.IOException
@@ -44,7 +45,7 @@ import java.util.Locale.getDefault
 //---------- Contribution by saaiqSAS ----------
 @Composable
 fun ScriptsDisplayView(
-    mainViewModel: MainViewModel = viewModel(),
+    mainViewModel: MainViewModel = activityViewModel(),
     scriptingViewModel: ScriptingViewModel = viewModel()
 ) {
     var scriptPathString by remember { mutableStateOf("") }

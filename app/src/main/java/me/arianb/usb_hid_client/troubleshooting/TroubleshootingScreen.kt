@@ -49,6 +49,7 @@ import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
 import me.arianb.usb_hid_client.ui.utils.Experimental
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 import me.arianb.usb_hid_client.ui.utils.SimpleNavTopBar
+import me.arianb.usb_hid_client.ui.utils.activityViewModel
 import timber.log.Timber
 
 class TroubleshootingScreen : Screen {
@@ -93,7 +94,7 @@ private fun TroubleshootingTopBar() {
 }
 
 @Composable
-private fun GadgetActionButtons(mainViewModel: MainViewModel = viewModel()) {
+private fun GadgetActionButtons(mainViewModel: MainViewModel = activityViewModel()) {
     var isShowingConfirmationAlert by remember { mutableStateOf(false) }
 
     val gadgetState by mainViewModel.gadgetState.collectAsState()

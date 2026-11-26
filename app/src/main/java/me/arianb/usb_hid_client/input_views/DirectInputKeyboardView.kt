@@ -25,6 +25,7 @@ import me.arianb.usb_hid_client.databinding.DirectInputViewBinding
 import me.arianb.usb_hid_client.hid_utils.KeyCodeTranslation
 import me.arianb.usb_hid_client.report_senders.KeySender
 import me.arianb.usb_hid_client.settings.SettingsViewModel
+import me.arianb.usb_hid_client.ui.utils.activityViewModel
 import timber.log.Timber
 
 class DirectInputKeyboardView : AppCompatEditText {
@@ -55,7 +56,7 @@ class DirectInputKeyboardView : AppCompatEditText {
 
 @Composable
 fun DirectInput(
-    mainViewModel: MainViewModel = viewModel(),
+    mainViewModel: MainViewModel = activityViewModel(),
     settingsViewModel: SettingsViewModel = viewModel(),
 ) {
     val keySender by mainViewModel.keySender.collectAsState()

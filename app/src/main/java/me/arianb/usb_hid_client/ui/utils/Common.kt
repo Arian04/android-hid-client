@@ -1,6 +1,7 @@
 package me.arianb.usb_hid_client.ui.utils
 
 import android.content.res.Configuration
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -34,6 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -168,6 +171,20 @@ fun getColorByTheme(): Int {
     val textColor: Color = MaterialTheme.colorScheme.onSurface
 
     return textColor.toArgb()
+}
+
+/**
+ * Returns a [ViewModel] scoped to the hosting Activity rather than the current Voyager screen,
+ * so screens share a single instance. Falls back to default [viewModel] scoping (ex: in Compose previews).
+ */
+@Composable
+inline fun <reified VM : ViewModel> activityViewModel(): VM {
+    val activity = LocalActivity.current
+    return if (activity is ViewModelStoreOwner) {
+        viewModel(viewModelStoreOwner = activity)
+    } else {
+        viewModel()
+    }
 }
 
 @Preview(
