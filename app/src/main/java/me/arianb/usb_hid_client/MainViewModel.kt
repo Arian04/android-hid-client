@@ -162,60 +162,58 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun createCharacterDevices() {
+    private fun launchGadgetOperation(
+        operationName: String,
+        block: suspend () -> Unit,
+    ) {
         if (!rootStateHolder.hasRootPermissions()) {
-            val message = "Can't create character devices, missing root permissions"
+            val message = "Can't run operation '$operationName', missing root permissions"
             Timber.w(message)
             sendSnackbar(message)
             return
         }
 
         viewModelScope.launch {
-            try {
-                val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
-                val succeeded = characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
-                if (!succeeded) {
-                    val message = "Failed to create character devices"
-                    Timber.e(message)
-                    sendSnackbar(message)
-                }
-
-                // Re-evaluate state
-                anyCharacterDeviceMissing()
-            } catch (e: CancellationException) {
-                // Re-throw so coroutine structured cancellation propagates normally
-                throw e
-            } catch (e: Exception) {
-                Timber.wtf(
-                    e,
-                    "Unhandled exception bubbled up to MainViewModel while creating character devices"
-                )
-
-                sendSnackbar("[BUG] Unhandled exception thrown while creating character devices: ${e.message}")
-            }
+            block()
         }
     }
 
-    fun deleteCharacterDevices() {
-        if (!rootStateHolder.hasRootPermissions()) {
-            val message = "Can't delete character devices, missing root permissions"
-            Timber.w(message)
-            sendSnackbar(message)
-            return
-        }
-
-        viewModelScope.launch {
+    fun createCharacterDevices() = launchGadgetOperation("create character devices") {
+        try {
             val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
-            val succeeded = characterDeviceManager.deleteCharacterDevices(gadgetUserPreferences)
+            val succeeded = characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
             if (!succeeded) {
-                val message = "Failed to delete character devices"
+                val message = "Failed to create character devices"
                 Timber.e(message)
                 sendSnackbar(message)
             }
 
             // Re-evaluate state
             anyCharacterDeviceMissing()
+        } catch (e: CancellationException) {
+            // Re-throw so coroutine structured cancellation propagates normally
+            throw e
+        } catch (e: Exception) {
+            Timber.wtf(
+                e,
+                "Unhandled exception bubbled up to MainViewModel while creating character devices"
+            )
+
+            sendSnackbar("[BUG] Unhandled exception thrown while creating character devices: ${e.message}")
         }
+    }
+
+    fun deleteCharacterDevices() = launchGadgetOperation("delete character devices") {
+        val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+        val succeeded = characterDeviceManager.deleteCharacterDevices(gadgetUserPreferences)
+        if (!succeeded) {
+            val message = "Failed to delete character devices"
+            Timber.e(message)
+            sendSnackbar(message)
+        }
+
+        // Re-evaluate state
+        anyCharacterDeviceMissing()
     }
 
     fun fixCharacterDevicePermissions(device: String) {
