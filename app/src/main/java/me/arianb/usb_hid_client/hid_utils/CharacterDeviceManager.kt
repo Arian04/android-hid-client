@@ -106,7 +106,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
     /**
      * For each device, waits (up to a timeout) for it to exist, then fixes its permissions.
      */
-    private suspend fun CharacterDeviceManager.fixPermissionsOnceDevicesExist(devicePaths: List<DevicePath>) {
+    private suspend fun fixPermissionsOnceDevicesExist(devicePaths: List<DevicePath>) {
         for (devicePath in devicePaths) {
             try {
                 Timber.i("fixPermissionsOnceDevicesExist(): about to poll for existence of device path, then fix its permissions. for path: $devicePath")
