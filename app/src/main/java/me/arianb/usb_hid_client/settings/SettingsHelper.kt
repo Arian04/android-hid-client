@@ -195,32 +195,52 @@ fun <T> TextDialogPreference(
 ) {
     val currentUserPreferences by settingsViewModel.userPreferencesFlow.collectAsState()
 
-    val initialValue = property.get(currentUserPreferences)
-    val initialValueString = if (initialValue == preference.defaultValue) {
+    val currentValue = property.get(currentUserPreferences)
+    val currentValueString = if (currentValue == preference.defaultValue) {
         // If preference is default, string is empty
         ""
     } else {
-        preference.toStringPreference(initialValue)
+        preference.toStringPreference(currentValue)
     }
 
     // UI stuff
     var isShowingDialog by remember { mutableStateOf(false) }
-    var editableValue by remember { mutableStateOf(initialValueString) }
     OnClickPreference(
         title = title,
-        summary = summary ?: editableValue.ifBlank {
+        summary = summary ?: currentValueString.ifBlank {
             "Default"
         },
         enabled = enabled,
         onClick = { isShowingDialog = true },
         trailingContent = {
             if (isShowingDialog) {
+                var editableValue by remember { mutableStateOf(currentValueString) }
+
                 AlertDialog(
                     title = { Text(title) },
                     onDismissRequest = { isShowingDialog = false },
                     confirmButton = {
-                        TextButton(onClick = { isShowingDialog = false }) {
+                        TextButton(
+                            onClick = {
+                                // Update preference
+                                if (editableValue.isBlank()) {
+                                    settingsViewModel.resetPreferenceToDefault(preference)
+                                } else {
+                                    settingsViewModel.setPreference(
+                                        preference,
+                                        preference.fromStringPreference(editableValue)
+                                    )
+                                }
+
+                                isShowingDialog = false
+                            }
+                        ) {
                             Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { isShowingDialog = false }) {
+                            Text("Cancel")
                         }
                     },
                     text = {
@@ -229,17 +249,7 @@ fun <T> TextDialogPreference(
                             placeholder = {
                                 Text(text = preference.toStringPreference(preference.defaultValue))
                             },
-                            onValueChange = {
-                                // Update UI
-                                editableValue = it
-
-                                // Update preference
-                                if (it.isBlank()) {
-                                    settingsViewModel.resetPreferenceToDefault(preference)
-                                } else {
-                                    settingsViewModel.setPreference(preference, preference.fromStringPreference(it))
-                                }
-                            },
+                            onValueChange = { editableValue = it },
                         )
                     }
                 )
