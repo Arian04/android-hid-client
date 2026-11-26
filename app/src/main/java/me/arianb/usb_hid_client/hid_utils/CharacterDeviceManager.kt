@@ -8,7 +8,6 @@ import com.topjohnwu.superuser.ipc.RootService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
@@ -96,10 +95,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         withContext(Dispatchers.IO) {
             fixSelinuxPermissions()
-
-            launch {
-                fixPermissionsOnceDevicesExist(gadgetUserPreferences.allCharacterDevicePathsList)
-            }
+            fixPermissionsOnceDevicesExist(gadgetUserPreferences.allCharacterDevicePathsList)
         }
     }
 
