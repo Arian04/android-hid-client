@@ -69,6 +69,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val characterDeviceUserPrefs = userPreferencesStateFlow.mapState {
         CharacterDeviceManagerUserPreferences.fromUserPreferences(it)
     }
+    private val currentGadgetPreferences: GadgetUserPreferences
+        get() = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
 
     private val _gadgetState = MutableStateFlow(initialGadgetState())
     val gadgetState: StateFlow<GadgetState> = _gadgetState
@@ -191,7 +193,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun createCharacterDevices() = launchGadgetOperation("create character devices") {
         try {
-            val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+            val gadgetUserPreferences = currentGadgetPreferences
             val succeeded = characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
             if (!succeeded) {
                 val message = "Failed to create character devices"
@@ -218,8 +220,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun deleteCharacterDevices() = launchGadgetOperation("delete character devices") {
-        val gadgetUserPreferences = _gadgetState.value.appliedPreferences
-            ?: GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+        val gadgetUserPreferences = _gadgetState.value.appliedPreferences ?: currentGadgetPreferences
         val succeeded = characterDeviceManager.deleteCharacterDevices(gadgetUserPreferences)
         if (!succeeded) {
             val message = "Failed to delete character devices"
@@ -275,7 +276,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val appliedPrefs = if (areMissing) {
             null
         } else {
-            GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+            currentGadgetPreferences
         }
         return GadgetState(
             areCharacterDevicesMissing = areMissing,
