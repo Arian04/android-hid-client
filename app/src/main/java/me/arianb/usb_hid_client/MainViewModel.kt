@@ -146,7 +146,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     // Character Device Manager
     fun syncLogsToMainProcess() = viewModelScope.launch {
-        characterDeviceManager.syncLogsToMainProcessLogBuffer()
+        if (!characterDeviceManager.syncLogsToMainProcessLogBuffer()) {
+            Timber.w("Failed to sync logs from RootService to main process log buffer")
+        }
     }
 
     fun createCharacterDevices() {
@@ -160,7 +162,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
-                characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
+                val succeeded = characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
+                if (!succeeded) {
+                    val message = "Failed to create character devices"
+                    Timber.e(message)
+                    sendSnackbar(message)
+                }
 
                 // Re-evaluate state
                 anyCharacterDeviceMissing()
@@ -188,7 +195,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
-            characterDeviceManager.deleteCharacterDevices(gadgetUserPreferences)
+            val succeeded = characterDeviceManager.deleteCharacterDevices(gadgetUserPreferences)
+            if (!succeeded) {
+                val message = "Failed to delete character devices"
+                Timber.e(message)
+                sendSnackbar(message)
+            }
 
             // Re-evaluate state
             anyCharacterDeviceMissing()
