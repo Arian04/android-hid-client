@@ -39,11 +39,14 @@ import kotlin.coroutines.cancellation.CancellationException
  */
 data class MyUiState(
     // Character Device Stuff
-    val missingCharacterDevice: Boolean = false,
     val isCharacterDevicePermissionsBroken: String? = null,
 
     // Other Stuff
     val isDeviceUnplugged: Boolean = false
+)
+
+data class GadgetState(
+    val areCharacterDevicesMissing: Boolean = false,
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -60,6 +63,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val characterDeviceUserPrefs = userPreferencesStateFlow.mapState {
         CharacterDeviceManagerUserPreferences.fromUserPreferences(it)
     }
+
+    @OptIn(ModifiesStateDirectly::class)
+    private val _gadgetState = MutableStateFlow(
+        GadgetState(
+            areCharacterDevicesMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs.value)
+        )
+    )
+    val gadgetState: StateFlow<GadgetState> = _gadgetState
 
     val keySender: StateFlow<KeySender> = userPreferencesStateFlow
         .mapState {
@@ -222,7 +233,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
         val result = characterDeviceManager.characterDeviceMissing(charDevicePath, characterDeviceUserPrefs.value)
 
-        _uiState.update { it.copy(missingCharacterDevice = result) }
+        _gadgetState.update { it.copy(areCharacterDevicesMissing = result) }
 
         return result
     }
@@ -231,7 +242,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun anyCharacterDeviceMissing(): Boolean {
         val result = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs.value)
 
-        _uiState.update { it.copy(missingCharacterDevice = result) }
+        _gadgetState.update { it.copy(areCharacterDevicesMissing = result) }
 
         return result
     }

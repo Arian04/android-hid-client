@@ -70,13 +70,14 @@ fun MainPage(
     val rootStateHolder = RootStateHolder.getInstance()
     val rootState by rootStateHolder.uiState.collectAsState()
 
+    val uiState by mainViewModel.uiState.collectAsState()
+    val gadgetState by mainViewModel.gadgetState.collectAsState()
+    Timber.v("in MainScreen, uiState is: %s, gadgetState is: %s", uiState.toString(), gadgetState.toString())
+
     // TODO: should i do this in VM constructor? but then I cant differentiate between
     //       missing char dev on startup or a weird issue of it missing AFTER startup.
     //       but should I even do that? should I just handle both situations the same way?
-    val showMissingCharDeviceOnStartupAlert = remember { mutableStateOf(mainViewModel.anyCharacterDeviceMissing()) }
-
-    val uiState by mainViewModel.uiState.collectAsState()
-    Timber.v("in MainScreen, uiState is: %s", uiState.toString())
+    val showMissingCharDeviceOnStartupAlert = remember { mutableStateOf(gadgetState.areCharacterDevicesMissing) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -120,8 +121,12 @@ fun MainPage(
 
         Touchpad()
 
-        LaunchedEffect(uiState) {
-            Timber.v("LAUNCHED EFFECT RUNNING WITH UI STATE = %s", uiState.toString())
+        LaunchedEffect(uiState, gadgetState.areCharacterDevicesMissing) {
+            Timber.v(
+                "LAUNCHED EFFECT RUNNING WITH UI STATE = %s, GADGET STATE = %s",
+                uiState.toString(),
+                gadgetState.toString()
+            )
             if (rootState.missingRootPrivileges) {
                 // TODO: if this fails here, I need to make it incredibly clear that the app will not work.
                 //       right now, you can still try to use it and it'll fail. It should just "lock" the inputs
@@ -135,7 +140,7 @@ fun MainPage(
                     message = "ERROR: Your device seems to be disconnected. If not, try reseating the USB cable",
                     duration = SnackbarDuration.Long
                 )
-            } else if (!showMissingCharDeviceOnStartupAlert.value && uiState.missingCharacterDevice) {
+            } else if (!showMissingCharDeviceOnStartupAlert.value && gadgetState.areCharacterDevicesMissing) {
                 val result = snackbarHostState.showSnackbar(
                     message = "ERROR: Character device has disappeared since the app was started.",
                     actionLabel = "RECREATE",
