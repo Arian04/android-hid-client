@@ -48,6 +48,10 @@ data class MyUiState(
 
 data class GadgetState(
     val areCharacterDevicesMissing: Boolean = false,
+    /**
+     * null if no preferences are applied (ex: configfs functions or character devices don't exist)
+     */
+    val appliedPreferences: GadgetUserPreferences? = null,
     val isOperationInProgress: Boolean = false,
 )
 
@@ -66,12 +70,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         CharacterDeviceManagerUserPreferences.fromUserPreferences(it)
     }
 
-    @OptIn(ModifiesStateDirectly::class)
-    private val _gadgetState = MutableStateFlow(
-        GadgetState(
-            areCharacterDevicesMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs.value)
-        )
-    )
+    private val _gadgetState = MutableStateFlow(initialGadgetState())
     val gadgetState: StateFlow<GadgetState> = _gadgetState
 
     val keySender: StateFlow<KeySender> = userPreferencesStateFlow
@@ -201,7 +200,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             // Re-evaluate state
-            anyCharacterDeviceMissing()
+            val anyMissing = anyCharacterDeviceMissing()
+            if (succeeded && !anyMissing) {
+                _gadgetState.update { it.copy(appliedPreferences = gadgetUserPreferences) }
+            }
         } catch (e: CancellationException) {
             // Re-throw so coroutine structured cancellation propagates normally
             throw e
@@ -216,7 +218,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun deleteCharacterDevices() = launchGadgetOperation("delete character devices") {
-        val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+        val gadgetUserPreferences = _gadgetState.value.appliedPreferences
+            ?: GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
         val succeeded = characterDeviceManager.deleteCharacterDevices(gadgetUserPreferences)
         if (!succeeded) {
             val message = "Failed to delete character devices"
@@ -226,6 +229,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         // Re-evaluate state
         anyCharacterDeviceMissing()
+        if (succeeded) {
+            _gadgetState.update { it.copy(appliedPreferences = null) }
+        }
     }
 
     fun fixCharacterDevicePermissions(device: String) {
@@ -252,9 +258,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun anyCharacterDeviceMissing(): Boolean {
         val result = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs.value)
 
+        // NOTE: Intentionally not clearing appliedPreferences when result is true.
+        //  This is so that if (for example) the user edits a char device path to one that doesn't exist yet,
+        //  we still need appliedPreferences intact so delete/recreate can know what was previously applied.
         _gadgetState.update { it.copy(areCharacterDevicesMissing = result) }
 
         return result
+    }
+
+    /**
+     * Just a simple little helper for initializing the gadget state StateFlow. Should only be called in one place.
+     */
+    @OptIn(ModifiesStateDirectly::class)
+    private fun initialGadgetState(): GadgetState {
+        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs.value)
+        val appliedPrefs = if (areMissing) {
+            null
+        } else {
+            GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
+        }
+        return GadgetState(
+            areCharacterDevicesMissing = areMissing,
+            appliedPreferences = appliedPrefs,
+        )
     }
 
     // Keyboard
