@@ -182,11 +182,10 @@ class CharacterDeviceManager private constructor(private val application: Applic
         return categories
     }
 
-    override suspend fun deleteCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) {
+    override suspend fun deleteCharacterDevices(gadgetUserPreferences: GadgetUserPreferences) =
         useService {
             it.deleteGadget(gadgetUserPreferences)
         }
-    }
 
     @ModifiesStateDirectly
     override fun characterDeviceMissing(
