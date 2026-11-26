@@ -119,7 +119,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
                     Timber.i("$devicePath exists now!!!")
                 }
                 fixCharacterDevicePermissions(devicePath)
-            } catch (e: TimeoutCancellationException) {
+            } catch (_: TimeoutCancellationException) {
                 // FIXME: show this error to the user
                 Timber.e("Timed out while waiting for character device '$devicePath' to be created.")
             }
