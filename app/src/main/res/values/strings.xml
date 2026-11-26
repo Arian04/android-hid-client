@@ -57,6 +57,9 @@
     <string name="experimental_mode_summary">Enable various experimental settings and features. Use at your own risk.
     </string>
 
+    <string name="gadget_config_title">USB Gadget</string>
+    <string name="gadget_config_summary">Configure USB gadget and character device options</string>
+
     <string name="usb_gadget_path_title">USB Gadget Path</string>
 
     <string name="keyboard_character_device_path">Keyboard Character Device Path</string>

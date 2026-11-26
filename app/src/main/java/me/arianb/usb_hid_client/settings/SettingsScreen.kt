@@ -1,6 +1,9 @@
 package me.arianb.usb_hid_client.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -8,7 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.settings.AppSettings.AppThemePreference
 import me.arianb.usb_hid_client.settings.AppSettings.ClearManualInputOnSend
@@ -16,20 +21,16 @@ import me.arianb.usb_hid_client.settings.AppSettings.DynamicColors
 import me.arianb.usb_hid_client.settings.AppSettings.EnablePrecisionTouchpad
 import me.arianb.usb_hid_client.settings.AppSettings.EnableScriptingSupport
 import me.arianb.usb_hid_client.settings.AppSettings.ExperimentalMode
-import me.arianb.usb_hid_client.settings.AppSettings.FullyDisableGadgetDuringConfiguration
-import me.arianb.usb_hid_client.settings.AppSettings.KeyboardCharacterDevicePath
+import me.arianb.usb_hid_client.settings.AppSettings.GadgetConfigScreenNavigation
 import me.arianb.usb_hid_client.settings.AppSettings.MediaKeyPassthrough
-import me.arianb.usb_hid_client.settings.AppSettings.TouchpadCharacterDevicePath
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadFullscreenInLandscape
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadLoopbackMode
-import me.arianb.usb_hid_client.settings.AppSettings.UsbGadgetPath
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.isDynamicColorAvailable
 import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
 import me.arianb.usb_hid_client.ui.utils.Experimental
 import me.arianb.usb_hid_client.ui.utils.SimpleNavTopBar
-import me.arianb.usb_hid_client.ui.utils.isExperimentalModeEnabled
 
 class SettingsScreen : Screen {
     @Composable
@@ -81,19 +82,11 @@ fun SettingsPage() {
 
         PreferenceCategory(
             title = stringResource(R.string.misc_header),
-            showDivider = isExperimentalModeEnabled()
+            showDivider = false
         ) {
             ExperimentalMode()
-        }
-        Experimental {
-            PreferenceCategory(
-                title = stringResource(R.string.device_specific_quirks_header),
-                showDivider = false
-            ) {
-                FullyDisableGadgetDuringConfiguration()
-                UsbGadgetPath()
-                KeyboardCharacterDevicePath()
-                TouchpadCharacterDevicePath()
+            Experimental {
+                GadgetConfigScreenNavigation()
             }
         }
     }
@@ -190,38 +183,22 @@ private object AppSettings {
     }
 
     @Composable
-    fun UsbGadgetPath() {
-        TextDialogPreference(
-            title = stringResource(R.string.usb_gadget_path_title),
-            preference = AppPreference.UsbGadgetPathPref,
-            property = UserPreferences::usbGadgetPath
-        )
-    }
-
-    @Composable
-    fun KeyboardCharacterDevicePath() {
-        TextDialogPreference(
-            title = stringResource(R.string.keyboard_character_device_path),
-            preference = AppPreference.KeyboardCharacterDevicePath,
-            property = UserPreferences::keyboardCharacterDevicePath
-        )
-    }
-
-    @Composable
-    fun TouchpadCharacterDevicePath() {
-        TextDialogPreference(
-            title = stringResource(R.string.touchpad_character_device_path),
-            preference = AppPreference.TouchpadCharacterDevicePath,
-            property = UserPreferences::touchpadCharacterDevicePath
-        )
-    }
-
-    @Composable
-    fun FullyDisableGadgetDuringConfiguration() {
-        SwitchPreference(
-            title = stringResource(R.string.disable_gadget_functions_during_config),
-            summary = stringResource(R.string.disable_gadget_functions_during_config_summary),
-            preference = AppPreference.DisableGadgetFunctionsDuringConfiguration
+    fun GadgetConfigScreenNavigation() {
+        val navigator = LocalNavigator.currentOrThrow
+        OnClickPreference(
+            title = stringResource(R.string.gadget_config_title),
+            summary = stringResource(R.string.gadget_config_summary),
+            onClick = {
+                if (navigator.lastItem !is GadgetConfigScreen) {
+                    navigator.push(GadgetConfigScreen())
+                }
+            },
+            trailingContent = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
+                    contentDescription = null
+                )
+            }
         )
     }
 
