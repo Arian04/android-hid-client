@@ -43,14 +43,13 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
     private val mConnection = UsbGadgetServiceConnection()
 
-    @Throws(TimeoutCancellationException::class)
     private suspend fun ensureServiceIsBound(
         timeout: Duration = 5000.milliseconds,
         pollInterval: Duration = 500.milliseconds
-    ) {
+    ): Boolean {
         if (mConnection.isBound) {
             Timber.d("UsbGadgetService is already bound")
-            return
+            return true
         }
 
         Timber.i("Binding to UsbGadgetService...")
@@ -58,21 +57,24 @@ class CharacterDeviceManager private constructor(private val application: Applic
             RootService.bind(intent, mConnection)
         }
 
-        withTimeout(timeout) {
-            // wait until the service is bound before trying to use it
-            while (!mConnection.isBound) {
-                Timber.d("not bound yet, sleeping for a bit before trying again...")
-                delay(pollInterval)
+        return try {
+            withTimeout(timeout) {
+                // wait until the service is bound before trying to use it
+                while (!mConnection.isBound) {
+                    Timber.d("not bound yet, sleeping for a bit before trying again...")
+                    delay(pollInterval)
+                }
+                Timber.i("service is bound now!!!")
             }
-            Timber.i("service is bound now!!!")
+            true
+        } catch (e: TimeoutCancellationException) {
+            Timber.e("Failed to bind service within timeout duration: $e")
+            false
         }
     }
 
     private suspend fun useService(block: suspend (UsbGadgetServiceConnection) -> Unit) {
-        try {
-            ensureServiceIsBound()
-        } catch (e: TimeoutCancellationException) {
-            Timber.e("Failed to bind service within timeout duration: $e")
+        if (!ensureServiceIsBound()) {
             return
         }
 
