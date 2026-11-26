@@ -48,10 +48,14 @@ class CharacterDeviceManager private constructor(private val application: Applic
         timeout: Duration = 5000.milliseconds,
         pollInterval: Duration = 500.milliseconds
     ) {
-        if (!mConnection.isBound) {
-            Intent(application, UsbGadgetService::class.java).also { intent ->
-                RootService.bind(intent, mConnection)
-            }
+        if (mConnection.isBound) {
+            Timber.d("UsbGadgetService is already bound")
+            return
+        }
+
+        Timber.i("Binding to UsbGadgetService...")
+        Intent(application, UsbGadgetService::class.java).also { intent ->
+            RootService.bind(intent, mConnection)
         }
 
         withTimeout(timeout) {
@@ -76,10 +80,6 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         // After every call to the service, sync the logs to the main process's log buffer
         mConnection.getLogs()
-
-        if (mConnection.isBound) {
-            RootService.unbind(mConnection)
-        }
     }
 
     override suspend fun syncLogsToMainProcessLogBuffer() = useService {
