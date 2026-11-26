@@ -3,6 +3,7 @@ package me.arianb.usb_hid_client.settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
@@ -24,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
+import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 import kotlin.reflect.KProperty1
 
@@ -31,12 +33,27 @@ import kotlin.reflect.KProperty1
 @Composable
 fun PreferenceCategory(
     title: String,
-    modifier: Modifier = Modifier,
+    modifier: Modifier,
     showDivider: Boolean = true,
     preferences: @Composable () -> Unit
 ) = LabeledCategory(title, modifier, showDivider) {
     preferences()
 }
+
+/**
+ * Overload of PreferenceCategory for my very common use case of passing a specific padding as the only Modifier
+ */
+@Composable
+fun PreferenceCategory(
+    title: String,
+    showDivider: Boolean = true,
+    preferences: @Composable (() -> Unit)
+) = PreferenceCategory(
+    title = title,
+    modifier = Modifier.padding(horizontal = PaddingNormal),
+    showDivider = showDivider,
+    preferences = preferences,
+)
 
 @Composable
 fun SwitchPreference(

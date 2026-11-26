@@ -1,12 +1,10 @@
 package me.arianb.usb_hid_client.settings
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
@@ -21,7 +19,6 @@ import me.arianb.usb_hid_client.settings.AppSettings.ExperimentalMode
 import me.arianb.usb_hid_client.settings.AppSettings.FullyDisableGadgetDuringConfiguration
 import me.arianb.usb_hid_client.settings.AppSettings.KeyboardCharacterDevicePath
 import me.arianb.usb_hid_client.settings.AppSettings.MediaKeyPassthrough
-import me.arianb.usb_hid_client.settings.AppSettings.PreferenceCategory
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadCharacterDevicePath
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadFullscreenInLandscape
 import me.arianb.usb_hid_client.settings.AppSettings.TouchpadLoopbackMode
@@ -111,22 +108,6 @@ private fun SettingsTopBar() {
 
 // Specializations of the generic preference composable "helper" functions
 private object AppSettings {
-    @Composable
-    fun PreferenceCategory(
-        title: String,
-        showDivider: Boolean = true,
-        preferences: @Composable (() -> Unit)
-    ) {
-        val paddingModifier = Modifier.padding(horizontal = PaddingNormal)
-
-        PreferenceCategory(
-            title = title,
-            modifier = paddingModifier,
-            showDivider = showDivider,
-            preferences = preferences,
-        )
-    }
-
     @Composable
     fun AppThemePreference(
         enabled: Boolean = true,
