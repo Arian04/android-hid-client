@@ -50,6 +50,7 @@ import me.arianb.usb_hid_client.ui.utils.Experimental
 import me.arianb.usb_hid_client.ui.utils.LabeledCategory
 import me.arianb.usb_hid_client.ui.utils.SimpleNavTopBar
 import me.arianb.usb_hid_client.ui.utils.activityViewModel
+import me.arianb.usb_hid_client.ui.utils.rememberSnackbarHostState
 import timber.log.Timber
 
 class TroubleshootingScreen : Screen {
@@ -60,9 +61,12 @@ class TroubleshootingScreen : Screen {
 }
 
 @Composable
-fun TroubleshootingPage() {
+fun TroubleshootingPage(
+    gadgetViewModel: GadgetViewModel = activityViewModel(),
+) {
     BasicPage(
         topBar = { TroubleshootingTopBar() },
+        snackbarHostState = rememberSnackbarHostState(gadgetViewModel.snackbarFlow),
         scrollable = true
     ) {
 
