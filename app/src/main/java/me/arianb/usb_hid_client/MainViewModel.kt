@@ -12,14 +12,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
-import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManagerUserPreferences
 import me.arianb.usb_hid_client.hid_utils.DevicePath
-import me.arianb.usb_hid_client.hid_utils.ModifiesStateDirectly
+import me.arianb.usb_hid_client.hid_utils.GadgetState
+import me.arianb.usb_hid_client.hid_utils.GadgetStateHolder
 import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.KeySender
@@ -27,13 +26,10 @@ import me.arianb.usb_hid_client.report_senders.pointer_device_senders.LoopbackTo
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
-import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.settings.UserPreferencesRepository
-import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.IOException
-import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Data class that represents the UI state
@@ -46,19 +42,6 @@ data class MyUiState(
     val isDeviceUnplugged: Boolean = false
 )
 
-data class GadgetState(
-    val areCharacterDevicesMissing: Boolean = false,
-    /**
-     * null if no preferences are applied (ex: configfs functions or character devices don't exist)
-     */
-    val appliedPreferences: GadgetUserPreferences? = null,
-    val isOperationInProgress: Boolean = false,
-) {
-    fun needsRecreate(currentPreferences: GadgetUserPreferences): Boolean {
-        return appliedPreferences != null && appliedPreferences != currentPreferences
-    }
-}
-
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(MyUiState())
     val uiState: StateFlow<MyUiState> = _uiState
@@ -68,15 +51,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val snackbarFlow: Flow<String> = _snackbarChannel.receiveAsFlow()
 
     private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
-    private val rootStateHolder = RootStateHolder.getInstance()
+    private val gadgetStateHolder = GadgetStateHolder.getInstance(application)
     private val userPreferencesStateFlow = UserPreferencesRepository.getInstance(application).userPreferencesFlow
-    private val characterDeviceUserPrefs: CharacterDeviceManagerUserPreferences
-        get() = CharacterDeviceManagerUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
-    private val currentGadgetPreferences: GadgetUserPreferences
-        get() = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
 
-    private val _gadgetState = MutableStateFlow(initialGadgetState())
-    val gadgetState: StateFlow<GadgetState> = _gadgetState
+    val gadgetState: StateFlow<GadgetState> = gadgetStateHolder.state
 
     val keySender: StateFlow<KeySender> = userPreferencesStateFlow
         .mapState {
@@ -168,165 +146,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun launchGadgetOperation(
-        operationName: String,
-        block: suspend () -> Unit,
-    ) {
-        if (!rootStateHolder.hasRootPermissions()) {
-            val message = "Can't run operation '$operationName', missing root permissions"
-            Timber.w(message)
-            sendSnackbar(message)
-            return
-        }
-
-        val previous = _gadgetState.getAndUpdate { it.copy(isOperationInProgress = true) }
-        if (previous.isOperationInProgress) {
-            Timber.w("Ignoring '$operationName' request: another gadget operation is already in progress")
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                block()
-            } finally {
-                _gadgetState.update { it.copy(isOperationInProgress = false) }
-            }
-        }
+    fun createCharacterDevices() = viewModelScope.launch {
+        gadgetStateHolder.createCharacterDevices().errors.forEach(::sendSnackbar)
     }
 
-    fun createCharacterDevices() = launchGadgetOperation("create character devices") {
-        try {
-            val gadgetUserPreferences = currentGadgetPreferences
-            val succeeded = characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
-            if (!succeeded) {
-                val message = "Failed to create character devices"
-                Timber.e(message)
-                sendSnackbar(message)
-            }
-
-            // Re-evaluate state
-            val anyMissing = anyCharacterDeviceMissing()
-            if (succeeded && !anyMissing) {
-                _gadgetState.update { it.copy(appliedPreferences = gadgetUserPreferences) }
-            }
-        } catch (e: CancellationException) {
-            // Re-throw so coroutine structured cancellation propagates normally
-            throw e
-        } catch (e: Exception) {
-            Timber.wtf(
-                e,
-                "Unhandled exception bubbled up to MainViewModel while creating character devices"
-            )
-
-            sendSnackbar("[BUG] Unhandled exception thrown while creating character devices: ${e.message}")
-        }
+    fun deleteCharacterDevices() = viewModelScope.launch {
+        gadgetStateHolder.deleteCharacterDevices().errors.forEach(::sendSnackbar)
     }
 
-    fun deleteCharacterDevices() = launchGadgetOperation("delete character devices") {
-        val gadgetUserPreferences = _gadgetState.value.appliedPreferences ?: currentGadgetPreferences
-        val succeeded = characterDeviceManager.deleteCharacterDevices(gadgetUserPreferences)
-        if (!succeeded) {
-            val message = "Failed to delete character devices"
-            Timber.e(message)
-            sendSnackbar(message)
-        }
-
-        // Re-evaluate state
-        anyCharacterDeviceMissing()
-        if (succeeded) {
-            _gadgetState.update { it.copy(appliedPreferences = null) }
-        }
-    }
-
-    fun recreateCharacterDevices() = launchGadgetOperation("recreate character devices") {
-        try {
-            val currentPrefs = currentGadgetPreferences
-            val previousPrefs = _gadgetState.value.appliedPreferences ?: currentPrefs
-
-            // Delete the old stuff
-            val deleted = characterDeviceManager.deleteCharacterDevices(previousPrefs)
-            if (!deleted) {
-                val message = "Failed to delete existing character devices during recreate"
-                Timber.e(message)
-                sendSnackbar(message)
-            }
-
-            // Create the new stuff :)
-            val created = characterDeviceManager.createCharacterDevices(currentPrefs)
-            if (!created) {
-                val message = "Failed to create character devices"
-                Timber.e(message)
-                sendSnackbar(message)
-            }
-
-            // Re-evaluate state
-            val anyMissing = anyCharacterDeviceMissing()
-            if (created && !anyMissing) {
-                _gadgetState.update { it.copy(appliedPreferences = currentPrefs) }
-            } else if (deleted && anyMissing) {
-                _gadgetState.update { it.copy(appliedPreferences = null) }
-            }
-        } catch (e: CancellationException) {
-            // Re-throw so coroutine structured cancellation propagates normally
-            throw e
-        } catch (e: Exception) {
-            Timber.wtf(
-                e,
-                "Unhandled exception bubbled up to MainViewModel while recreating character devices"
-            )
-
-            sendSnackbar("[BUG] Unhandled exception thrown while recreating character devices: ${e.message}")
-        }
+    fun recreateCharacterDevices() = viewModelScope.launch {
+        gadgetStateHolder.recreateCharacterDevices().errors.forEach(::sendSnackbar)
     }
 
     fun fixCharacterDevicePermissions(device: String) {
-        if (!rootStateHolder.hasRootPermissions()) {
-            val message = "Can't fix character device permissions, missing root permissions"
-            Timber.w(message)
-            sendSnackbar(message)
-            return
-        }
-
-        characterDeviceManager.fixCharacterDevicePermissions(device)
+        gadgetStateHolder.fixCharacterDevicePermissions(device).errors.forEach(::sendSnackbar)
     }
 
-    @OptIn(ModifiesStateDirectly::class)
-    fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
-        val result = characterDeviceManager.characterDeviceMissing(charDevicePath, characterDeviceUserPrefs)
+    fun characterDeviceMissing(charDevicePath: DevicePath): Boolean =
+        gadgetStateHolder.characterDeviceMissing(charDevicePath)
 
-        _gadgetState.update { it.copy(areCharacterDevicesMissing = result) }
-
-        return result
-    }
-
-    @OptIn(ModifiesStateDirectly::class)
-    fun anyCharacterDeviceMissing(): Boolean {
-        val result = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
-
-        // NOTE: Intentionally not clearing appliedPreferences when result is true.
-        //  This is so that if (for example) the user edits a char device path to one that doesn't exist yet,
-        //  we still need appliedPreferences intact so delete/recreate can know what was previously applied.
-        _gadgetState.update { it.copy(areCharacterDevicesMissing = result) }
-
-        return result
-    }
-
-    /**
-     * Just a simple little helper for initializing the gadget state StateFlow. Should only be called in one place.
-     */
-    @OptIn(ModifiesStateDirectly::class)
-    private fun initialGadgetState(): GadgetState {
-        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
-        val appliedPrefs = if (areMissing) {
-            null
-        } else {
-            currentGadgetPreferences
-        }
-        return GadgetState(
-            areCharacterDevicesMissing = areMissing,
-            appliedPreferences = appliedPrefs,
-        )
-    }
+    fun anyCharacterDeviceMissing(): Boolean =
+        gadgetStateHolder.anyCharacterDeviceMissing()
 
     // Keyboard
     fun addStandardKey(modifier: Byte, key: Byte) =

@@ -268,13 +268,13 @@ private fun logShellCommandResult(label: String, commandResult: Shell.Result) {
     }
 }
 
-// This annotation is to help me ensure that I don't accidentally bypass my ViewModel wrappers when calling certain
-// methods from inside ViewModel. For example, by calling CharacterDeviceManager.anyCharacterDeviceMissing directly without
+// This annotation is to help me ensure that I don't accidentally bypass my GadgetStateHolder wrappers when calling certain
+// methods from inside GadgetStateHolder. For example, by calling CharacterDeviceManager.anyCharacterDeviceMissing directly without
 // updating the state at the call site.
 @Retention(value = AnnotationRetention.BINARY)
 @RequiresOptIn(
     level = RequiresOptIn.Level.ERROR,
-    message = "Ensure to update state when calling this method. You will usually want to be calling the ViewModel wrappers instead"
+    message = "Ensure to update state when calling this method. You will usually want to be calling the GadgetStateHolder wrappers instead"
 )
 annotation class ModifiesStateDirectly
 
