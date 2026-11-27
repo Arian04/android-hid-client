@@ -11,11 +11,5 @@ interface ICharacterDeviceManager {
     suspend fun deleteCharacterDevices(gadgetUserPreferences: GadgetUserPreferences): Boolean
 
     @ModifiesStateDirectly
-    fun characterDeviceMissing(
-        charDevicePath: DevicePath,
-        userPreferences: CharacterDeviceManagerUserPreferences
-    ): Boolean
-
-    @ModifiesStateDirectly
     fun anyCharacterDeviceMissing(userPreferences: CharacterDeviceManagerUserPreferences): Boolean
 }

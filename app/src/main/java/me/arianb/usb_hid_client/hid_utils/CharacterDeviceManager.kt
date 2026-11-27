@@ -198,21 +198,6 @@ class CharacterDeviceManager private constructor(private val application: Applic
         }
 
     @ModifiesStateDirectly
-    override fun characterDeviceMissing(
-        charDevicePath: DevicePath,
-        userPreferences: CharacterDeviceManagerUserPreferences
-    ): Boolean {
-        val allCharacterDevicePathsList = userPreferences.allCharacterDevicePathsList
-        val isCharDevMissing = if (!allCharacterDevicePathsList.contains(charDevicePath)) {
-            true
-        } else !charDevicePath.exists()
-
-        Timber.i("characterDeviceMissing($charDevicePath) -> $isCharDevMissing")
-
-        return isCharDevMissing
-    }
-
-    @ModifiesStateDirectly
     override fun anyCharacterDeviceMissing(userPreferences: CharacterDeviceManagerUserPreferences): Boolean {
         val allCharacterDevicePathsList = userPreferences.allCharacterDevicePathsList
         for (charDevicePath in allCharacterDevicePathsList) {

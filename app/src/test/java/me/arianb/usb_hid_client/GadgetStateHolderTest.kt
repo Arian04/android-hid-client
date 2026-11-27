@@ -254,26 +254,6 @@ class GadgetStateHolderTest {
         )
     }
 
-    @Test
-    fun `characterDeviceMissing does not mark gadget devices missing for non-gadget paths like loopback uhid`() {
-        val holder = createHolder(devicesExist = true)
-
-        holder.characterDeviceMissing(TouchpadDevicePath(UHID.PATH))
-
-        assertFalse(holder.state.value.areCharacterDevicesMissing)
-    }
-
-    @Test
-    fun `characterDeviceMissing does not clear areCharacterDevicesMissing when another gadget device is still missing`() {
-        // Only the keyboard device exists; touchpad is still missing.
-        characterDeviceManager.existingDevices.add(DEFAULT_GADGET_PREFS.keyboardCharacterDevicePath)
-        val holder = createHolder()
-        assertTrue(holder.state.value.areCharacterDevicesMissing)
-
-        assertFalse(holder.characterDeviceMissing(DEFAULT_GADGET_PREFS.keyboardCharacterDevicePath))
-        assertTrue(holder.state.value.areCharacterDevicesMissing)
-    }
-
     // ---------- Fakes ----------
 
     private class FakeCharacterDeviceManager : ICharacterDeviceManager {
@@ -309,12 +289,6 @@ class GadgetStateHolderTest {
             if (deleteResult) existingDevices.removeAll(gadgetUserPreferences.allCharacterDevicePathsList.toSet())
             return deleteResult
         }
-
-        @ModifiesStateDirectly
-        override fun characterDeviceMissing(
-            charDevicePath: DevicePath,
-            userPreferences: CharacterDeviceManagerUserPreferences,
-        ): Boolean = charDevicePath !in userPreferences.allCharacterDevicePathsList || charDevicePath !in existingDevices
 
         @ModifiesStateDirectly
         override fun anyCharacterDeviceMissing(userPreferences: CharacterDeviceManagerUserPreferences): Boolean =

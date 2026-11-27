@@ -156,17 +156,6 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
     }
 
     @OptIn(ModifiesStateDirectly::class)
-    fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
-        val result = characterDeviceManager.characterDeviceMissing(charDevicePath, characterDeviceUserPrefs)
-
-        // Refresh the state by checking if *any* char devices are missing to avoid accidentally clearing the error
-        // state if this character device is *not* missing.
-        anyCharacterDeviceMissing()
-
-        return result
-    }
-
-    @OptIn(ModifiesStateDirectly::class)
     fun anyCharacterDeviceMissing(): Boolean {
         val result = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
 
