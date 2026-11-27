@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -28,8 +29,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,9 +40,12 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.flow.Flow
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingLarge
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
@@ -185,6 +191,31 @@ inline fun <reified VM : ViewModel> activityViewModel(): VM {
     } else {
         viewModel()
     }
+}
+
+/**
+ * Remembers a [SnackbarHostState] and automatically collects [snackbarFlow] with the current
+ * lifecycle, displaying each emitted message as a snackbar.
+ */
+@Composable
+fun rememberSnackbarHostState(
+    snackbarFlow: Flow<String>,
+    duration: SnackbarDuration = SnackbarDuration.Long,
+): SnackbarHostState {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(snackbarFlow, lifecycleOwner) {
+        snackbarFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
+            .collect { message ->
+                snackbarHostState.showSnackbar(
+                    message = message,
+                    duration = duration
+                )
+            }
+    }
+
+    return snackbarHostState
 }
 
 @Preview(

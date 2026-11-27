@@ -14,7 +14,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,8 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -54,6 +51,7 @@ import me.arianb.usb_hid_client.ui.utils.BasicPage
 import me.arianb.usb_hid_client.ui.utils.BasicTopBar
 import me.arianb.usb_hid_client.ui.utils.DarkLightModePreviews
 import me.arianb.usb_hid_client.ui.utils.activityViewModel
+import me.arianb.usb_hid_client.ui.utils.rememberSnackbarHostState
 import timber.log.Timber
 
 class MainScreen : Screen {
@@ -80,7 +78,7 @@ fun MainPage(
     //       but should I even do that? should I just handle both situations the same way?
     val showMissingCharDeviceOnStartupAlert = remember { mutableStateOf(gadgetState.areCharacterDevicesMissing) }
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = rememberSnackbarHostState(mainViewModel.snackbarFlow)
 
     val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
     val isDeviceInLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -167,18 +165,6 @@ fun MainPage(
                     SnackbarResult.Dismissed -> {}
                 }
             }
-        }
-
-        val lifecycleOwner = LocalLifecycleOwner.current
-        val snackbarFlow = mainViewModel.snackbarFlow
-        LaunchedEffect(snackbarFlow, lifecycleOwner) {
-            snackbarFlow.flowWithLifecycle(lifecycleOwner.lifecycle)
-                .collect { message ->
-                    snackbarHostState.showSnackbar(
-                        message = message,
-                        duration = SnackbarDuration.Long
-                    )
-                }
         }
     }
 }
