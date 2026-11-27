@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource
  *       mutable modifier state across calls (`keyCharToScanCodes_modifier` /
  *       `keyCharToScanCodes_isModifierUsed`), and since `Scripting` is a singleton `object`, that
  *       state persists across test methods too. Needs either careful sequencing within a single
- *       test or a test-only reset hook added to production code (touch base before adding one).
+ *       test or a test-only reset hook added to production code.
  */
 class KeyCodeTranslationTest {
 
