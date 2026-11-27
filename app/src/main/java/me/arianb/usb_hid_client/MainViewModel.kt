@@ -53,7 +53,11 @@ data class GadgetState(
      */
     val appliedPreferences: GadgetUserPreferences? = null,
     val isOperationInProgress: Boolean = false,
-)
+) {
+    fun needsRecreate(currentPreferences: GadgetUserPreferences): Boolean {
+        return appliedPreferences != null && appliedPreferences != currentPreferences
+    }
+}
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(MyUiState())
@@ -232,6 +236,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         anyCharacterDeviceMissing()
         if (succeeded) {
             _gadgetState.update { it.copy(appliedPreferences = null) }
+        }
+    }
+
+    fun recreateCharacterDevices() = launchGadgetOperation("recreate character devices") {
+        try {
+            val currentPrefs = currentGadgetPreferences
+            val previousPrefs = _gadgetState.value.appliedPreferences ?: currentPrefs
+
+            // Delete the old stuff
+            val deleted = characterDeviceManager.deleteCharacterDevices(previousPrefs)
+            if (!deleted) {
+                val message = "Failed to delete existing character devices during recreate"
+                Timber.e(message)
+                sendSnackbar(message)
+            }
+
+            // Create the new stuff :)
+            val created = characterDeviceManager.createCharacterDevices(currentPrefs)
+            if (!created) {
+                val message = "Failed to create character devices"
+                Timber.e(message)
+                sendSnackbar(message)
+            }
+
+            // Re-evaluate state
+            val anyMissing = anyCharacterDeviceMissing()
+            if (created && !anyMissing) {
+                _gadgetState.update { it.copy(appliedPreferences = currentPrefs) }
+            } else if (deleted && anyMissing) {
+                _gadgetState.update { it.copy(appliedPreferences = null) }
+            }
+        } catch (e: CancellationException) {
+            // Re-throw so coroutine structured cancellation propagates normally
+            throw e
+        } catch (e: Exception) {
+            Timber.wtf(
+                e,
+                "Unhandled exception bubbled up to MainViewModel while recreating character devices"
+            )
+
+            sendSnackbar("[BUG] Unhandled exception thrown while recreating character devices: ${e.message}")
         }
     }
 

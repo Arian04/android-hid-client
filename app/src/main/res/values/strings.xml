@@ -59,6 +59,8 @@
 
     <string name="gadget_config_title">USB Gadget</string>
     <string name="gadget_config_summary">Configure USB gadget and character device options</string>
+    <string name="gadget_config_recreate_notice">Gadget functions must be recreated for changes to take effect.</string>
+    <string name="gadget_config_recreate_button">Recreate Gadget</string>
 
     <string name="usb_gadget_path_title">USB Gadget Path</string>
 
