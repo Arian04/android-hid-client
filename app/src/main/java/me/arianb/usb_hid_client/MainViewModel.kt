@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.hid_utils.GadgetStateHolder
 import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
@@ -44,7 +43,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val snackbarQueue = SnackbarQueue()
     val snackbarFlow: Flow<String> = snackbarQueue.flow
 
-    private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
     private val gadgetStateHolder = GadgetStateHolder.getInstance(application)
     private val userPreferencesStateFlow = UserPreferencesRepository.getInstance(application).userPreferencesFlow
 
@@ -119,13 +117,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         Timber.v("in MainViewModel, new state is: %s", uiState.value.toString())
-    }
-
-    // Character Device Manager
-    fun syncLogsToMainProcess() = viewModelScope.launch {
-        if (!characterDeviceManager.syncLogsToMainProcessLogBuffer()) {
-            Timber.w("Failed to sync logs from RootService to main process log buffer")
-        }
     }
 
     // Keyboard

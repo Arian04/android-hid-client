@@ -1,5 +1,6 @@
 package me.arianb.usb_hid_client.troubleshooting
 
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -10,6 +11,7 @@ import androidx.collection.mutableIntSetOf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -19,16 +21,16 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.topjohnwu.superuser.Shell
 import com.topjohnwu.superuser.ShellUtils
+import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.BuildConfig
-import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
+import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.settings.OnClickPreference
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.settings.UserPreferences
 import me.arianb.usb_hid_client.shell_utils.RootMethod
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
-import me.arianb.usb_hid_client.ui.utils.activityViewModel
 import timber.log.Timber
 import java.io.IOException
 
@@ -398,8 +400,8 @@ annotation class RequiresRoot
 fun ExportLogsButton() {
     val settingsViewModel: SettingsViewModel = viewModel()
     val userPreferences by settingsViewModel.userPreferencesFlow.collectAsState()
-    val mainViewModel: MainViewModel = activityViewModel()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         // If the user doesn't choose a location to save the file, don't continue
         val uri = result.data?.data ?: return@rememberLauncherForActivityResult
@@ -407,7 +409,9 @@ fun ExportLogsButton() {
         Timber.v("selected file URI: %s", uri)
 
         val troubleshootingInfo = detectIssues(userPreferences)
-        mainViewModel.syncLogsToMainProcess()
+        coroutineScope.launch {
+            syncLogsToMainProcess(context)
+        }
         saveLogFile(context, uri, troubleshootingInfo)
     }
 
@@ -427,6 +431,13 @@ fun ExportLogsButton() {
             launcher.launch(intent)
         }
     )
+}
+
+private suspend fun syncLogsToMainProcess(context: Context) {
+    val characterDeviceManager = CharacterDeviceManager.getInstance(context.applicationContext as Application)
+    if (!characterDeviceManager.syncLogsToMainProcessLogBuffer()) {
+        Timber.w("Failed to sync logs from RootService to main process log buffer")
+    }
 }
 
 private fun StringBuilder.appendDivider(): StringBuilder =
