@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +37,7 @@ import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.input_views.touch_input_handlers.MouseInputHandler
 import me.arianb.usb_hid_client.input_views.touch_input_handlers.TouchInputHandler
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSender
-import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
+import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender.TouchpadButtonState
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
 import me.arianb.usb_hid_client.ui.utils.activityViewModel
 
@@ -110,35 +111,35 @@ private fun TouchpadForMouse(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-
-            val leftButtonInteractionSource = remember { MutableInteractionSource() }
-            val rightButtonInteractionSource = remember { MutableInteractionSource() }
-
-            val isLeftButtonPressed: Boolean by leftButtonInteractionSource.collectIsPressedAsState()
-            val isRightButtonPressed: Boolean by rightButtonInteractionSource.collectIsPressedAsState()
-
-            val sendButtonStateUpdate: () -> Unit = {
-                mouseInputHandler.sendButtonStateUpdate(
-                    PointerDeviceSender.TouchpadButtonState(
-                        isLeftButtonPressed,
-                        isRightButtonPressed,
+            val buttonState = remember {
+                mutableStateOf(
+                    TouchpadButtonState(
+                        isLeftButtonPressed = false,
+                        isRightButtonPressed = false,
                     )
                 )
+            }
+
+            fun updateButtonState(
+                isLeftPressed: Boolean = buttonState.value.isLeftButtonPressed,
+                isRightPressed: Boolean = buttonState.value.isRightButtonPressed,
+            ) {
+                val updated = TouchpadButtonState(isLeftPressed, isRightPressed)
+                buttonState.value = updated
+                mouseInputHandler.sendButtonStateUpdate(updated)
             }
 
             TouchPadButton(
                 modifier = Modifier.weight(1f),
                 text = "Left Button",
-                interactionSource = leftButtonInteractionSource,
-                onPressed = sendButtonStateUpdate,
-                onReleased = sendButtonStateUpdate
+                onPressed = { updateButtonState(isLeftPressed = true) },
+                onReleased = { updateButtonState(isLeftPressed = false) },
             )
             TouchPadButton(
                 modifier = Modifier.weight(1f),
                 text = "Right Button",
-                interactionSource = rightButtonInteractionSource,
-                onPressed = sendButtonStateUpdate,
-                onReleased = sendButtonStateUpdate
+                onPressed = { updateButtonState(isRightPressed = true) },
+                onReleased = { updateButtonState(isRightPressed = false) },
             )
         }
     }
@@ -172,12 +173,12 @@ private fun TouchpadContactSurfaceArea(
 internal fun TouchPadButton(
     modifier: Modifier = Modifier,
     text: String,
-    interactionSource: MutableInteractionSource,
     onPressed: () -> Unit = {},
     onReleased: () -> Unit = {},
 ) {
     // Haptic feedback on press and release
     val hapticFeedback = LocalHapticFeedback.current
+    val interactionSource = remember { MutableInteractionSource() }
     val isPressed: Boolean by interactionSource.collectIsPressedAsState()
     LaunchedEffect(isPressed) {
         if (isPressed) {

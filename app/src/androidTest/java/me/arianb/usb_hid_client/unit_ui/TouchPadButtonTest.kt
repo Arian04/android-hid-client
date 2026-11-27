@@ -1,7 +1,5 @@
 package me.arianb.usb_hid_client.unit_ui
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.runtime.remember
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTouchInput
@@ -64,7 +62,6 @@ class TouchPadButtonTest {
             ) {
                 TouchPadButton(
                     text = BUTTON_TEXT,
-                    interactionSource = remember { MutableInteractionSource() },
                     onPressed = { events.add(ButtonEvent.PRESSED) },
                     onReleased = { events.add(ButtonEvent.RELEASED) },
                 )
