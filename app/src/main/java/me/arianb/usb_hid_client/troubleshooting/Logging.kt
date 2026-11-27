@@ -1,6 +1,7 @@
 package me.arianb.usb_hid_client.troubleshooting
 
 import android.os.Parcelable
+import androidx.annotation.VisibleForTesting
 import kotlinx.parcelize.Parcelize
 import timber.log.Timber
 
@@ -47,7 +48,8 @@ enum class Level(val priority: Int) {
 
 object LogBuffer {
     // NOTE: adjust limit if this uses too much memory
-    private const val LIMIT = 50000
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal const val LIMIT = 50000
     private val buffer = ArrayDeque<LogEntry>(LIMIT)
 
     fun log(priority: Int, tag: String?, message: String, t: Throwable? = null) {
