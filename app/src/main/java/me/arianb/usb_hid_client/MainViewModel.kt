@@ -1,7 +1,6 @@
 package me.arianb.usb_hid_client
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
@@ -78,23 +77,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             // so let's set the UI state back to default (no errors)
                             _uiState.update { MyUiState() }
                         },
-                        onException = { e ->
-                            val transport = sender.transport
-                            if (
-                                e is FileNotFoundException &&
-                                transport is CharDeviceTransport &&
-                                gadgetStateHolder.characterDeviceMissing(transport.devicePath)
-                            ) {
-                                Timber.w("Character device '${transport.devicePath}' doesn't exist. The user probably skipped the character device creation prompt.")
-
-                                // TODO:
-                                //  uncomment this once I make it not show on startup (since if it's missing on startup,
-                                //  it will be showing the prompt)
-                                //sendSnackbar("Character device '${transport.devicePath}' doesn't exist. Did you skip the character device creation prompt?")
-                            } else {
-                                handleException(e, transport)
-                            }
-                        }
+                        onException = { e -> handleException(e, sender.transport) }
                     )
                 }
             }
@@ -102,22 +85,42 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun handleException(e: IOException, transport: ReportTransport) {
-        val exceptionString = e.message ?: Log.getStackTraceString(e)
-        val lowercaseExceptionString = exceptionString.lowercase()
+        if (
+            e is FileNotFoundException &&
+            transport is CharDeviceTransport &&
+            gadgetStateHolder.characterDeviceMissing(transport.devicePath)
+        ) {
+            Timber.w("Character device '${transport.devicePath}' doesn't exist. The user probably skipped the character device creation prompt.")
 
-        if (lowercaseExceptionString.contains("errno 108")) {
-            Timber.i("device might be unplugged")
-            _uiState.update { it.copy(isDeviceUnplugged = true) }
-        } else if (lowercaseExceptionString.contains("permission denied") && transport is CharDeviceTransport) {
-            Timber.i("char dev perms are wrong")
-            _uiState.update { it.copy(isCharacterDevicePermissionsBroken = transport.devicePath.path) }
-        } else if (lowercaseExceptionString.contains("enxio")) {
-            Timber.i("somehow the HID gadget is disabled but the character devices are still present")
-            snackbarQueue.send("ERROR: Failed to send HID report. HID gadget has been disabled (but character devices are still present)")
-        } else {
-            val message = "unknown error has occurred while trying to write to character device"
-            Timber.e(e, message)
-            snackbarQueue.send("ERROR: $message")
+            // TODO:
+            //  uncomment this once I make it not show on startup (since if it's missing on startup,
+            //  it will be showing the prompt)
+            //sendSnackbar("Character device '${transport.devicePath}' doesn't exist. Did you skip the character device creation prompt?")
+            return
+        }
+
+        val lowercaseExceptionString = (e.message ?: e.stackTraceToString()).lowercase()
+        when {
+            lowercaseExceptionString.contains("errno 108") -> {
+                Timber.i("device might be unplugged")
+                _uiState.update { it.copy(isDeviceUnplugged = true) }
+            }
+
+            lowercaseExceptionString.contains("permission denied") && transport is CharDeviceTransport -> {
+                Timber.i("char dev perms are wrong")
+                _uiState.update { it.copy(isCharacterDevicePermissionsBroken = transport.devicePath.path) }
+            }
+
+            lowercaseExceptionString.contains("enxio") -> {
+                Timber.i("somehow the HID gadget is disabled but the character devices are still present")
+                snackbarQueue.send("ERROR: Failed to send HID report. HID gadget has been disabled (but character devices are still present)")
+            }
+
+            else -> {
+                val message = "unknown error has occurred while trying to write to character device"
+                Timber.e(e, message)
+                snackbarQueue.send("ERROR: $message")
+            }
         }
 
         Timber.v("in MainViewModel, new state is: %s", uiState.value.toString())
