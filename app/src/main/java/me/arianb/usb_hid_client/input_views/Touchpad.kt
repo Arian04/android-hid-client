@@ -1,6 +1,7 @@
 package me.arianb.usb_hid_client.input_views
 
 import android.view.MotionEvent
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -167,7 +168,8 @@ private fun TouchpadContactSurfaceArea(
 }
 
 @Composable
-private fun TouchPadButton(
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+internal fun TouchPadButton(
     modifier: Modifier = Modifier,
     text: String,
     interactionSource: MutableInteractionSource,
