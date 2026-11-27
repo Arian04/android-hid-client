@@ -17,12 +17,12 @@ class KeySender(
     // event right afterward
     override fun sendReport(report: ByteArray) {
         // Send "key-down" report
-        writeBytes(report)
+        transport.write(report)
 
         // Send "key-up" report of all zeroes (preserving report ID) to release
         val releaseReport = ByteArray(report.size)
         releaseReport[0] = report[0]
-        writeBytes(releaseReport)
+        transport.write(releaseReport)
     }
 
     companion object {

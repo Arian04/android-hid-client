@@ -39,13 +39,7 @@ abstract class ReportSender(
         reportsChannel.trySend(report)
     }
 
-    open fun sendReport(report: ByteArray) {
-        writeBytes(report)
-    }
-
-    // Writes HID report to character device
-    @Throws(IOException::class)
-    fun writeBytes(report: ByteArray) {
+    protected open fun sendReport(report: ByteArray) {
         transport.write(report)
     }
 }
