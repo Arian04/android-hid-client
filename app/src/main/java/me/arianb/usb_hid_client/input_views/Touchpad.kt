@@ -50,13 +50,13 @@ fun Touchpad(
 
     when (val it = pointerDeviceSender) {
         is TouchpadSender -> {
-            val touchInputHandler = remember { TouchInputHandler(it) }
+            val touchInputHandler = remember(it) { TouchInputHandler(it) }
 
             TouchpadForTouchpad(touchInputHandler)
         }
 
         is MouseSender -> {
-            val mouseInputHandler = remember { MouseInputHandler(it) }
+            val mouseInputHandler = remember(it) { MouseInputHandler(it) }
 
             TouchpadForMouse(mouseInputHandler)
         }
