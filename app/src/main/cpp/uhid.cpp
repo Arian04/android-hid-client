@@ -103,7 +103,7 @@ Java_me_arianb_usb_1hid_1client_hid_1utils_UHIDKt_createDevice(JNIEnv *env, jcla
     int fd;
     int ret;
 
-    android_log(ANDROID_LOG_ERROR, "Attempting to open uhid-cdev: %s", path);
+    android_log(ANDROID_LOG_INFO, "Attempting to open uhid-cdev: %s", path);
     fd = open(path, O_RDWR | O_CLOEXEC);
     env->ReleaseStringUTFChars(jpath, path);
     if (fd < 0) {
@@ -111,7 +111,7 @@ Java_me_arianb_usb_1hid_1client_hid_1utils_UHIDKt_createDevice(JNIEnv *env, jcla
         return EXIT_FAILURE;
     }
 
-    android_log(ANDROID_LOG_ERROR, "Create uhid device");
+    android_log(ANDROID_LOG_INFO, "Create uhid device");
     ret = create(fd);
     if (ret) {
         close(fd);
@@ -123,6 +123,6 @@ Java_me_arianb_usb_1hid_1client_hid_1utils_UHIDKt_createDevice(JNIEnv *env, jcla
 
 extern "C" JNIEXPORT void JNICALL
 Java_me_arianb_usb_1hid_1client_hid_1utils_UHIDKt_destroyDevice(JNIEnv *env, jclass clazz, jint fd) {
-    android_log(ANDROID_LOG_ERROR, "Destroy uhid device");
+    android_log(ANDROID_LOG_INFO, "Destroy uhid device");
     destroy(fd);
 }
