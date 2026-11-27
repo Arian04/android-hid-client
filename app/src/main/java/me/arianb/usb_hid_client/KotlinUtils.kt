@@ -34,7 +34,12 @@ inline fun <reified T : Parcelable> Bundle.getParcelableArrayCompat(key: String?
     } else {
         // Suppress deprecation because the alternative is only supported on SDKs >= the one that this
         // was deprecated in, so wrapping this in an SDK version conditional is the best I can do.
+        // NOTE: in SDKs before Tiramisu, Bundle.getParcelableArray returns Parcelable[] (not T[]), so we have to
+        //  copy into a typed Array<T> (and return null on element type mismatch to match API >= Tiramisu behavior).
         @Suppress("DEPRECATION")
-        return getParcelableArray(key) as Array<T>?
+        val rawArray = getParcelableArray(key) ?: return null
+        return Array(rawArray.size) { index ->
+            rawArray[index] as? T ?: return null
+        }
     }
 }
