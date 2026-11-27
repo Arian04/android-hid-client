@@ -159,12 +159,15 @@ class MouseInputHandler(
         relativeY: Byte,
         touchpadButtonState: PointerDeviceSender.TouchpadButtonState?
     ) {
-        val updatedCoordinates: Coordinates<Short> = previousCoordinates?.let {
+        // NOTE: Only update previousCoordinates when non-null (a pointer is active). if we set a default value,
+        //  then if the user clicks the touchpad button before actually using the touchpad,
+        //  the cursor will jump from the default coordinates.
+        val updatedCoordinates: Coordinates<Short>? = previousCoordinates?.let {
             val x: Short = (it.x + relativeX).toShort()
             val y: Short = (it.y + relativeY).toShort()
 
             Coordinates(x, y)
-        } ?: Coordinates(0, 0)
+        }
 
         previousCoordinates = updatedCoordinates
 
