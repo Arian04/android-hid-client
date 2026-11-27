@@ -57,7 +57,7 @@ static int uhid_write(int fd, const struct uhid_event *ev) {
         android_log(ANDROID_LOG_ERROR, "Cannot write to uhid: %m");
         return -errno;
     } else if (ret != sizeof(*ev)) {
-        android_log(ANDROID_LOG_ERROR, "Wrong size written to uhid: %zd != %zu", ret, sizeof(ev));
+        android_log(ANDROID_LOG_ERROR, "Wrong size written to uhid: %zd != %zu", ret, sizeof(*ev));
         return -EFAULT;
     } else {
         return 0;
