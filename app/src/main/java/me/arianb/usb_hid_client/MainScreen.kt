@@ -34,6 +34,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.flow.merge
+import me.arianb.usb_hid_client.hid_utils.GadgetViewModel
 import me.arianb.usb_hid_client.input_views.DirectInput
 import me.arianb.usb_hid_client.input_views.DirectInputIconButton
 import me.arianb.usb_hid_client.input_views.ManualInput
@@ -64,13 +66,14 @@ class MainScreen : Screen {
 @Composable
 fun MainPage(
     mainViewModel: MainViewModel = activityViewModel(),
+    gadgetViewModel: GadgetViewModel = activityViewModel(),
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
     val rootStateHolder = RootStateHolder.getInstance()
     val rootState by rootStateHolder.uiState.collectAsState()
 
     val uiState by mainViewModel.uiState.collectAsState()
-    val gadgetState by mainViewModel.gadgetState.collectAsState()
+    val gadgetState by gadgetViewModel.gadgetState.collectAsState()
     Timber.v("in MainScreen, uiState is: %s, gadgetState is: %s", uiState.toString(), gadgetState.toString())
 
     // TODO: should i do this in VM constructor? but then I cant differentiate between
@@ -78,7 +81,10 @@ fun MainPage(
     //       but should I even do that? should I just handle both situations the same way?
     val showMissingCharDeviceOnStartupAlert = remember { mutableStateOf(gadgetState.areCharacterDevicesMissing) }
 
-    val snackbarHostState = rememberSnackbarHostState(mainViewModel.snackbarFlow)
+    val snackbarFlow = remember(mainViewModel, gadgetViewModel) {
+        merge(mainViewModel.snackbarFlow, gadgetViewModel.snackbarFlow)
+    }
+    val snackbarHostState = rememberSnackbarHostState(snackbarFlow)
 
     val preferences by settingsViewModel.userPreferencesFlow.collectAsState()
     val isDeviceInLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -146,7 +152,7 @@ fun MainPage(
                 )
                 when (result) {
                     SnackbarResult.ActionPerformed -> {
-                        mainViewModel.createCharacterDevices()
+                        gadgetViewModel.createCharacterDevices()
                     }
 
                     SnackbarResult.Dismissed -> {}
@@ -159,7 +165,7 @@ fun MainPage(
                 )
                 when (result) {
                     SnackbarResult.ActionPerformed -> {
-                        mainViewModel.fixCharacterDevicePermissions(characterDevicePath)
+                        gadgetViewModel.fixCharacterDevicePermissions(characterDevicePath)
                     }
 
                     SnackbarResult.Dismissed -> {}
@@ -236,7 +242,7 @@ private fun MainTopBar() {
 @Composable
 private fun CreateCharDevicesAlertDialog(
     showAlert: MutableState<Boolean>,
-    mainViewModel: MainViewModel = activityViewModel()
+    gadgetViewModel: GadgetViewModel = activityViewModel()
 ) {
     AlertDialog(
         title = { Text("Character device(s) do not exist") },
@@ -245,7 +251,7 @@ private fun CreateCharDevicesAlertDialog(
             TextButton(
                 content = { Text("YES") },
                 onClick = {
-                    mainViewModel.createCharacterDevices()
+                    gadgetViewModel.createCharacterDevices()
                     showAlert.value = false
                 }
             )

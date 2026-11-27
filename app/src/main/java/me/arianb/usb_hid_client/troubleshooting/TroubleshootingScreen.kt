@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
-import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
+import me.arianb.usb_hid_client.hid_utils.GadgetViewModel
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.shell_utils.RootMethod
 import me.arianb.usb_hid_client.ui.theme.codeLineHeightScaleFactor
@@ -94,18 +94,18 @@ private fun TroubleshootingTopBar() {
 }
 
 @Composable
-private fun GadgetActionButtons(mainViewModel: MainViewModel = activityViewModel()) {
+private fun GadgetActionButtons(gadgetViewModel: GadgetViewModel = activityViewModel()) {
     var isShowingConfirmationAlert by remember { mutableStateOf(false) }
 
-    val gadgetState by mainViewModel.gadgetState.collectAsState()
+    val gadgetState by gadgetViewModel.gadgetState.collectAsState()
 
     val runOnClick: () -> Unit
     val actionLabel: String
     if (gadgetState.areCharacterDevicesMissing) {
-        runOnClick = { mainViewModel.createCharacterDevices() }
+        runOnClick = { gadgetViewModel.createCharacterDevices() }
         actionLabel = "Create Character Devices"
     } else {
-        runOnClick = { mainViewModel.deleteCharacterDevices() }
+        runOnClick = { gadgetViewModel.deleteCharacterDevices() }
         actionLabel = "Delete Character Devices"
     }
 

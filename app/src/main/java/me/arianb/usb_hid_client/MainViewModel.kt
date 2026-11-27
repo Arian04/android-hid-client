@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.DevicePath
-import me.arianb.usb_hid_client.hid_utils.GadgetState
 import me.arianb.usb_hid_client.hid_utils.GadgetStateHolder
 import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.hid_utils.UHID
@@ -49,8 +48,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val gadgetStateHolder = GadgetStateHolder.getInstance(application)
     private val userPreferencesStateFlow = UserPreferencesRepository.getInstance(application).userPreferencesFlow
 
-    val gadgetState: StateFlow<GadgetState> = gadgetStateHolder.state
-
     val keySender: StateFlow<KeySender> = userPreferencesStateFlow
         .mapState {
             KeySender(it.keyboardCharacterDevicePath)
@@ -62,7 +59,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             //  maybe make it clear to the user that the Loopback Mode always uses precision touchpad, and that these
             //  settings are therefore mutually exclusive.
             if (it.isLoopbackModeEnabled) {
-                fixCharacterDevicePermissions(UHID.PATH)
+                gadgetStateHolder.fixCharacterDevicePermissions(UHID.PATH).errors.forEach(snackbarQueue::send)
                 LoopbackTouchpadSender(TouchpadDevicePath(UHID.PATH))
             } else if (it.enablePrecisionTouchpad) {
                 TouchpadSender(it.touchpadCharacterDevicePath)
@@ -85,7 +82,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         },
                         onException = { e ->
                             val characterDevicePath = sender.characterDevicePath
-                            if (e is FileNotFoundException && characterDeviceMissing(characterDevicePath)) {
+                            if (e is FileNotFoundException && gadgetStateHolder.characterDeviceMissing(characterDevicePath)) {
                                 Timber.w("Character device '$characterDevicePath' doesn't exist. The user probably skipped the character device creation prompt.")
 
                                 // TODO:
@@ -130,28 +127,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             Timber.w("Failed to sync logs from RootService to main process log buffer")
         }
     }
-
-    fun createCharacterDevices() = viewModelScope.launch {
-        gadgetStateHolder.createCharacterDevices().errors.forEach(snackbarQueue::send)
-    }
-
-    fun deleteCharacterDevices() = viewModelScope.launch {
-        gadgetStateHolder.deleteCharacterDevices().errors.forEach(snackbarQueue::send)
-    }
-
-    fun recreateCharacterDevices() = viewModelScope.launch {
-        gadgetStateHolder.recreateCharacterDevices().errors.forEach(snackbarQueue::send)
-    }
-
-    fun fixCharacterDevicePermissions(device: String) {
-        gadgetStateHolder.fixCharacterDevicePermissions(device).errors.forEach(snackbarQueue::send)
-    }
-
-    fun characterDeviceMissing(charDevicePath: DevicePath): Boolean =
-        gadgetStateHolder.characterDeviceMissing(charDevicePath)
-
-    fun anyCharacterDeviceMissing(): Boolean =
-        gadgetStateHolder.anyCharacterDeviceMissing()
 
     // Keyboard
     fun addStandardKey(modifier: Byte, key: Byte) =

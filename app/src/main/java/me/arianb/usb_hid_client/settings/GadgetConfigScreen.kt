@@ -20,8 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.Navigator
-import me.arianb.usb_hid_client.MainViewModel
 import me.arianb.usb_hid_client.R
+import me.arianb.usb_hid_client.hid_utils.GadgetViewModel
 import me.arianb.usb_hid_client.settings.GadgetConfigSettings.FullyDisableGadgetDuringConfiguration
 import me.arianb.usb_hid_client.settings.GadgetConfigSettings.KeyboardCharacterDevicePath
 import me.arianb.usb_hid_client.settings.GadgetConfigSettings.TouchpadCharacterDevicePath
@@ -42,11 +42,11 @@ class GadgetConfigScreen : Screen {
 
 @Composable
 fun GadgetConfigPage(
-    mainViewModel: MainViewModel = activityViewModel(),
+    gadgetViewModel: GadgetViewModel = activityViewModel(),
 ) {
     BasicPage(
         topBar = { GadgetConfigTopBar() },
-        snackbarHostState = rememberSnackbarHostState(mainViewModel.snackbarFlow),
+        snackbarHostState = rememberSnackbarHostState(gadgetViewModel.snackbarFlow),
         scrollable = true
     ) {
         RecreateGadgetBanner()
@@ -72,11 +72,11 @@ private fun GadgetConfigTopBar() {
 
 @Composable
 private fun ColumnScope.RecreateGadgetBanner(
-    mainViewModel: MainViewModel = activityViewModel(),
+    gadgetViewModel: GadgetViewModel = activityViewModel(),
     settingsViewModel: SettingsViewModel = viewModel()
 ) {
     val userPreferences by settingsViewModel.userPreferencesFlow.collectAsState()
-    val gadgetState by mainViewModel.gadgetState.collectAsState()
+    val gadgetState by gadgetViewModel.gadgetState.collectAsState()
 
     val currentGadgetPrefs = GadgetUserPreferences.fromUserPreferences(userPreferences)
     val needsRecreate = gadgetState.needsRecreate(currentGadgetPrefs)
@@ -84,7 +84,7 @@ private fun ColumnScope.RecreateGadgetBanner(
     AnimatedVisibility(visible = needsRecreate) {
         RecreateGadgetCard(
             enabled = !gadgetState.isOperationInProgress,
-            onRecreateClick = { mainViewModel.recreateCharacterDevices() }
+            onRecreateClick = { gadgetViewModel.recreateCharacterDevices() }
         )
     }
 }
