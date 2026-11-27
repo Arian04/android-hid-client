@@ -62,8 +62,9 @@ class TouchPadButtonTest {
             ) {
                 TouchPadButton(
                     text = BUTTON_TEXT,
-                    onPressed = { events.add(ButtonEvent.PRESSED) },
-                    onReleased = { events.add(ButtonEvent.RELEASED) },
+                    onPressStateChange = { isPressed ->
+                        events.add(if (isPressed) ButtonEvent.PRESSED else ButtonEvent.RELEASED)
+                    },
                 )
             }
         }

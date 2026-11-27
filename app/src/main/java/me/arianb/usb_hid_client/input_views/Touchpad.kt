@@ -133,14 +133,12 @@ private fun TouchpadForMouse(
             TouchPadButton(
                 modifier = Modifier.weight(1f),
                 text = "Left Button",
-                onPressed = { updateButtonState(isLeftPressed = true) },
-                onReleased = { updateButtonState(isLeftPressed = false) },
+                onPressStateChange = { isPressed -> updateButtonState(isLeftPressed = isPressed) },
             )
             TouchPadButton(
                 modifier = Modifier.weight(1f),
                 text = "Right Button",
-                onPressed = { updateButtonState(isRightPressed = true) },
-                onReleased = { updateButtonState(isRightPressed = false) },
+                onPressStateChange = { isPressed -> updateButtonState(isRightPressed = isPressed) },
             )
         }
     }
@@ -174,30 +172,29 @@ private fun TouchpadContactSurfaceArea(
 internal fun TouchPadButton(
     modifier: Modifier = Modifier,
     text: String,
-    onPressed: () -> Unit = {},
-    onReleased: () -> Unit = {},
+    onPressStateChange: (isPressed: Boolean) -> Unit = {},
 ) {
     // Haptic feedback on press and release
     val hapticFeedback = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
-    val currentOnPressed by rememberUpdatedState(onPressed)
-    val currentOnReleased by rememberUpdatedState(onReleased)
+    val currentOnPressStateChange by rememberUpdatedState(onPressStateChange)
 
     // NOTE: Collect PressInteraction events directly (rather than observing a boolean pressed state)
     // so callbacks and haptic feedback only fire on actual user input, not on initial composition.
     LaunchedEffect(interactionSource) {
         interactionSource.interactions.collect { interaction ->
-            when (interaction) {
-                is PressInteraction.Press -> {
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
-                    currentOnPressed()
-                }
-
-                is PressInteraction.Release, is PressInteraction.Cancel -> {
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                    currentOnReleased()
-                }
+            val isPressed = when (interaction) {
+                is PressInteraction.Press -> true
+                is PressInteraction.Release, is PressInteraction.Cancel -> false
+                else -> return@collect
             }
+            val hapticType = if (isPressed) {
+                HapticFeedbackType.GestureThresholdActivate
+            } else {
+                HapticFeedbackType.GestureEnd
+            }
+            hapticFeedback.performHapticFeedback(hapticType)
+            currentOnPressStateChange(isPressed)
         }
     }
 
