@@ -45,11 +45,17 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.onClosed
+import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.ui.theme.PaddingLarge
 import me.arianb.usb_hid_client.ui.theme.PaddingNormal
 import me.arianb.usb_hid_client.ui.theme.USBHIDClientTheme
+import timber.log.Timber
 
 @Composable
 fun BasicPage(
@@ -190,6 +196,25 @@ inline fun <reified VM : ViewModel> activityViewModel(): VM {
         viewModel(viewModelStoreOwner = activity)
     } else {
         viewModel()
+    }
+}
+
+class SnackbarQueue(capacity: Int = DEFAULT_CAPACITY) {
+    private val channel = Channel<String>(capacity = capacity, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    val flow: Flow<String> = channel.receiveAsFlow()
+
+    fun send(message: String) {
+        channel.trySend(message)
+            .onFailure {
+                Timber.e("Failed to add snackbar to channel: $it")
+            }
+            .onClosed {
+                Timber.wtf("Failed to add snackbar to channel because it was closed, but it should NEVER be closed.")
+            }
+    }
+
+    private companion object {
+        private const val DEFAULT_CAPACITY = 5
     }
 }
 

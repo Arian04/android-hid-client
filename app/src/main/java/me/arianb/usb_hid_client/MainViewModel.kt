@@ -4,15 +4,10 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.onClosed
-import kotlinx.coroutines.channels.onFailure
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
@@ -27,6 +22,7 @@ import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSende
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
 import me.arianb.usb_hid_client.settings.UserPreferencesRepository
+import me.arianb.usb_hid_client.ui.utils.SnackbarQueue
 import timber.log.Timber
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -46,9 +42,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(MyUiState())
     val uiState: StateFlow<MyUiState> = _uiState
 
-    // Snackbar queue
-    private val _snackbarChannel = Channel<String>(capacity = 5, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val snackbarFlow: Flow<String> = _snackbarChannel.receiveAsFlow()
+    private val snackbarQueue = SnackbarQueue()
+    val snackbarFlow: Flow<String> = snackbarQueue.flow
 
     private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
     private val gadgetStateHolder = GadgetStateHolder.getInstance(application)
@@ -107,16 +102,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun sendSnackbar(message: String) {
-        _snackbarChannel.trySend(message)
-            .onFailure {
-                Timber.e("Failed to add snackbar to channel: $it")
-            }
-            .onClosed {
-                Timber.wtf("Failed to add snackbar to channel because it was closed, but it should NEVER be closed.")
-            }
-    }
-
     private fun handleException(e: IOException, devicePath: DevicePath) {
         val exceptionString = e.message ?: Log.getStackTraceString(e)
         val lowercaseExceptionString = exceptionString.lowercase()
@@ -129,11 +114,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isCharacterDevicePermissionsBroken = devicePath.path) }
         } else if (lowercaseExceptionString.contains("enxio")) {
             Timber.i("somehow the HID gadget is disabled but the character devices are still present")
-            sendSnackbar("ERROR: Failed to send mouse report. HID gadget has been disabled (but character devices are still present)")
+            snackbarQueue.send("ERROR: Failed to send mouse report. HID gadget has been disabled (but character devices are still present)")
         } else {
             val message = "unknown error has occurred while trying to write to character device"
             Timber.e(e, message)
-            sendSnackbar("ERROR: $message")
+            snackbarQueue.send("ERROR: $message")
         }
 
         Timber.v("in MainViewModel, new state is: %s", uiState.value.toString())
@@ -147,19 +132,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun createCharacterDevices() = viewModelScope.launch {
-        gadgetStateHolder.createCharacterDevices().errors.forEach(::sendSnackbar)
+        gadgetStateHolder.createCharacterDevices().errors.forEach(snackbarQueue::send)
     }
 
     fun deleteCharacterDevices() = viewModelScope.launch {
-        gadgetStateHolder.deleteCharacterDevices().errors.forEach(::sendSnackbar)
+        gadgetStateHolder.deleteCharacterDevices().errors.forEach(snackbarQueue::send)
     }
 
     fun recreateCharacterDevices() = viewModelScope.launch {
-        gadgetStateHolder.recreateCharacterDevices().errors.forEach(::sendSnackbar)
+        gadgetStateHolder.recreateCharacterDevices().errors.forEach(snackbarQueue::send)
     }
 
     fun fixCharacterDevicePermissions(device: String) {
-        gadgetStateHolder.fixCharacterDevicePermissions(device).errors.forEach(::sendSnackbar)
+        gadgetStateHolder.fixCharacterDevicePermissions(device).errors.forEach(snackbarQueue::send)
     }
 
     fun characterDeviceMissing(charDevicePath: DevicePath): Boolean =
