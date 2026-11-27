@@ -182,6 +182,12 @@ class MouseInputHandler(
     fun sendButtonStateUpdate(touchpadButtonState: PointerDeviceSender.TouchpadButtonState) =
         this.sendRelativeMouseMovement(0, 0, touchpadButtonState)
 
+    fun setLeftButtonPressed(isPressed: Boolean) =
+        sendButtonStateUpdate(currentTouchpadButtonState.copy(isLeftButtonPressed = isPressed))
+
+    fun setRightButtonPressed(isPressed: Boolean) =
+        sendButtonStateUpdate(currentTouchpadButtonState.copy(isRightButtonPressed = isPressed))
+
     private companion object {
         // Matches the HID mouse report descriptor logical min/max (0x81..0x7f).
         private const val MIN_RELATIVE_DELTA = -127
