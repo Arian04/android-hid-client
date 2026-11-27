@@ -48,14 +48,14 @@ class UsbGadgetService : RootService() {
         override fun handleMessage(msg: Message): Boolean {
             Timber.i("Message (what = ${msg.what}) received in service, running with UID = ${Process.myUid()}")
 
-            try {
+            val replyMsg: Message? = try {
                 when (msg.what) {
                     MSG_CREATE, MSG_DELETE -> {
                         val didSucceed = handleGadgetManagerMessage(msg)
-                        sendOperationComplete(msg.replyTo, msg.what, didSucceed)
+                        operationCompleteMessage(msg.what, didSucceed)
                     }
 
-                    MSG_GET_LOGS -> sendLogs(msg.replyTo)
+                    MSG_GET_LOGS -> logsMessage()
                     else -> {
                         Timber.wtf("Unhandled message: $msg")
                         return false
@@ -69,8 +69,12 @@ class UsbGadgetService : RootService() {
 
                 // TODO: should we sendOperationComplete here? I don't wanna double-send depending on where the
                 //  exception is thrown from. Maybe I should wrap each "when" block in its own try-catch or runCatching
+                null
             }
 
+            if (replyMsg != null) {
+                sendReply(msg.replyTo, replyMsg)
+            }
             return true
         }
 
@@ -100,37 +104,29 @@ class UsbGadgetService : RootService() {
             return true
         }
 
-        private fun sendOperationComplete(messenger: Messenger?, completedMsgWhat: Int, didSucceed: Boolean) {
-            if (messenger == null) {
-                Timber.w("Attempted to send operation completion using null replyTo messenger")
-                return
-            }
-
-            val replyMsg = Message.obtain(null, MSG_OPERATION_COMPLETE).apply {
+        private fun operationCompleteMessage(completedMsgWhat: Int, didSucceed: Boolean): Message =
+            Message.obtain(null, MSG_OPERATION_COMPLETE).apply {
                 arg1 = completedMsgWhat
                 arg2 = if (didSucceed) 1 else 0
             }
 
-            try {
-                messenger.send(replyMsg)
-            } catch (e: RemoteException) {
-                Timber.e(e)
+        private fun logsMessage(): Message {
+            val logArray = LogBuffer.getAndClearLogList()
+            Timber.d("RootService sending logs array: ${logArray.contentToString()}")
+            return Message.obtain(null, MSG_GET_LOGS).apply {
+                data.putParcelableArray(null, logArray)
             }
         }
 
-        private fun sendLogs(messenger: Messenger?) {
+        private fun sendReply(messenger: Messenger?, replyMsg: Message) {
             if (messenger == null) {
-                Timber.w("Attempted to communicate with service using unbound connection")
+                Timber.w("Attempted to send reply (what = ${replyMsg.what}) using null replyTo messenger")
+                replyMsg.recycle()
                 return
-            }
-            val logArray = LogBuffer.getAndClearLogList()
-            Timber.d("RootService sending logs array: ${logArray.contentToString()}")
-            val msg = Message.obtain(null, MSG_GET_LOGS).apply {
-                data.putParcelableArray(null, logArray)
             }
 
             try {
-                messenger.send(msg)
+                messenger.send(replyMsg)
             } catch (e: RemoteException) {
                 Timber.e(e)
             }
