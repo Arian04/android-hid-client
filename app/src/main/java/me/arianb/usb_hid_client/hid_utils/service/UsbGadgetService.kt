@@ -48,7 +48,7 @@ class UsbGadgetService : RootService() {
         override fun handleMessage(msg: Message): Boolean {
             Timber.i("Message (what = ${msg.what}) received in service, running with UID = ${Process.myUid()}")
 
-            val replyMsg: Message? = try {
+            val replyMsg: Message = try {
                 when (msg.what) {
                     MSG_CREATE, MSG_DELETE -> {
                         val didSucceed = handleGadgetManagerMessage(msg)
@@ -64,17 +64,12 @@ class UsbGadgetService : RootService() {
             } catch (e: Exception) {
                 // Catching unhandled exceptions because the logs were complaining about unclosed file descriptors
                 // when I didn't
-                Timber.w("Oh no, an unhandled exception occurred in UsbGadgetService")
-                Timber.w(e)
+                Timber.e(e, "Oh no, an unhandled exception occurred in UsbGadgetService while handling what=${msg.what}")
 
-                // TODO: should we sendOperationComplete here? I don't wanna double-send depending on where the
-                //  exception is thrown from. Maybe I should wrap each "when" block in its own try-catch or runCatching
-                null
+                operationCompleteMessage(msg.what, didSucceed = false)
             }
 
-            if (replyMsg != null) {
-                sendReply(msg.replyTo, replyMsg)
-            }
+            sendReply(msg.replyTo, replyMsg)
             return true
         }
 
