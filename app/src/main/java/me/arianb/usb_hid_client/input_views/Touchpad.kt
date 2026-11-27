@@ -4,7 +4,7 @@ import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -179,14 +180,24 @@ internal fun TouchPadButton(
     // Haptic feedback on press and release
     val hapticFeedback = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed: Boolean by interactionSource.collectIsPressedAsState()
-    LaunchedEffect(isPressed) {
-        if (isPressed) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
-            onPressed()
-        } else {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
-            onReleased()
+    val currentOnPressed by rememberUpdatedState(onPressed)
+    val currentOnReleased by rememberUpdatedState(onReleased)
+
+    // NOTE: Collect PressInteraction events directly (rather than observing a boolean pressed state)
+    // so callbacks and haptic feedback only fire on actual user input, not on initial composition.
+    LaunchedEffect(interactionSource) {
+        interactionSource.interactions.collect { interaction ->
+            when (interaction) {
+                is PressInteraction.Press -> {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                    currentOnPressed()
+                }
+
+                is PressInteraction.Release, is PressInteraction.Cancel -> {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                    currentOnReleased()
+                }
+            }
         }
     }
 
