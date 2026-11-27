@@ -70,9 +70,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val characterDeviceManager = CharacterDeviceManager.getInstance(application)
     private val rootStateHolder = RootStateHolder.getInstance()
     private val userPreferencesStateFlow = UserPreferencesRepository.getInstance(application).userPreferencesFlow
-    private val characterDeviceUserPrefs = userPreferencesStateFlow.mapState {
-        CharacterDeviceManagerUserPreferences.fromUserPreferences(it)
-    }
+    private val characterDeviceUserPrefs: CharacterDeviceManagerUserPreferences
+        get() = CharacterDeviceManagerUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
     private val currentGadgetPreferences: GadgetUserPreferences
         get() = GadgetUserPreferences.fromUserPreferences(userPreferencesStateFlow.value)
 
@@ -293,7 +292,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @OptIn(ModifiesStateDirectly::class)
     fun characterDeviceMissing(charDevicePath: DevicePath): Boolean {
-        val result = characterDeviceManager.characterDeviceMissing(charDevicePath, characterDeviceUserPrefs.value)
+        val result = characterDeviceManager.characterDeviceMissing(charDevicePath, characterDeviceUserPrefs)
 
         _gadgetState.update { it.copy(areCharacterDevicesMissing = result) }
 
@@ -302,7 +301,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     @OptIn(ModifiesStateDirectly::class)
     fun anyCharacterDeviceMissing(): Boolean {
-        val result = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs.value)
+        val result = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
 
         // NOTE: Intentionally not clearing appliedPreferences when result is true.
         //  This is so that if (for example) the user edits a char device path to one that doesn't exist yet,
@@ -317,7 +316,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     @OptIn(ModifiesStateDirectly::class)
     private fun initialGadgetState(): GadgetState {
-        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs.value)
+        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
         val appliedPrefs = if (areMissing) {
             null
         } else {
