@@ -135,10 +135,14 @@ class MouseInputHandler(
         touchpadButtonState: PointerDeviceSender.TouchpadButtonState? = null,
     ) {
         // This uses relative movements, so if the "previous" coordinates haven't been set (var is null), then we have
-        // (relatively) moved 0 distance. So in that case, just use (0,0) as relative distance. Otherwise, calculate
-        // the difference and use it.
-        val difference: Coordinates<Short> = previousCoordinates?.let {
-            Coordinates((absoluteX - it.x).toShort(), (absoluteY - it.y).toShort())
+        // (relatively) moved 0 distance. So in that case, just use (0,0) as relative distance.
+        //
+        // Otherwise, clamp the delta to the HID mouse descriptor's logical range [-127, 127]
+        // so fast swipes don't wrap around mod 256 and invert the direction.
+        val difference: Coordinates<Byte> = previousCoordinates?.let {
+            val deltaX = (absoluteX - it.x).coerceIn(MIN_RELATIVE_DELTA, MAX_RELATIVE_DELTA).toByte()
+            val deltaY = (absoluteY - it.y).coerceIn(MIN_RELATIVE_DELTA, MAX_RELATIVE_DELTA).toByte()
+            Coordinates(deltaX, deltaY)
         } ?: Coordinates(0, 0)
 
         previousCoordinates = Coordinates(absoluteX, absoluteY)
@@ -147,7 +151,7 @@ class MouseInputHandler(
             currentTouchpadButtonState = touchpadButtonState
         }
 
-        return mouseSender.sendMouseReport(difference.x.toByte(), difference.y.toByte(), currentTouchpadButtonState)
+        return mouseSender.sendMouseReport(difference.x, difference.y, currentTouchpadButtonState)
     }
 
     fun sendRelativeMouseMovement(
@@ -174,4 +178,10 @@ class MouseInputHandler(
     // Send new button state with 0 relative mouse movement
     fun sendButtonStateUpdate(touchpadButtonState: PointerDeviceSender.TouchpadButtonState) =
         this.sendRelativeMouseMovement(0, 0, touchpadButtonState)
+
+    private companion object {
+        // Matches the HID mouse report descriptor logical min/max (0x81..0x7f).
+        private const val MIN_RELATIVE_DELTA = -127
+        private const val MAX_RELATIVE_DELTA = 127
+    }
 }
