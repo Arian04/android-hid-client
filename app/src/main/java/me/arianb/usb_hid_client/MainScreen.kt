@@ -126,7 +126,7 @@ fun MainPage(
 
         Touchpad()
 
-        LaunchedEffect(uiState, gadgetState.areCharacterDevicesMissing) {
+        LaunchedEffect(rootState, uiState, gadgetState.areCharacterDevicesMissing) {
             Timber.v(
                 "LAUNCHED EFFECT RUNNING WITH UI STATE = %s, GADGET STATE = %s",
                 uiState.toString(),
