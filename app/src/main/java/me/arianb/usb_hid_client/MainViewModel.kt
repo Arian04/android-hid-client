@@ -13,7 +13,7 @@ import me.arianb.usb_hid_client.hid_utils.GadgetStateHolder
 import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.CharDeviceTransport
 import me.arianb.usb_hid_client.report_senders.KeySender
-import me.arianb.usb_hid_client.report_senders.ReportTransport
+import me.arianb.usb_hid_client.report_senders.ReportWriteError
 import me.arianb.usb_hid_client.report_senders.UhidTransport
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
@@ -21,8 +21,6 @@ import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSe
 import me.arianb.usb_hid_client.settings.UserPreferencesRepository
 import me.arianb.usb_hid_client.ui.utils.SnackbarQueue
 import timber.log.Timber
-import java.io.FileNotFoundException
-import java.io.IOException
 
 /**
  * Data class that represents the UI state
@@ -77,48 +75,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             // so let's set the UI state back to default (no errors)
                             _uiState.update { MyUiState() }
                         },
-                        onException = { e -> handleException(e, sender.transport) }
+                        onError = ::handleError
                     )
                 }
             }
         }
     }
 
-    private fun handleException(e: IOException, transport: ReportTransport) {
-        if (
-            e is FileNotFoundException &&
-            transport is CharDeviceTransport &&
-            gadgetStateHolder.characterDeviceMissing(transport.devicePath)
-        ) {
-            Timber.w("Character device '${transport.devicePath}' doesn't exist. The user probably skipped the character device creation prompt.")
+    private fun handleError(error: ReportWriteError) {
+        when (error) {
+            is ReportWriteError.MissingCharDevice -> {
+                gadgetStateHolder.characterDeviceMissing(error.devicePath)
+                Timber.w("Character device '${error.devicePath}' doesn't exist. The user probably skipped the character device creation prompt.")
 
-            // TODO:
-            //  uncomment this once I make it not show on startup (since if it's missing on startup,
-            //  it will be showing the prompt)
-            //sendSnackbar("Character device '${transport.devicePath}' doesn't exist. Did you skip the character device creation prompt?")
-            return
-        }
+                // TODO:
+                //  uncomment this once I make it not show on startup (since if it's missing on startup,
+                //  it will be showing the prompt)
+                //sendSnackbar("Character device '${error.devicePath}' doesn't exist. Did you skip the character device creation prompt?")
+            }
 
-        val lowercaseExceptionString = (e.message ?: e.stackTraceToString()).lowercase()
-        when {
-            lowercaseExceptionString.contains("errno 108") -> {
+            ReportWriteError.DeviceUnplugged -> {
                 Timber.i("device might be unplugged")
                 _uiState.update { it.copy(isDeviceUnplugged = true) }
             }
 
-            lowercaseExceptionString.contains("permission denied") && transport is CharDeviceTransport -> {
+            is ReportWriteError.BrokenPermissions -> {
                 Timber.i("char dev perms are wrong")
-                _uiState.update { it.copy(isCharacterDevicePermissionsBroken = transport.devicePath.path) }
+                _uiState.update { it.copy(isCharacterDevicePermissionsBroken = error.devicePath.path) }
             }
 
-            lowercaseExceptionString.contains("enxio") -> {
+            ReportWriteError.GadgetDisabled -> {
                 Timber.i("somehow the HID gadget is disabled but the character devices are still present")
                 snackbarQueue.send("ERROR: Failed to send HID report. HID gadget has been disabled (but character devices are still present)")
             }
 
-            else -> {
+            is ReportWriteError.Unknown -> {
                 val message = "unknown error has occurred while trying to write to character device"
-                Timber.e(e, message)
+                Timber.e(error.cause, message)
                 snackbarQueue.send("ERROR: $message")
             }
         }

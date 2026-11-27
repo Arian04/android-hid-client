@@ -56,7 +56,7 @@ class DirectInputKeyboardViewTest {
             launch {
                 sender.start(
                     onSuccess = { receivingSender.complete(sender) },
-                    onException = { receivingSender.completeExceptionally(it) },
+                    onError = { receivingSender.completeExceptionally(IllegalStateException("Unexpected report error: $it")) },
                 )
             }
         }

@@ -13,7 +13,7 @@ abstract class ReportSender(
         Timber.wtf("A channel with an unlimited buffer shouldn't be failing to receive elements")
     }
 
-    suspend fun start(onSuccess: () -> Unit, onException: (e: IOException) -> Unit) = withContext(Dispatchers.IO) {
+    suspend fun start(onSuccess: () -> Unit, onError: (error: ReportWriteError) -> Unit) = withContext(Dispatchers.IO) {
         for (report in reportsChannel) {
             try {
                 Timber.v("REPORT HEX (len = %d): %s", report.size, report.toHexString())
@@ -21,9 +21,7 @@ abstract class ReportSender(
                 onSuccess()
             } catch (e: IOException) {
                 Timber.v(e)
-
-                // TODO: map exception to a sealed error type and pass that to lambda?
-                onException(e)
+                onError(transport.classifyError(e))
             }
         }
     }
