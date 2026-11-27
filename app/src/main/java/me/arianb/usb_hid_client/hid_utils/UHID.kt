@@ -23,12 +23,19 @@ object UHID {
         System.loadLibrary(NATIVE_PROJECT_LIB_NAME)
 
         fd = createDevice(PATH)
+        if (fd < 0) {
+            Timber.e("Failed to create UHID device at $PATH")
+        }
     }
 
     // This method serves two purposes over existing write() methods:
     //  1. Trying to write to /dev/uhid from the JVM throws EINVAL unless I dup the file descriptor, still don't know why.
     //  2. I can catch all thrown exceptions for the safety of the caller.
     private fun write(byteArray: ByteArray) {
+        if (fd < 0) {
+            return
+        }
+
         val pfd = ParcelFileDescriptor.fromFd(fd)
         pfd.use {
             try {
@@ -49,6 +56,10 @@ object UHID {
 
     // TODO: figure out when I ever actually need to destroy this?
     fun destroy() {
+        if (fd < 0) {
+            return
+        }
+
         val destroyEvent = getDestroyEvent()
 
         write(destroyEvent)

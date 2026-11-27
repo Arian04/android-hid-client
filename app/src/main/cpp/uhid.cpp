@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <linux/uhid.h>
-#include <cstdlib>
 #include <android/log.h>
 #include "uhid.h"
 
@@ -100,6 +99,9 @@ jbyteArray Java_me_arianb_usb_1hid_1client_hid_1utils_UHIDKt_getDestroyEvent(JNI
 extern "C" JNIEXPORT jint JNICALL
 Java_me_arianb_usb_1hid_1client_hid_1utils_UHIDKt_createDevice(JNIEnv *env, jclass clazz, jstring jpath) {
     const char *path = env->GetStringUTFChars(jpath, nullptr);
+    if (path == nullptr) {
+        return -1;
+    }
     int fd;
     int ret;
 
@@ -108,14 +110,14 @@ Java_me_arianb_usb_1hid_1client_hid_1utils_UHIDKt_createDevice(JNIEnv *env, jcla
     env->ReleaseStringUTFChars(jpath, path);
     if (fd < 0) {
         android_log(ANDROID_LOG_ERROR, "Cannot open uhid-cdev: %m");
-        return EXIT_FAILURE;
+        return -1;
     }
 
     android_log(ANDROID_LOG_INFO, "Create uhid device");
     ret = create(fd);
     if (ret) {
         close(fd);
-        return EXIT_FAILURE;
+        return -1;
     }
 
     return fd;
