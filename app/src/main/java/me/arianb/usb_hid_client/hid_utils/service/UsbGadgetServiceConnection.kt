@@ -18,6 +18,7 @@ import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 
 class UsbGadgetServiceConnection : ServiceConnection {
+    @Volatile
     private var mService: Messenger? = null
     private val pendingOperations = ConcurrentHashMap<Int, CompletableDeferred<Boolean>>()
 
@@ -90,7 +91,8 @@ class UsbGadgetServiceConnection : ServiceConnection {
     }
 
     private fun send(messageType: Int, preferences: GadgetUserPreferences?): Boolean {
-        if (!isBound) {
+        val service = mService
+        if (service == null) {
             Timber.w("Attempted to communicate with service using unbound connection")
             return false
         }
@@ -103,7 +105,7 @@ class UsbGadgetServiceConnection : ServiceConnection {
         }
 
         try {
-            mService!!.send(msg)
+            service.send(msg)
             return true
         } catch (e: RemoteException) {
             Timber.e(e)
