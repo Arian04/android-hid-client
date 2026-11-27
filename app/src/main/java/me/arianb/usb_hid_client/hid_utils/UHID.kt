@@ -4,6 +4,7 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os.write
 import timber.log.Timber
+import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -36,15 +37,16 @@ object UHID {
             return
         }
 
-        val pfd = ParcelFileDescriptor.fromFd(fd)
-        pfd.use {
-            try {
+        try {
+            ParcelFileDescriptor.fromFd(fd).use {
                 write(it.fileDescriptor, byteArray, 0, byteArray.size)
-            } catch (e: ErrnoException) {
-                Timber.e(e)
-            } catch (e: InterruptedException) {
-                Timber.w(e)
             }
+        } catch (e: IOException) {
+            Timber.e(e)
+        } catch (e: ErrnoException) {
+            Timber.e(e)
+        } catch (e: InterruptedException) {
+            Timber.w(e)
         }
     }
 
