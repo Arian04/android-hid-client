@@ -109,7 +109,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isCharacterDevicePermissionsBroken = devicePath.path) }
         } else if (lowercaseExceptionString.contains("enxio")) {
             Timber.i("somehow the HID gadget is disabled but the character devices are still present")
-            snackbarQueue.send("ERROR: Failed to send mouse report. HID gadget has been disabled (but character devices are still present)")
+            snackbarQueue.send("ERROR: Failed to send HID report. HID gadget has been disabled (but character devices are still present)")
         } else {
             val message = "unknown error has occurred while trying to write to character device"
             Timber.e(e, message)
