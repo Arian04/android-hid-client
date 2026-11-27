@@ -29,20 +29,23 @@ import me.arianb.usb_hid_client.ui.utils.activityViewModel
 import timber.log.Timber
 
 class DirectInputKeyboardView : AppCompatEditText {
-    private lateinit var keySender: KeySender
-    private lateinit var myInputConnection: MyInputConnection
+    private var keySender: KeySender? = null
+    private var myInputConnection: MyInputConnection? = null
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection {
+    override fun onCreateInputConnection(outAttrs: EditorInfo): InputConnection? {
         Timber.i("onCreateInputConnection() called")
-        if (keySender == null) {
+        val currentKeySender = keySender
+        if (currentKeySender == null) {
             Timber.wtf("KEY SENDER IS NULL, SOMETHING IS TERRIBLY WRONG")
+            return null
         }
-        myInputConnection = MyInputConnection(keySender, this, false)
-        return myInputConnection
+        val inputConnection = MyInputConnection(currentKeySender, this, false)
+        myInputConnection = inputConnection
+        return inputConnection
     }
 
     fun sendKeyEvent(event: KeyEvent): Boolean {
