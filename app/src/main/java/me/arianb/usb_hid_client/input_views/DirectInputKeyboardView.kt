@@ -54,6 +54,7 @@ class DirectInputKeyboardView : AppCompatEditText {
 
     fun setKeySender(keySender: KeySender) {
         this.keySender = keySender
+        myInputConnection?.keySender = keySender
     }
 }
 

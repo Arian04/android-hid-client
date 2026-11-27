@@ -10,7 +10,7 @@ import me.arianb.usb_hid_client.report_senders.KeySender
 import timber.log.Timber
 
 class MyInputConnection(
-    private val keySender: KeySender,
+    internal var keySender: KeySender,
     targetView: View,
     fullEditor: Boolean
 ) : BaseInputConnection(targetView, fullEditor) {
