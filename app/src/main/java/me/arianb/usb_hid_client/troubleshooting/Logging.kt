@@ -63,6 +63,7 @@ object LogBuffer {
         add(entry)
     }
 
+    @Synchronized
     private fun add(entry: LogEntry) {
         if (buffer.size >= LIMIT) {
             buffer.removeFirst()
@@ -71,6 +72,7 @@ object LogBuffer {
         buffer.add(entry)
     }
 
+    @Synchronized
     fun addLogArray(entries: Array<LogEntry>) {
         for (entry in entries) {
             add(entry)
@@ -90,10 +92,12 @@ object LogBuffer {
         }
     }
 
+    @Synchronized
     fun getLogList(): List<LogEntry> {
         return buffer.toList()
     }
 
+    @Synchronized
     fun getLogArray(): Array<LogEntry> {
         return buffer.toTypedArray()
     }
