@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.hid_utils.GadgetStateHolder
-import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.hid_utils.UHID
+import me.arianb.usb_hid_client.report_senders.CharDeviceTransport
 import me.arianb.usb_hid_client.report_senders.KeySender
-import me.arianb.usb_hid_client.report_senders.pointer_device_senders.LoopbackTouchpadSender
+import me.arianb.usb_hid_client.report_senders.ReportTransport
+import me.arianb.usb_hid_client.report_senders.UhidTransport
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
@@ -48,7 +48,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val keySender: StateFlow<KeySender> = userPreferencesStateFlow
         .mapState {
-            KeySender(it.keyboardCharacterDevicePath)
+            KeySender(CharDeviceTransport(it.keyboardCharacterDevicePath))
         }
 
     val touchpadSender: StateFlow<PointerDeviceSender> = userPreferencesStateFlow
@@ -58,11 +58,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             //  settings are therefore mutually exclusive.
             if (it.isLoopbackModeEnabled) {
                 gadgetStateHolder.fixCharacterDevicePermissions(UHID.PATH).errors.forEach(snackbarQueue::send)
-                LoopbackTouchpadSender(TouchpadDevicePath(UHID.PATH))
+                TouchpadSender(UhidTransport)
             } else if (it.enablePrecisionTouchpad) {
-                TouchpadSender(it.touchpadCharacterDevicePath)
+                TouchpadSender(CharDeviceTransport(it.touchpadCharacterDevicePath))
             } else {
-                MouseSender(it.touchpadCharacterDevicePath)
+                MouseSender(CharDeviceTransport(it.touchpadCharacterDevicePath))
             }
         }
 
@@ -79,16 +79,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             _uiState.update { MyUiState() }
                         },
                         onException = { e ->
-                            val characterDevicePath = sender.characterDevicePath
-                            if (e is FileNotFoundException && gadgetStateHolder.characterDeviceMissing(characterDevicePath)) {
-                                Timber.w("Character device '$characterDevicePath' doesn't exist. The user probably skipped the character device creation prompt.")
+                            val transport = sender.transport
+                            if (
+                                e is FileNotFoundException &&
+                                transport is CharDeviceTransport &&
+                                gadgetStateHolder.characterDeviceMissing(transport.devicePath)
+                            ) {
+                                Timber.w("Character device '${transport.devicePath}' doesn't exist. The user probably skipped the character device creation prompt.")
 
                                 // TODO:
                                 //  uncomment this once I make it not show on startup (since if it's missing on startup,
                                 //  it will be showing the prompt)
-                                //sendSnackbar("Character device '$characterDevicePath' doesn't exist. Did you skip the character device creation prompt?")
+                                //sendSnackbar("Character device '${transport.devicePath}' doesn't exist. Did you skip the character device creation prompt?")
                             } else {
-                                handleException(e, sender.characterDevicePath)
+                                handleException(e, transport)
                             }
                         }
                     )
@@ -97,16 +101,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun handleException(e: IOException, devicePath: DevicePath) {
+    private fun handleException(e: IOException, transport: ReportTransport) {
         val exceptionString = e.message ?: Log.getStackTraceString(e)
         val lowercaseExceptionString = exceptionString.lowercase()
 
         if (lowercaseExceptionString.contains("errno 108")) {
             Timber.i("device might be unplugged")
             _uiState.update { it.copy(isDeviceUnplugged = true) }
-        } else if (lowercaseExceptionString.contains("permission denied")) {
+        } else if (lowercaseExceptionString.contains("permission denied") && transport is CharDeviceTransport) {
             Timber.i("char dev perms are wrong")
-            _uiState.update { it.copy(isCharacterDevicePermissionsBroken = devicePath.path) }
+            _uiState.update { it.copy(isCharacterDevicePermissionsBroken = transport.devicePath.path) }
         } else if (lowercaseExceptionString.contains("enxio")) {
             Timber.i("somehow the HID gadget is disabled but the character devices are still present")
             snackbarQueue.send("ERROR: Failed to send HID report. HID gadget has been disabled (but character devices are still present)")

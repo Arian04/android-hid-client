@@ -1,11 +1,11 @@
 package me.arianb.usb_hid_client.report_senders.pointer_device_senders
 
-import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
+import me.arianb.usb_hid_client.report_senders.ReportTransport
 
 class MouseSender(
-    mouseDevicePath: TouchpadDevicePath,
+    transport: ReportTransport,
 ) : PointerDeviceSender(
-    mouseDevicePath
+    transport
 ) {
     override fun send(
         contactID: Byte,

@@ -3,14 +3,11 @@ package me.arianb.usb_hid_client.report_senders
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.withContext
-import me.arianb.usb_hid_client.hid_utils.DevicePath
 import timber.log.Timber
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.IOException
 
 abstract class ReportSender(
-    val characterDevicePath: DevicePath
+    val transport: ReportTransport
 ) {
     private val reportsChannel = Channel<ByteArray>(Channel.UNLIMITED) {
         Timber.wtf("A channel with an unlimited buffer shouldn't be failing to receive elements")
@@ -47,10 +44,8 @@ abstract class ReportSender(
     }
 
     // Writes HID report to character device
-    @Throws(IOException::class, FileNotFoundException::class)
+    @Throws(IOException::class)
     fun writeBytes(report: ByteArray) {
-        FileOutputStream(characterDevicePath.path).use { outputStream ->
-            outputStream.write(report)
-        }
+        transport.write(report)
     }
 }

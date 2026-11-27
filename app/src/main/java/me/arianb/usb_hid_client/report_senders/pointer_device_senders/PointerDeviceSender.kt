@@ -1,14 +1,14 @@
 package me.arianb.usb_hid_client.report_senders.pointer_device_senders
 
-import me.arianb.usb_hid_client.hid_utils.TouchpadDevicePath
 import me.arianb.usb_hid_client.report_senders.ReportSender
+import me.arianb.usb_hid_client.report_senders.ReportTransport
 import me.arianb.usb_hid_client.report_senders.safeBitSetToByte
 import java.util.BitSet
 
 sealed class PointerDeviceSender(
-    touchpadDevicePath: TouchpadDevicePath
+    transport: ReportTransport
 ) : ReportSender(
-    touchpadDevicePath
+    transport
 ) {
     abstract fun send(
         contactID: Byte,

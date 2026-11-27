@@ -13,6 +13,7 @@ import kotlinx.coroutines.withTimeout
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.KeyboardDevicePath
 import me.arianb.usb_hid_client.input_views.DirectInputKeyboardView
+import me.arianb.usb_hid_client.report_senders.CharDeviceTransport
 import me.arianb.usb_hid_client.report_senders.KeySender
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
@@ -47,8 +48,8 @@ class DirectInputKeyboardViewTest {
 
     @Test
     fun sendKeyEvent_routesToLatestKeySenderAfterUpdate() = runBlocking {
-        val firstSender = KeySender(KeyboardDevicePath(tempFolder.newFile("hidg0").absolutePath))
-        val secondSender = KeySender(KeyboardDevicePath(tempFolder.newFile("hidg1").absolutePath))
+        val firstSender = KeySender(CharDeviceTransport(KeyboardDevicePath(tempFolder.newFile("hidg0").absolutePath)))
+        val secondSender = KeySender(CharDeviceTransport(KeyboardDevicePath(tempFolder.newFile("hidg1").absolutePath)))
         val receivingSender = CompletableDeferred<KeySender>()
 
         val senderJobs = listOf(firstSender, secondSender).map { sender ->

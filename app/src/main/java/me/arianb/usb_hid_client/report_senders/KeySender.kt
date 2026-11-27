@@ -1,11 +1,9 @@
 package me.arianb.usb_hid_client.report_senders
 
-import me.arianb.usb_hid_client.hid_utils.KeyboardDevicePath
-
 class KeySender(
-    keyboardDevicePath: KeyboardDevicePath
+    transport: ReportTransport
 ) : ReportSender(
-    keyboardDevicePath
+    transport
 ) {
     fun addStandardKey(modifier: Byte, key: Byte) {
         super.addReportToChannel(byteArrayOf(STANDARD_KEY, modifier, 0, key, 0))
