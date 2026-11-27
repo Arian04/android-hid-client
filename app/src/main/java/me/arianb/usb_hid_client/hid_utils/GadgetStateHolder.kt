@@ -65,6 +65,15 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
         val errors = mutableListOf<String>()
         try {
             block(errors)
+        } catch (e: CancellationException) {
+            // Re-throw so coroutine structured cancellation propagates normally
+            throw e
+        } catch (e: Exception) {
+            Timber.wtf(
+                e,
+                "Unhandled exception bubbled up to GadgetStateHolder during '$operationName'"
+            )
+            errors += "[BUG] Unhandled exception thrown during '$operationName': ${e.message}"
         } finally {
             _state.update { it.copy(isOperationInProgress = false) }
         }
@@ -73,30 +82,18 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
 
     suspend fun createCharacterDevices(): GadgetOperationResult =
         runGadgetOperation("create character devices") { errors ->
-            try {
-                val gadgetUserPreferences = currentGadgetPreferences
-                val succeeded = characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
-                if (!succeeded) {
-                    val message = "Failed to create character devices"
-                    Timber.e(message)
-                    errors += message
-                }
+            val gadgetUserPreferences = currentGadgetPreferences
+            val succeeded = characterDeviceManager.createCharacterDevices(gadgetUserPreferences)
+            if (!succeeded) {
+                val message = "Failed to create character devices"
+                Timber.e(message)
+                errors += message
+            }
 
-                // Re-evaluate state
-                val anyMissing = anyCharacterDeviceMissing()
-                if (succeeded && !anyMissing) {
-                    _state.update { it.copy(appliedPreferences = gadgetUserPreferences) }
-                }
-            } catch (e: CancellationException) {
-                // Re-throw so coroutine structured cancellation propagates normally
-                throw e
-            } catch (e: Exception) {
-                Timber.wtf(
-                    e,
-                    "Unhandled exception bubbled up to GadgetStateHolder while creating character devices"
-                )
-
-                errors += "[BUG] Unhandled exception thrown while creating character devices: ${e.message}"
+            // Re-evaluate state
+            val anyMissing = anyCharacterDeviceMissing()
+            if (succeeded && !anyMissing) {
+                _state.update { it.copy(appliedPreferences = gadgetUserPreferences) }
             }
         }
 
@@ -119,43 +116,31 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
 
     suspend fun recreateCharacterDevices(): GadgetOperationResult =
         runGadgetOperation("recreate character devices") { errors ->
-            try {
-                val currentPrefs = currentGadgetPreferences
-                val previousPrefs = _state.value.appliedPreferences ?: currentPrefs
+            val currentPrefs = currentGadgetPreferences
+            val previousPrefs = _state.value.appliedPreferences ?: currentPrefs
 
-                // Delete the old stuff
-                val deleted = characterDeviceManager.deleteCharacterDevices(previousPrefs)
-                if (!deleted) {
-                    val message = "Failed to delete existing character devices during recreate"
-                    Timber.e(message)
-                    errors += message
-                }
+            // Delete the old stuff
+            val deleted = characterDeviceManager.deleteCharacterDevices(previousPrefs)
+            if (!deleted) {
+                val message = "Failed to delete existing character devices during recreate"
+                Timber.e(message)
+                errors += message
+            }
 
-                // Create the new stuff :)
-                val created = characterDeviceManager.createCharacterDevices(currentPrefs)
-                if (!created) {
-                    val message = "Failed to create character devices"
-                    Timber.e(message)
-                    errors += message
-                }
+            // Create the new stuff :)
+            val created = characterDeviceManager.createCharacterDevices(currentPrefs)
+            if (!created) {
+                val message = "Failed to create character devices"
+                Timber.e(message)
+                errors += message
+            }
 
-                // Re-evaluate state
-                val anyMissing = anyCharacterDeviceMissing()
-                if (created && !anyMissing) {
-                    _state.update { it.copy(appliedPreferences = currentPrefs) }
-                } else if (deleted && anyMissing) {
-                    _state.update { it.copy(appliedPreferences = null) }
-                }
-            } catch (e: CancellationException) {
-                // Re-throw so coroutine structured cancellation propagates normally
-                throw e
-            } catch (e: Exception) {
-                Timber.wtf(
-                    e,
-                    "Unhandled exception bubbled up to GadgetStateHolder while recreating character devices"
-                )
-
-                errors += "[BUG] Unhandled exception thrown while recreating character devices: ${e.message}"
+            // Re-evaluate state
+            val anyMissing = anyCharacterDeviceMissing()
+            if (created && !anyMissing) {
+                _state.update { it.copy(appliedPreferences = currentPrefs) }
+            } else if (deleted && anyMissing) {
+                _state.update { it.copy(appliedPreferences = null) }
             }
         }
 
