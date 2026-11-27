@@ -121,15 +121,18 @@ class UsbGadgetServiceConnection : ServiceConnection {
             return false
         }
 
-        val sent = send(messageType, preferences)
-        if (!sent) {
-            // If fails to send, complete the operation immediately
-            pendingOperations.remove(messageType)
-            return false
-        }
+        try {
+            val sent = send(messageType, preferences)
+            if (!sent) {
+                // If fails to send, complete the operation immediately
+                return false
+            }
 
-        // TODO: should I try/catch CancellationException and remove from pendingOperations in the catch block?
-        return deferred.await()
+            return deferred.await()
+        } finally {
+            // Only remove our own deferred so this cleanup logic (after completion/cancellation) can't get rid of a newer request.
+            pendingOperations.remove(messageType, deferred)
+        }
     }
 
     suspend fun createGadget(preferences: GadgetUserPreferences): Boolean {
