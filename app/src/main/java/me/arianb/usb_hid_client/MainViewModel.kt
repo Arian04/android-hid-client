@@ -15,11 +15,13 @@ import me.arianb.usb_hid_client.hid_utils.GadgetStateHolder
 import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.CharDeviceTransport
 import me.arianb.usb_hid_client.report_senders.KeySender
+import me.arianb.usb_hid_client.report_senders.ReportTransport
 import me.arianb.usb_hid_client.report_senders.ReportWriteError
 import me.arianb.usb_hid_client.report_senders.UhidTransport
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.MouseSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.PointerDeviceSender
 import me.arianb.usb_hid_client.report_senders.pointer_device_senders.TouchpadSender
+import me.arianb.usb_hid_client.settings.UserPreferences
 import me.arianb.usb_hid_client.settings.UserPreferencesRepository
 import me.arianb.usb_hid_client.ui.utils.SnackbarQueue
 import timber.log.Timber
@@ -45,24 +47,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val gadgetStateHolder = GadgetStateHolder.getInstance(application)
     private val userPreferencesStateFlow = UserPreferencesRepository.getInstance(application).userPreferencesFlow
 
-    val keySender: StateFlow<KeySender> = userPreferencesStateFlow
-        .mapState {
-            KeySender(CharDeviceTransport(it.keyboardCharacterDevicePath))
-        }
+    val keySender: StateFlow<KeySender> = userPreferencesStateFlow.mapState(
+        keySelector = { CharDeviceTransport(it.keyboardCharacterDevicePath) },
+        transform = ::KeySender,
+    )
 
-    val touchpadSender: StateFlow<PointerDeviceSender> = userPreferencesStateFlow
-        .mapState {
-            // TODO:
-            //  maybe make it clear to the user that the Loopback Mode always uses precision touchpad, and that these
-            //  settings are therefore mutually exclusive.
-            if (it.isLoopbackModeEnabled) {
-                TouchpadSender(UhidTransport)
-            } else if (it.enablePrecisionTouchpad) {
-                TouchpadSender(CharDeviceTransport(it.touchpadCharacterDevicePath))
-            } else {
-                MouseSender(CharDeviceTransport(it.touchpadCharacterDevicePath))
-            }
-        }
+    val touchpadSender: StateFlow<PointerDeviceSender> = userPreferencesStateFlow.mapState(
+        keySelector = PointerSenderSpec::fromPreferences,
+        transform = PointerSenderSpec::createSender,
+    )
 
     private val senderFlowList = listOf(keySender, touchpadSender)
 
@@ -135,7 +128,31 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun addMediaKey(key: Byte) =
         keySender.value.addMediaKey(key)
 
-    private inline fun <T, R> StateFlow<T>.mapState(
-        crossinline transform: (value: T) -> R
-    ) = mapState(viewModelScope, transform)
+    private fun <T, K, R> StateFlow<T>.mapState(
+        keySelector: (value: T) -> K,
+        transform: (key: K) -> R,
+    ): StateFlow<R> = mapState(viewModelScope, keySelector, transform)
+
+    private sealed interface PointerSenderSpec {
+        fun createSender(): PointerDeviceSender
+
+        data class Touchpad(val transport: ReportTransport) : PointerSenderSpec {
+            override fun createSender() = TouchpadSender(transport)
+        }
+
+        data class Mouse(val transport: ReportTransport) : PointerSenderSpec {
+            override fun createSender() = MouseSender(transport)
+        }
+
+        companion object {
+            fun fromPreferences(prefs: UserPreferences): PointerSenderSpec = when {
+                // TODO:
+                //  maybe make it clear to the user that the Loopback Mode always uses precision touchpad, and that
+                //  these settings are therefore mutually exclusive.
+                prefs.isLoopbackModeEnabled -> Touchpad(UhidTransport)
+                prefs.enablePrecisionTouchpad -> Touchpad(CharDeviceTransport(prefs.touchpadCharacterDevicePath))
+                else -> Mouse(CharDeviceTransport(prefs.touchpadCharacterDevicePath))
+            }
+        }
+    }
 }

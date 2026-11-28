@@ -9,12 +9,25 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-inline fun <T, R> StateFlow<T>.mapState(
+/**
+ * Derives a [StateFlow] from a selected slice of [T], invoking [transform] only when the
+ * selected key changes (avoiding duplicate construction on startup or unrelated updates).
+ */
+fun <T, K, R> StateFlow<T>.mapState(
     scope: CoroutineScope,
-    crossinline transform: (value: T) -> R
+    keySelector: (value: T) -> K,
+    transform: (key: K) -> R,
 ): StateFlow<R> {
-    return map { transform(it) }
-        .stateIn(scope, SharingStarted.Eagerly, transform(this.value))
+    var currentKey = keySelector(value)
+    var currentValue = transform(currentKey)
+    return map { value ->
+        val key = keySelector(value)
+        if (key != currentKey) {
+            currentKey = key
+            currentValue = transform(key)
+        }
+        currentValue
+    }.stateIn(scope, SharingStarted.Eagerly, currentValue)
 }
 
 inline fun <reified T : Parcelable> Bundle.getParcelableCompat(key: String?): T? {
