@@ -14,28 +14,12 @@ import kotlinx.parcelize.Parcelize
 import me.arianb.usb_hid_client.hid_utils.service.UsbGadgetService
 import me.arianb.usb_hid_client.hid_utils.service.UsbGadgetServiceConnection
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
-import me.arianb.usb_hid_client.settings.UserPreferences
 import me.arianb.usb_hid_client.shell_utils.RootStateHolder
 import timber.log.Timber
 import java.io.File
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
-
-data class CharacterDeviceManagerUserPreferences(
-    val keyboardCharacterDevicePath: KeyboardDevicePath,
-    val touchpadCharacterDevicePath: TouchpadDevicePath,
-) {
-    val allCharacterDevicePathsList: List<DevicePath> = listOf(keyboardCharacterDevicePath, touchpadCharacterDevicePath)
-
-    companion object {
-        fun fromUserPreferences(it: UserPreferences): CharacterDeviceManagerUserPreferences =
-            CharacterDeviceManagerUserPreferences(
-                it.keyboardCharacterDevicePath,
-                it.touchpadCharacterDevicePath
-            )
-    }
-}
 
 class CharacterDeviceManager private constructor(private val application: Application) : ICharacterDeviceManager {
     private val rootStateHolder = RootStateHolder.getInstance()
@@ -198,8 +182,8 @@ class CharacterDeviceManager private constructor(private val application: Applic
         }
 
     @ModifiesStateDirectly
-    override fun anyCharacterDeviceMissing(userPreferences: CharacterDeviceManagerUserPreferences): Boolean {
-        val allCharacterDevicePathsList = userPreferences.allCharacterDevicePathsList
+    override fun anyCharacterDeviceMissing(gadgetUserPreferences: GadgetUserPreferences): Boolean {
+        val allCharacterDevicePathsList = gadgetUserPreferences.allCharacterDevicePathsList
         for (charDevicePath in allCharacterDevicePathsList) {
             if (!charDevicePath.exists()) {
                 Timber.d("anyCharacterDeviceMissing(): $charDevicePath is missing")

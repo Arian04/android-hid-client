@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
-import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManagerUserPreferences
 import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.hid_utils.GadgetOperationResult
 import me.arianb.usb_hid_client.hid_utils.GadgetState
@@ -291,8 +290,8 @@ class GadgetStateHolderTest {
         }
 
         @ModifiesStateDirectly
-        override fun anyCharacterDeviceMissing(userPreferences: CharacterDeviceManagerUserPreferences): Boolean =
-            userPreferences.allCharacterDevicePathsList.any { it !in existingDevices }
+        override fun anyCharacterDeviceMissing(gadgetUserPreferences: GadgetUserPreferences): Boolean =
+            gadgetUserPreferences.allCharacterDevicePathsList.any { it !in existingDevices }
     }
 
     companion object {

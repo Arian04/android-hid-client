@@ -37,9 +37,6 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
     private val rootStateHolder: IRootStateHolder,
     private val userPreferencesFlow: StateFlow<UserPreferences>,
 ) {
-    private val characterDeviceUserPrefs: CharacterDeviceManagerUserPreferences
-        get() = CharacterDeviceManagerUserPreferences.fromUserPreferences(userPreferencesFlow.value)
-
     private val currentGadgetPreferences: GadgetUserPreferences
         get() = GadgetUserPreferences.fromUserPreferences(userPreferencesFlow.value)
 
@@ -162,7 +159,7 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
      */
     @OptIn(ModifiesStateDirectly::class)
     fun checkAndUpdateMissingDevices(): Boolean {
-        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
+        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(currentGadgetPreferences)
 
         // NOTE: Intentionally not clearing appliedPreferences when areMissing is true.
         //  This is so that if (for example) the user edits a char device path to one that doesn't exist yet,
@@ -177,7 +174,7 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
      */
     @OptIn(ModifiesStateDirectly::class)
     private fun initialGadgetState(): GadgetState {
-        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
+        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(currentGadgetPreferences)
         val appliedPrefs = if (areMissing) {
             null
         } else {
