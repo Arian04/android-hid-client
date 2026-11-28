@@ -241,13 +241,13 @@ class GadgetStateHolderTest {
     // ---------- Missing Device State ----------
 
     @Test
-    fun `anyCharacterDeviceMissing preserves appliedPreferences when devices become missing`() {
+    fun `checkAndUpdateMissingDevices preserves appliedPreferences when devices become missing`() {
         val holder = createHolder(devicesExist = true)
 
         // User edits a path to one that doesn't exist yet; appliedPreferences must stay intact for delete/recreate.
         userPreferencesFlow.value = defaultUserPreferences(keyboardPath = KeyboardDevicePath("/dev/hidg2"))
 
-        assertTrue(holder.anyCharacterDeviceMissing())
+        assertTrue(holder.checkAndUpdateMissingDevices())
         assertEquals(
             GadgetState(areCharacterDevicesMissing = true, appliedPreferences = DEFAULT_GADGET_PREFS),
             holder.state.value,

@@ -91,7 +91,7 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
             }
 
             // Re-evaluate state
-            val anyMissing = anyCharacterDeviceMissing()
+            val anyMissing = checkAndUpdateMissingDevices()
             if (succeeded && !anyMissing) {
                 _state.update { it.copy(appliedPreferences = gadgetUserPreferences) }
             }
@@ -107,8 +107,8 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
                 errors += message
             }
 
-            // Re-evaluate state
-            anyCharacterDeviceMissing()
+            // Re-evaluate state (since we're deleting, we don't care about the return val here)
+            checkAndUpdateMissingDevices()
             if (succeeded) {
                 _state.update { it.copy(appliedPreferences = null) }
             }
@@ -136,7 +136,7 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
             }
 
             // Re-evaluate state
-            val anyMissing = anyCharacterDeviceMissing()
+            val anyMissing = checkAndUpdateMissingDevices()
             if (created && !anyMissing) {
                 _state.update { it.copy(appliedPreferences = currentPrefs) }
             } else if (deleted && anyMissing) {
@@ -155,16 +155,21 @@ class GadgetStateHolder @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE
         return GadgetOperationResult()
     }
 
+    /**
+     * Re-checks whether any configured character devices are missing, updates
+     * [GadgetState.areCharacterDevicesMissing] without modifying [GadgetState.appliedPreferences],
+     * and returns whether any are missing.
+     */
     @OptIn(ModifiesStateDirectly::class)
-    fun anyCharacterDeviceMissing(): Boolean {
-        val result = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
+    fun checkAndUpdateMissingDevices(): Boolean {
+        val areMissing = characterDeviceManager.anyCharacterDeviceMissing(characterDeviceUserPrefs)
 
-        // NOTE: Intentionally not clearing appliedPreferences when result is true.
+        // NOTE: Intentionally not clearing appliedPreferences when areMissing is true.
         //  This is so that if (for example) the user edits a char device path to one that doesn't exist yet,
         //  we still need appliedPreferences intact so delete/recreate can know what was previously applied.
-        _state.update { it.copy(areCharacterDevicesMissing = result) }
+        _state.update { it.copy(areCharacterDevicesMissing = areMissing) }
 
-        return result
+        return areMissing
     }
 
     /**

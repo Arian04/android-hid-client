@@ -85,7 +85,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun handleError(error: ReportWriteError) {
         when (error) {
             is ReportWriteError.MissingCharDevice -> {
-                gadgetStateHolder.anyCharacterDeviceMissing()
+                gadgetStateHolder.checkAndUpdateMissingDevices()
                 Timber.w("Character device '${error.devicePath}' doesn't exist. The user probably skipped the character device creation prompt.")
 
                 // TODO:
