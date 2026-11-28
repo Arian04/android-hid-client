@@ -26,6 +26,7 @@ import me.arianb.usb_hid_client.BuildConfig
 import me.arianb.usb_hid_client.R
 import me.arianb.usb_hid_client.hid_utils.CharacterDeviceManager
 import me.arianb.usb_hid_client.hid_utils.DevicePath
+import me.arianb.usb_hid_client.settings.GadgetUserPreferences
 import me.arianb.usb_hid_client.settings.OnClickPreference
 import me.arianb.usb_hid_client.settings.SettingsViewModel
 import me.arianb.usb_hid_client.settings.UserPreferences
@@ -114,14 +115,8 @@ fun detectIssues(userPreferences: UserPreferences): TroubleshootingInfo {
     if (hasRootPermissions) {
         Timber.d("detectIssues(): gathering debugging info that requires root permissions")
         // Check character device stuff
-        val allCharacterDevicePaths: List<DevicePath> = userPreferences.let {
-            listOf(it.keyboardCharacterDevicePath, it.touchpadCharacterDevicePath)
-        }
-        characterDevicesInfoList = buildList {
-            for (path in allCharacterDevicePaths) {
-                add(getCharacterDeviceInfo(path))
-            }
-        }
+        val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferences)
+        characterDevicesInfoList = gadgetUserPreferences.allCharacterDevicePathsList.map(::getCharacterDeviceInfo)
 
         // Check kernel support
         kernelInfo = getKernelInfo()
