@@ -3,12 +3,14 @@ package me.arianb.usb_hid_client
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.arianb.usb_hid_client.hid_utils.GadgetStateHolder
 import me.arianb.usb_hid_client.hid_utils.UHID
 import me.arianb.usb_hid_client.report_senders.CharDeviceTransport
@@ -54,7 +56,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             //  maybe make it clear to the user that the Loopback Mode always uses precision touchpad, and that these
             //  settings are therefore mutually exclusive.
             if (it.isLoopbackModeEnabled) {
-                gadgetStateHolder.fixCharacterDevicePermissions(UHID.PATH).errors.forEach(snackbarQueue::send)
                 TouchpadSender(UhidTransport)
             } else if (it.enablePrecisionTouchpad) {
                 TouchpadSender(CharDeviceTransport(it.touchpadCharacterDevicePath))
@@ -69,6 +70,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         senderFlowList.forEach { senderFlow ->
             viewModelScope.launch {
                 senderFlow.collectLatest { sender ->
+                    if (sender.transport is UhidTransport) {
+                        withContext(Dispatchers.IO) {
+                            gadgetStateHolder.fixCharacterDevicePermissions(UHID.PATH)
+                                .errors
+                                .forEach(snackbarQueue::send)
+                        }
+                    }
+
                     sender.start(
                         onSuccess = {
                             // This is called when no exception was thrown, meaning everything is good :)
