@@ -40,7 +40,7 @@ class GadgetStateHolderTest {
 
     private fun createHolder(devicesExist: Boolean = false): GadgetStateHolder {
         if (devicesExist) {
-            characterDeviceManager.existingDevices.addAll(DEFAULT_GADGET_PREFS.allCharacterDevicePathsList)
+            characterDeviceManager.existingDevices.addAll(DEFAULT_GADGET_PREFS.characterDevicePaths)
         }
         return GadgetStateHolder(
             characterDeviceManager = characterDeviceManager,
@@ -272,7 +272,7 @@ class GadgetStateHolderTest {
             createGate?.await()
             nextException?.let { throw it }
             createdPreferences += gadgetUserPreferences
-            if (createResult) existingDevices.addAll(gadgetUserPreferences.allCharacterDevicePathsList)
+            if (createResult) existingDevices.addAll(gadgetUserPreferences.characterDevicePaths)
             return createResult
         }
 
@@ -285,13 +285,13 @@ class GadgetStateHolderTest {
         override suspend fun deleteCharacterDevices(gadgetUserPreferences: GadgetUserPreferences): Boolean {
             nextException?.let { throw it }
             deletedPreferences += gadgetUserPreferences
-            if (deleteResult) existingDevices.removeAll(gadgetUserPreferences.allCharacterDevicePathsList.toSet())
+            if (deleteResult) existingDevices.removeAll(gadgetUserPreferences.characterDevicePaths.toSet())
             return deleteResult
         }
 
         @ModifiesStateDirectly
         override fun anyCharacterDeviceMissing(gadgetUserPreferences: GadgetUserPreferences): Boolean =
-            gadgetUserPreferences.allCharacterDevicePathsList.any { it !in existingDevices }
+            gadgetUserPreferences.characterDevicePaths.any { it !in existingDevices }
     }
 
     companion object {

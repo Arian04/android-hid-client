@@ -116,7 +116,7 @@ fun detectIssues(userPreferences: UserPreferences): TroubleshootingInfo {
         Timber.d("detectIssues(): gathering debugging info that requires root permissions")
         // Check character device stuff
         val gadgetUserPreferences = GadgetUserPreferences.fromUserPreferences(userPreferences)
-        characterDevicesInfoList = gadgetUserPreferences.allCharacterDevicePathsList.map(::getCharacterDeviceInfo)
+        characterDevicesInfoList = gadgetUserPreferences.characterDevicePaths.map(::getCharacterDeviceInfo)
 
         // Check kernel support
         kernelInfo = getKernelInfo()

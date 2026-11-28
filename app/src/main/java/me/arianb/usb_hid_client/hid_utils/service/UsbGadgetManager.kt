@@ -1,6 +1,5 @@
 package me.arianb.usb_hid_client.hid_utils.service
 
-import me.arianb.usb_hid_client.hid_utils.DevicePath
 import me.arianb.usb_hid_client.hid_utils.service.HidFunction.Companion.keyboardHidFunction
 import me.arianb.usb_hid_client.hid_utils.service.HidFunction.Companion.touchpadHidFunction
 import me.arianb.usb_hid_client.settings.GadgetUserPreferences
@@ -32,8 +31,6 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
 
     private val CONFIGS_PATH: Path = USB_GADGET_PATH / "configs/b.1/"
     private val FUNCTIONS_PATH: Path = USB_GADGET_PATH / "functions/"
-
-    private val allCharacterDevicePaths: List<DevicePath> = gadgetUserPreferences.allCharacterDevicePathsList
 
     // ----- Helpers to avoid needing to pass the base paths in at every call site -----
     private fun GadgetFunction.getFunctionPath(): Path =
@@ -285,7 +282,7 @@ internal class UsbGadgetManager(val gadgetUserPreferences: GadgetUserPreferences
         resetGadget()
 
         // Delete character devices
-        allCharacterDevicePaths.map { Path(it.path) }.forEach {
+        gadgetUserPreferences.characterDevicePaths.map { Path(it.path) }.forEach {
             Timber.i("deleteCharacterDevices(): deleting character device at $it")
             it.deleteIfExists()
         }

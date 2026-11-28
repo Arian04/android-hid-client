@@ -111,7 +111,7 @@ data class GadgetUserPreferences(
     val disableGadgetFunctionsDuringConfiguration: Boolean,
     val enablePrecisionTouchpad: Boolean,
 ) : Parcelable {
-    val allCharacterDevicePathsList: List<DevicePath>
+    val characterDevicePaths: List<DevicePath>
         get() = listOf(keyboardCharacterDevicePath, touchpadCharacterDevicePath)
 
     companion object {

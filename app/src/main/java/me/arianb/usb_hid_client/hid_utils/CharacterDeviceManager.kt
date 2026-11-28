@@ -88,7 +88,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
         return withContext(Dispatchers.IO) {
             fixSelinuxPermissions()
-            fixPermissionsOnceDevicesExist(gadgetUserPreferences.allCharacterDevicePathsList)
+            fixPermissionsOnceDevicesExist(gadgetUserPreferences.characterDevicePaths)
         }
     }
 
@@ -183,8 +183,7 @@ class CharacterDeviceManager private constructor(private val application: Applic
 
     @ModifiesStateDirectly
     override fun anyCharacterDeviceMissing(gadgetUserPreferences: GadgetUserPreferences): Boolean {
-        val allCharacterDevicePathsList = gadgetUserPreferences.allCharacterDevicePathsList
-        for (charDevicePath in allCharacterDevicePathsList) {
+        for (charDevicePath in gadgetUserPreferences.characterDevicePaths) {
             if (!charDevicePath.exists()) {
                 Timber.d("anyCharacterDeviceMissing(): $charDevicePath is missing")
                 return true
